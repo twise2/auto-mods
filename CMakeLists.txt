@@ -29,6 +29,7 @@ add_executable(
     patches/pocket_horse.cpp
     patches/teamwork.cpp
     patches/duplicate_techs.cpp
+    patches/regional_additions.cpp
     ids.h
 )
 set_property(TARGET create-data-mod PROPERTY CXX_STANDARD 17)

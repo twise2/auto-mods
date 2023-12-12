@@ -68,6 +68,9 @@ brew install cmake
 brew install boost
 brew install gcc
 brew install gdb
+brew install gsl
+#needed to set library path for GSL lib
+export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix zstd)/lib/
 ```
 
 

@@ -3,6 +3,7 @@
 #include "patches/community_games.h"
 #include "patches/duplicate_techs.h"
 #include "patches/exploding_villagers.h"
+#include "patches/regional_additions.h"
 #include "patches/exploding_kings.h"
 #include "patches/exploding_relic_monks.h"
 #include "patches/rewarding_snipes.h"
@@ -37,6 +38,7 @@ const char *const TEAMWORK = "teamwork";
 const char *const X_256_TECH = "x256";
 const char *const X_3_TECH = "x3";
 const char *const X_9_TECH = "x9";
+const char *const REGIONAL_ADDITIONS = "regional-additions";
 
 vector<string> getModIdentifiers(char *const *argv);
 
@@ -70,6 +72,7 @@ int main(int argc, char **argv) {
         cout << "    " << X_3_TECH << endl;
         cout << "    " << X_9_TECH << endl;
         cout << "    " << X_256_TECH << endl;
+        cout << "    " << REGIONAL_ADDITIONS << endl;
         return 1;
     }
 
@@ -142,6 +145,8 @@ void applyModifications(genie::DatFile *df, const string &modIdentifier) {
         duplicateTechs(df, 9);
     } else if (X_256_TECH == modIdentifier) {
         duplicateTechs(df, 256);
+    } else if (REGIONAL_ADDITIONS == modIdentifier) {
+        configureRegionalAdditions(df);
     } else {
         cout << "Unknown mod identifier: '" << modIdentifier << "'" << endl;
     }

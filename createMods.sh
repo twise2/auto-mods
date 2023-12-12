@@ -25,6 +25,9 @@ mkdir -p mods/teamwork/resources/_common/dat
 mkdir -p mods/x3/resources/_common/dat
 mkdir -p mods/x9/resources/_common/dat
 mkdir -p mods/x256/resources/_common/dat
+mkdir -p mods/regional_additions/resources/_common/dat
+mkdir -p mods/regional_additions_exploding_kings/resources/_common/dat
+mkdir -p mods/regional_additions_exploding_kings_rewarding_snipes/resources/_common/dat
 
 ./build/create-data-mod community-games ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./mods/community_games/resources/_common/dat/empires2_x2_p1.dat
 ./build/create-data-mod flying-dutchman ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./mods/flying_dutchman/resources/_common/dat/empires2_x2_p1.dat
@@ -50,6 +53,11 @@ mkdir -p mods/x256/resources/_common/dat
 ./build/create-data-mod x3 ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./mods/x3/resources/_common/dat/empires2_x2_p1.dat
 ./build/create-data-mod x9 ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./mods/x9/resources/_common/dat/empires2_x2_p1.dat
 ./build/create-data-mod x256 ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./mods/x256/resources/_common/dat/empires2_x2_p1.dat
+#regional additions changes w/ exploding kings and rewarding snipes
+./build/create-data-mod regional-additions ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./mods/regional_additions/resources/_common/dat/empires2_x2_p1.dat
+./build/create-data-mod exploding-kings ./mods/regional_additions/resources/_common/dat/empires2_x2_p1.dat ./mods/regional_additions_exploding_kings/resources/_common/dat/empires2_x2_p1.dat
+./build/create-data-mod rewarding-snipes ./mods/regional_additions_exploding_kings/resources/_common/dat/empires2_x2_p1.dat ./mods/regional_additions_exploding_kings_rewarding_snipes/resources/_common/dat/empires2_x2_p1.dat
+
 
 cd mods/community_games
 zip -r ../community_games.zip *
