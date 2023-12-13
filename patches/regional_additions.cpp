@@ -27,30 +27,34 @@ void duplicateTechToNewCiv(genie::DatFile *df, int techId, int civId ) {
 
 void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
     for (genie::Civ &civ : df->Civs) {
-        //use archer fo the eye for samurai swap
-        genie::Unit &samurai = civ.Units.at(SAMURAI);
-        samurai.Nothing = ARCHER_OF_THE_EYES;
-        samurai.Trait = samurai.Trait | 8;
+        //use archer fo the eye for samuraiUnit swap
+        genie::Unit &samuraiUnit = civ.Units.at(SAMURAI);
+        samuraiUnit.Nothing = ARCHER_OF_THE_EYES;
+        samuraiUnit.Trait = samuraiUnit.Trait | 8;
 
         //make archer of the eye bad except against unique units
-        genie::Unit &samuraiArcher = civ.Units.at(ARCHER_OF_THE_EYES);
-        samuraiArcher.Name = "Samurai (ranged)";
-        samuraiArcher.Creatable.HeroGlowGraphic = -1;
-        samuraiArcher.Creatable.HeroMode = 0;
-        samuraiArcher.Type50.BaseArmor = 0; //dont give armor bonuses
+        genie::Unit &samuraiUnitArcher = civ.Units.at(ARCHER_OF_THE_EYES);
+        samuraiUnitArcher.Nothing = SAMURAI;
+        samuraiUnitArcher.Trait = samuraiUnitArcher.Trait | 8;
+
+        samuraiUnitArcher.Name = "Samurai (ranged)";
+        //df->Langfile.setString(LANGFILE_ENGLISH_ARCHER_OF_THE_EYES, "Samurai (Ranged)").
+        samuraiUnitArcher.Creatable.HeroGlowGraphic = -1;
+        samuraiUnitArcher.Creatable.HeroMode = 0;
+        samuraiUnitArcher.Type50.BaseArmor = 0; //dont give armor bonuses
         //make sure it's ranged mode is only good against unique units
-        samuraiArcher.Type50.DisplayedAttack = 1;
+        samuraiUnitArcher.Type50.DisplayedAttack = 1;
         //super slow but heavy hitting to encourage shoot once than swap
-        samuraiArcher.Type50.ReloadTime = 4;
-        samuraiArcher.Type50.DisplayedReloadTime = 4;
+        samuraiUnitArcher.Type50.ReloadTime = 4;
+        samuraiUnitArcher.Type50.DisplayedReloadTime = 4;
         //has 2 attacks, unlikely to change
-        samuraiArcher.Type50.Attacks.at(0).Amount = 1;
-        samuraiArcher.Type50.Attacks.at(1).Amount = 25;
-        samuraiArcher.Type50.Attacks.at(1).Class = ATTACK_TYPE_HERO_BONUS_DAMAGE;
+        samuraiUnitArcher.Type50.Attacks.at(0).Amount = 1;
+        samuraiUnitArcher.Type50.Attacks.at(1).Amount = 25;
+        samuraiUnitArcher.Type50.Attacks.at(1).Class = ATTACK_TYPE_HERO_BONUS_DAMAGE;
         //slow them down for good measure to decrease odds of staying in this form
-        samuraiArcher.Speed = .81;
+        samuraiUnitArcher.Speed = .81;
     }
-    std::cout << "Added Ability 'Samurai swap to Ranged Mode'" << std::endl;
+    std::cout << "Added Ability 'samuraiUnit swap to Ranged Mode'" << std::endl;
 }
 
 void addTechnologiesToCivs(genie::DatFile *df, std::vector<int16_t> civIds, std::vector<int16_t>  techIds){
@@ -121,6 +125,8 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_VIETNAMESE
             }, {
                 TECH_ELEPHAUNT_ARCHER_MAKE_AVAILABLE
+                //have to move because these civs have cav archers as well
+                TECH_MOVE_ELEPHANT_ARCHER
             } 
     );
     //give armoured elephaunts to elephant civs 
@@ -214,6 +220,9 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
             TECH_WINGED_HUSSARS,
             TECH_DISABLE_HUSSARS
     });
+
+    //TODO need to make this work as war elephant is in the way
+    /*
     //give ethiopians war elephants, no elite
     //https://forums.ageofempires.com/t/should-ethiopians-get-war-elephants/202217/12
     addTechnologiesToCivs(df, {
@@ -221,6 +230,7 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
             }, {
             TECH_WAR_ELEPHANT_MAKE_AVAILABLE
     });
+    */
     //give imperial skirm to civs that had great skirms 
     //https://www.reddit.com/r/aoe2/comments/17h70lv/imperial_skirmisher_would_be_nice_if_it_wasnt/
     addTechnologiesToCivs(df, {

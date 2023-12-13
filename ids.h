@@ -437,6 +437,7 @@ static const int16_t TECH_STEPPE_LANCER_MAKE_AVAILABLE = 714;
 static const int16_t TECH_ELITE_STEPPE_LANCER_MAKE_AVAILABLE = 715; 
 static const int16_t TECH_ELEPHAUNT_ARCHER_MAKE_AVAILABLE = 480; 
 static const int16_t TECH_ELITE_ELEPHAUNT_ARCHER_MAKE_AVAILABLE = 481; 
+static const int16_t TECH_MOVE_ELEPHANT_ARCHER = 863; 
 static const int16_t TECH_CARAVANSERI_MAKE_AVAILABLE = 518; 
 static const int16_t TECH_DISABLE_PALADIN = 527; 
 static const int16_t TECH_HEAVY_CAMEL_RIDER = 236; 
@@ -456,8 +457,9 @@ static const int16_t TECH_SIEGE_ELEPHANT = 838;
 static const int16_t TECH_WAR_ELEPHANT_MAKE_AVAILABLE = 274;
 static const int16_t TECH_IMPERIAL_SKIRMISHER = 655;
 static const int16_t ARCHER_OF_THE_EYES = 686;
-static const int ATTACK_TYPE_HERO_BONUS_DAMAGE = 19;
+static const int16_t LANGFILE_ENGLISH_ARCHER_OF_THE_EYES = 5568;
 
+static const int ATTACK_TYPE_HERO_BONUS_DAMAGE = 19;
 static const int ACTION_TYPE_UNLOAD = 12;
 
 static const int CIV_BRITONS = 1;
