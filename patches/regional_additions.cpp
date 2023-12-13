@@ -108,7 +108,7 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_TURKS,
                 CIV_TATARS
             }, {
-               CHEMISTRY 
+               TECH_CARAVANSERI_MAKE_AVAILABLE 
             } 
     );
     //add elephaunt archers to civs that had them historically
@@ -232,6 +232,7 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
 }
 
 void configureRegionalAdditions(genie::DatFile *df) {
+    allowSamuraiToSwapToArcherMode(df);
     makeLongboatsTransports(df);
     giveHistoricRegionalVarietyToCivs(df);
 }
