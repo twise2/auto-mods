@@ -38,6 +38,7 @@ void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
         samuraiUnitArcher.Trait = samuraiUnitArcher.Trait | 8;
 
         samuraiUnitArcher.Name = "Samurai (ranged)";
+        samuraiUnitArcher.LanguageDLLName = LANGFILE_ENGLISH_SAMURAI;
         //df->Langfile.setString(LANGFILE_ENGLISH_ARCHER_OF_THE_EYES, "Samurai (Ranged)").
         samuraiUnitArcher.Creatable.HeroGlowGraphic = -1;
         samuraiUnitArcher.Creatable.HeroMode = 0;
@@ -54,7 +55,7 @@ void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
         //slow them down for good measure to decrease odds of staying in this form
         samuraiUnitArcher.Speed = .81;
     }
-    std::cout << "Added Ability 'samuraiUnit swap to Ranged Mode'" << std::endl;
+    std::cout << "Added Ability 'Samurai can swap to Ranged Mode'" << std::endl;
 }
 
 void addTechnologiesToCivs(genie::DatFile *df, std::vector<int16_t> civIds, std::vector<int16_t>  techIds){
@@ -138,8 +139,9 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_MALAY,
                 CIV_ETHIOPIANS
             }, {
-            TECH_ARMORED_ELEPHANT,
-            TECH_SIEGE_ELEPHANT
+            TECH_ARMORED_ELEPHANT_MAKE_AVAILABLE,
+            TECH_SIEGE_ELEPHANT,
+            TECH_MOVE_ARMORED_ELEPHANT
     });
     //add steppe lancers to civs that should probably have them
     //https://www.reddit.com/r/aoe2/comments/10mqm64/sotl_should_more_civs_get_elephant_archers/

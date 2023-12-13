@@ -452,12 +452,14 @@ static const int16_t TECH_DISABLE_MILITIA_UPGRADES = 895;
 static const int16_t TECH_SLINGERS_MAKE_AVAILABLE = 895;
 static const int16_t TECH_WINGED_HUSSARS = 786;
 static const int16_t TECH_DISABLE_HUSSARS = 788;
-static const int16_t TECH_ARMORED_ELEPHANT = 837;
+static const int16_t TECH_ARMORED_ELEPHANT_MAKE_AVAILABLE = 837;
+static const int16_t TECH_MOVE_ARMORED_ELEPHANT = 864; 
 static const int16_t TECH_SIEGE_ELEPHANT = 838;
 static const int16_t TECH_WAR_ELEPHANT_MAKE_AVAILABLE = 274;
 static const int16_t TECH_IMPERIAL_SKIRMISHER = 655;
 static const int16_t ARCHER_OF_THE_EYES = 686;
 static const int16_t LANGFILE_ENGLISH_ARCHER_OF_THE_EYES = 5568;
+static const int16_t LANGFILE_ENGLISH_SAMURAI = 5110;
 
 static const int ATTACK_TYPE_HERO_BONUS_DAMAGE = 19;
 static const int ACTION_TYPE_UNLOAD = 12;
