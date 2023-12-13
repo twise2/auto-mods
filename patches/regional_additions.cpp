@@ -124,7 +124,7 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_KHMER,
                 CIV_VIETNAMESE
             }, {
-                TECH_ELEPHAUNT_ARCHER_MAKE_AVAILABLE
+                TECH_ELEPHAUNT_ARCHER_MAKE_AVAILABLE,
                 //have to move because these civs have cav archers as well
                 TECH_MOVE_ELEPHANT_ARCHER
             } 
