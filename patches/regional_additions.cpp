@@ -23,6 +23,27 @@ int16_t getVectorAtIndex(std::vector<int16_t> vec, int16_t index, int16_t defaul
     return vec.at(index);
 }
 
+void updateUnitSkins(genie::DatFile *df, std::vector<int> civIds, int16_t unitId, int16_t replacementGraphicUnitId ) {
+    for (int16_t civId : civIds) {
+        //get the civ and skins we want
+        genie::Civ &chosenCiv = df->Civs.at(civId);
+        genie::Unit &unitToUpdate = chosenCiv.Units.at(unitId);
+        genie::Unit unitWhosSkinWeWant = chosenCiv.Units.at(replacementGraphicUnitId);
+        //update it from old to new
+        unitToUpdate.IconID = unitWhosSkinWeWant.IconID;
+        unitToUpdate.StandingGraphic = unitWhosSkinWeWant.StandingGraphic;
+        unitToUpdate.DyingGraphic = unitWhosSkinWeWant.DyingGraphic;
+        unitToUpdate.UndeadGraphic = unitWhosSkinWeWant.UndeadGraphic;
+        unitToUpdate.DamageGraphics = unitWhosSkinWeWant.DamageGraphics;
+        unitToUpdate.DeadFish.WalkingGraphic = unitWhosSkinWeWant.DeadFish.WalkingGraphic;
+        unitToUpdate.DeadFish.RunningGraphic = unitWhosSkinWeWant.DeadFish.RunningGraphic;
+        unitToUpdate.Type50.AttackGraphic = unitWhosSkinWeWant.Type50.AttackGraphic;
+
+
+        std::cout << "Gave Skin '" << unitWhosSkinWeWant.Name << "' to unit '" << unitToUpdate.Name << "' for Civ '" << chosenCiv.Name << "'" << std::endl; 
+    }
+}
+
 std::vector<int16_t> duplicateTechToNewCiv(genie::DatFile *df, int techId, int civId, std::vector<int16_t> feedForwardTechIds = {-1,-1}, int buttonOverride = -1) {
         //instantiate log and some id information
         std::string lastPositionString = "";
@@ -351,10 +372,15 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
             CIV_MALIANS,
             CIV_TURKS
     });
+}
 
+void giveUnitsRegionalSkins(genie::DatFile *df){
+    updateUnitSkins(df, {CIV_CHINESE}, MONK, BUI_BI);
 }
 
 void configureRegionalAdditions(genie::DatFile *df) {
+    //https://forums.ageofempires.com/t/regional-skins-are-already-in-the-game-its-just-a-matter-of-allowing-through-non-data-mod-for-asian-african-civs/85404
+    giveUnitsRegionalSkins(df);
     allowSamuraiToSwapToArcherMode(df);
     makeLongboatsTransports(df);
     giveHistoricRegionalVarietyToCivs(df);

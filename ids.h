@@ -469,6 +469,8 @@ static const int16_t ARCHER_OF_THE_EYES = 686;
 static const int16_t LANGFILE_ENGLISH_ARCHER_OF_THE_EYES = 5568;
 static const int16_t LANGFILE_ENGLISH_SAMURAI = 5110;
 
+static const int16_t BUI_BI = 1183;
+
 static const int ATTACK_TYPE_HERO_BONUS_DAMAGE = 19;
 static const int ACTION_TYPE_UNLOAD = 12;
 
