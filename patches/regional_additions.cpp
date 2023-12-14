@@ -13,17 +13,55 @@
 // 3. Focus on giving factions/regions more of an identity/uniqueness
 // 4. Try to be additive (devs give trebs to civs without them for a reason)
 // 5. If balance occurs, generally err on buffing instead of nerfing
+//
 
-void duplicateTechToNewCiv(genie::DatFile *df, int techId, int civId ) {
-        genie::Tech tech = df->Techs.at(techId);
-        tech.Civ = civId;
+
+
+std::vector<int16_t> duplicateTechToNewCiv(genie::DatFile *df, int techId, int civId, std::vector<int16_t> feedForwardTechIds = {-1,-1}, int buttonOverride = -1) {
+        //instantiate log and some id information
+        std::string lastPositionString = "";
+        int16_t newTechPosition = feedForwardTechIds.at(0);
+        int16_t originalTechId = feedForwardTechIds.at(1);
+
         //turn off full tech mode as that will break with this anyway
-        //and this will be so much easier if i can reuse FTT stuff in base
-        //rather than having to figure out tech tree modifications
+        genie::Tech tech = df->Techs.at(techId);
+        std::cout << "Added Tech '" << tech.Name << "' to civ id '" << df->Civs.at(civId).Name << "'" << lastPositionString; 
+        tech.Civ = civId;
         tech.FullTechMode = 0;         
+        if (buttonOverride >= 0) {
+            tech.ButtonID = buttonOverride;         
+            std::cout << ": Button overriden to " << buttonOverride;
+        }
+
+        //if tech references the last duplicated tech directly, move the new requirement
+        auto requiredTechs = tech.RequiredTechs;
+        auto it = find(requiredTechs.begin(), requiredTechs.end(), originalTechId);
+        if(originalTechId > 0 && it != requiredTechs.end() ){
+            int16_t foundIndex = it-requiredTechs.begin();
+            tech.RequiredTechs.at(foundIndex) = newTechPosition;
+            //reset added tech if the current tech needs to point at old tech
+            std::cout << ": moved research requirement position from " << originalTechId << " to " << newTechPosition;
+        }
+        else { 
+            //if no original tech found, set to new value 
+            originalTechId = techId;
+        };
+
+        std::cout << std::endl;
+        //push here, but logging looks better above so it is all consitent
         df->Techs.push_back(tech);
-    std::cout << "Added Tech '" << tech.Name << "' to civ id '" << df->Civs.at(civId).Name << "'" << std::endl;
+        newTechPosition = (df->Techs.size() -1);
+        std::vector<int16_t> res{newTechPosition, originalTechId};
+        return res;
 };
+
+void addExtraUniqueUnitToCiv(genie::DatFile *df, int civId, int16_t unitId, int enablementTechid){
+    genie::Civ &chosenCiv = df->Civs.at(civId);
+    genie::Unit &duplicateUnit = chosenCiv.Units.at(unitId);
+    duplicateUnit.Creatable.ButtonID = 4; //after petard so it doesnt block things
+    duplicateTechToNewCiv(df, enablementTechid, civId);
+    std::cout << "Added Unique Unit '" << duplicateUnit.Name << "' to civ '" << chosenCiv.Name << std::endl; 
+}
 
 void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
     for (genie::Civ &civ : df->Civs) {
@@ -42,13 +80,16 @@ void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
         //df->Langfile.setString(LANGFILE_ENGLISH_ARCHER_OF_THE_EYES, "Samurai (Ranged)").
         samuraiUnitArcher.Creatable.HeroGlowGraphic = -1;
         samuraiUnitArcher.Creatable.HeroMode = 0;
+        //make sure its weaker in archer form but make it the same otherwise
+        samuraiUnitArcher.Type50.Armours = samuraiUnit.Type50.Armours; //make it same as samurai
         samuraiUnitArcher.Type50.BaseArmor = 0; //dont give armor bonuses
+        samuraiUnitArcher.HitPoints = samuraiUnit.HitPoints; //keep it's HP in line
         //make sure it's ranged mode is only good against unique units
         samuraiUnitArcher.Type50.DisplayedAttack = 1;
         //super slow but heavy hitting to encourage shoot once than swap
         samuraiUnitArcher.Type50.ReloadTime = 4;
         samuraiUnitArcher.Type50.DisplayedReloadTime = 4;
-        //has 2 attacks, unlikely to change
+        //archer of the eye has 2 attacks like we need, unlikely to change
         samuraiUnitArcher.Type50.Attacks.at(0).Amount = 1;
         samuraiUnitArcher.Type50.Attacks.at(1).Amount = 25;
         samuraiUnitArcher.Type50.Attacks.at(1).Class = ATTACK_TYPE_HERO_BONUS_DAMAGE;
@@ -58,10 +99,13 @@ void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
     std::cout << "Added Ability 'Samurai can swap to Ranged Mode'" << std::endl;
 }
 
-void addTechnologiesToCivs(genie::DatFile *df, std::vector<int16_t> civIds, std::vector<int16_t>  techIds){
+void addTechnologiesToCivs(genie::DatFile *df, std::vector<int16_t> civIds, std::vector<std::vector<int16_t>> techSetters){
+    std::vector<int16_t> feedForwardTechIds{-1,-1};
     for (int16_t civId : civIds) {
-        for (int16_t techId : techIds) {
-            duplicateTechToNewCiv(df, techId, civId);
+        for (std::vector<int16_t> techSetter : techSetters) {
+            int16_t techId = techSetter.at(0);
+            int16_t buttonOverride = techSetter.at(1);
+            feedForwardTechIds = duplicateTechToNewCiv(df, techId, civId, feedForwardTechIds, buttonOverride);
         }
     };
 };
@@ -74,6 +118,10 @@ void makeLongboatsTransports(genie::DatFile *df) {
         genie::Unit &eliteLongboat = civ.Units.at(ELITE_LONGBOAT);
         longboat.GarrisonCapacity = 5;
         eliteLongboat.GarrisonCapacity = 5;
+        longboat.Class = CLASS_TRANSPORT_BOAT;
+        eliteLongboat.Class = CLASS_TRANSPORT_BOAT;
+        longboat.Trait = 3;
+        eliteLongboat.Trait = 3;
         auto unloadTask = new genie::Task();
         unloadTask->ActionType = ACTION_TYPE_UNLOAD;
         longboat.Bird.TaskList.push_back(*unloadTask);
@@ -92,16 +140,16 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_CUMANS,
                 CIV_MAGYARS
             }, {
-                TECH_MULECART_MAKE_AVAILABLE
+                {TECH_MULECART_MAKE_AVAILABLE, -1}
             } 
     );
-    //add chemistry to the civ that created it 
+    //add bombard and hand cannon to the civ that created it 
     //https://forums.ageofempires.com/t/chinese-civilization/73726
     addTechnologiesToCivs(df, {
                 CIV_CHINESE,
             }, {
-               TECH_HAND_CANNON,
-               TECH_BOMBARD_TOWER
+               {TECH_HAND_CANNON, -1},
+               {TECH_BOMBARD_TOWER, -1}
             } 
     );
     //add caravanseri to silk road civs 
@@ -113,7 +161,7 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_TURKS,
                 CIV_TATARS
             }, {
-               TECH_CARAVANSERI_MAKE_AVAILABLE 
+               {TECH_CARAVANSERI_MAKE_AVAILABLE, -1}
             } 
     );
     //add elephaunt archers to civs that had them historically
@@ -125,9 +173,8 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_KHMER,
                 CIV_VIETNAMESE
             }, {
-                TECH_ELEPHAUNT_ARCHER_MAKE_AVAILABLE,
-                //have to move because these civs have cav archers as well
-                TECH_MOVE_ELEPHANT_ARCHER
+                {TECH_ELEPHANT_ARCHER_MAKE_AVAILABLE, -1},
+                {TECH_MOVE_ELEPHANT_ARCHER, -1}
             } 
     );
     //give armoured elephaunts to elephant civs 
@@ -139,9 +186,9 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_MALAY,
                 CIV_ETHIOPIANS
             }, {
-            TECH_ARMORED_ELEPHANT_MAKE_AVAILABLE,
-            TECH_SIEGE_ELEPHANT,
-            TECH_MOVE_ARMORED_ELEPHANT
+            {TECH_ARMORED_ELEPHANT_MAKE_AVAILABLE, -1},
+            {TECH_MOVE_ARMORED_ELEPHANT, -1},
+            {TECH_SIEGE_ELEPHANT, 12}
     });
     //add steppe lancers to civs that should probably have them
     //https://www.reddit.com/r/aoe2/comments/10mqm64/sotl_should_more_civs_get_elephant_archers/
@@ -153,17 +200,16 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_HINDUSTANIS, 
                 CIV_MAGYARS,
                 CIV_SLAVS,
-                CIV_HUNS,
-                CIV_TURKS,
                 CIV_PERSIANS
             }, {
-                TECH_STEPPE_LANCER_MAKE_AVAILABLE
+                {TECH_STEPPE_LANCER_MAKE_AVAILABLE, -1}
     });
     addTechnologiesToCivs(df, {
                 CIV_HUNS,
                 CIV_TURKS
             }, {
-                TECH_ELITE_STEPPE_LANCER_MAKE_AVAILABLE
+                {TECH_STEPPE_LANCER_MAKE_AVAILABLE, -1},
+                {TECH_ELITE_STEPPE_LANCER_MAKE_AVAILABLE, -1}
     });
     //disable paladin for pure cumans and give heavy camel
     //https://forums.ageofempires.com/t/give-cumans-heavy-camel-riders-and-remove-paladins-and-maybe-chevaliers/196455
@@ -172,8 +218,8 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_CUMANS,
                 CIV_HUNS
             }, {
-                TECH_DISABLE_PALADIN,
-                TECH_HEAVY_CAMEL_RIDER
+            {TECH_DISABLE_PALADIN, -1},
+            {TECH_HEAVY_CAMEL_RIDER, -1}
     });
     //Add genitour to more civs that would have had them
     //https://forums.ageofempires.com/t/give-cumans-heavy-camel-riders-and-remove-paladins-and-maybe-chevaliers/196455
@@ -184,7 +230,7 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_SARACENS,
                 CIV_TURKS
             }, {
-                TECH_GENITOUR_MAKE_AVAILABLE
+                {TECH_GENITOUR_MAKE_AVAILABLE, -1}
     });
 
     //Give more civs access to the camel scout
@@ -194,24 +240,25 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_BERBERS,
                 CIV_SARACENS,
             }, {
-                TECH_CAMEL_SCOUT_MAKE_AVAILABLE
+            {TECH_CAMEL_SCOUT_MAKE_AVAILABLE, -1},
+            {TECH_CAMEL_MAKE_AVAILABLE, -1}
     });
     //Give out some legionaires 
     //https://www.reddit.com/r/aoe2/comments/13tw143/so_i_read_some_comments_about_how_byzantine_civ/
     addTechnologiesToCivs(df, {
                 CIV_BYZANTINES,
             }, {
-                TECH_LEGIONARY,
-                TECH_DISABLE_MILITIA_UPGRADES
+            {TECH_LEGIONARY, -1},
+            {TECH_DISABLE_MILITIA_UPGRADES, -1}
     });
     //give celts some infantry love and remove paladin
     //https://www.reddit.com/r/aoe2/comments/164jd1v/give_celts_squires/
     addTechnologiesToCivs(df, {
                 CIV_CELTS,
             }, {
-                SQUIRES,
-                BLOODLINES,
-                TECH_DISABLE_PALADIN
+            {SQUIRES, -1},
+            {BLOODLINES, -1},
+            {TECH_DISABLE_PALADIN, -1}
     });
     //give magyars winged hussars
     //https://www.reddit.com/r/aoe2/comments/qu6b4a/should_magyars_get_winged_hussars_too/
@@ -219,27 +266,33 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_MAGYARS,
                 CIV_CUMANS
             }, {
-            TECH_WINGED_HUSSARS,
-            TECH_DISABLE_HUSSARS
+                //must disable first so the id maps for adding winged hussars
+            {TECH_DISABLE_HUSSARS, -1},
+            {TECH_WINGED_HUSSARS, 6}
     });
 
     //TODO need to make this work as war elephant is in the way
-    /*
     //give ethiopians war elephants, no elite
     //https://forums.ageofempires.com/t/should-ethiopians-get-war-elephants/202217/12
-    addTechnologiesToCivs(df, {
-                CIV_ETHIOPIANS
-            }, {
-            TECH_WAR_ELEPHANT_MAKE_AVAILABLE
-    });
-    */
+    addExtraUniqueUnitToCiv(df,
+                CIV_ETHIOPIANS, WAR_ELEPHANT, TECH_WAR_ELEPHANT_MAKE_AVAILABLE
+    );
     //give imperial skirm to civs that had great skirms 
     //https://www.reddit.com/r/aoe2/comments/17h70lv/imperial_skirmisher_would_be_nice_if_it_wasnt/
     addTechnologiesToCivs(df, {
                 CIV_MALIANS,
                 CIV_ROMANS
             }, {
-            TECH_IMPERIAL_SKIRMISHER
+            {TECH_IMPERIAL_SKIRMISHER, 7}
+    });
+    //give some boys imp camels
+    //https://forums.ageofempires.com/t/imperial-camels-for-saracens-turks-and-berbers/245239
+    addTechnologiesToCivs(df, {
+                CIV_BERBERS,
+                CIV_SARACENS,
+                CIV_TURKS
+            }, {
+            {TECH_IMPERIAL_CAMEL_RIDER, 8}
     });
 }
 
