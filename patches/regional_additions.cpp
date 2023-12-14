@@ -16,13 +16,18 @@
 //
 
 
+int16_t getVectorAtIndex(std::vector<int16_t> vec, int16_t index, int16_t defaultValue = -1){
+    if(vec.size() <= index){
+        return defaultValue;
+    }
+    return vec.at(index);
+}
 
 std::vector<int16_t> duplicateTechToNewCiv(genie::DatFile *df, int techId, int civId, std::vector<int16_t> feedForwardTechIds = {-1,-1}, int buttonOverride = -1) {
         //instantiate log and some id information
         std::string lastPositionString = "";
-        int16_t newTechPosition = feedForwardTechIds.at(0);
-        int16_t originalTechId = feedForwardTechIds.at(1);
-
+        int16_t newTechPosition = getVectorAtIndex(feedForwardTechIds, 0);
+        int16_t originalTechId = getVectorAtIndex(feedForwardTechIds, 1);
         //turn off full tech mode as that will break with this anyway
         genie::Tech tech = df->Techs.at(techId);
         std::cout << "Added Tech '" << tech.Name << "' to civ id '" << df->Civs.at(civId).Name << "'" << lastPositionString; 
@@ -99,16 +104,32 @@ void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
     std::cout << "Added Ability 'Samurai can swap to Ranged Mode'" << std::endl;
 }
 
-void addTechnologiesToCivs(genie::DatFile *df, std::vector<int16_t> civIds, std::vector<std::vector<int16_t>> techSetters){
+int16_t addTechnologiesToCivs(genie::DatFile *df, std::vector<int16_t> civIds, std::vector<std::vector<int16_t>> techSetters){
     std::vector<int16_t> feedForwardTechIds{-1,-1};
     for (int16_t civId : civIds) {
         for (std::vector<int16_t> techSetter : techSetters) {
-            int16_t techId = techSetter.at(0);
-            int16_t buttonOverride = techSetter.at(1);
+            //this should probably be done better, but works for now and we
+            //names nicelyish? idk, probably make it map<string,int> it
+            //and check if tech.String (exists) then set to int but i'm lazy
+            int16_t techId = getVectorAtIndex(techSetter, 0);
+            int16_t buttonOverride = getVectorAtIndex(techSetter, 1);
             feedForwardTechIds = duplicateTechToNewCiv(df, techId, civId, feedForwardTechIds, buttonOverride);
         }
     };
+    int16_t finalNewTechnologyId =  getVectorAtIndex(feedForwardTechIds, 0);
+    return finalNewTechnologyId;
 };
+
+void addGenitourToCivs(genie::DatFile *df, std::vector<int16_t> civIds){
+    int16_t addedGenitourtechId = -1;
+    for (int16_t civId : civIds) {
+        addedGenitourtechId = addTechnologiesToCivs(df, {civId}, {{TECH_GENITOUR_MAKE_AVAILABLE}});
+        genie::Tech &newlyAddedGenitourTech = df->Techs.at(addedGenitourtechId);
+        newlyAddedGenitourTech.ResourceCosts.at(0).Amount = 0;
+        newlyAddedGenitourTech.ResearchTime = 0;
+        std::cout << "  Genitour at tech id " << addedGenitourtechId << " updated cost";
+    }
+}
 
 void makeLongboatsTransports(genie::DatFile *df) {
     //allow viking longboats to transport 5 units
@@ -148,8 +169,7 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
     addTechnologiesToCivs(df, {
                 CIV_CHINESE,
             }, {
-               {TECH_HAND_CANNON, -1},
-               {TECH_BOMBARD_TOWER, -1}
+               {TECH_HAND_CANNON, -1}
             } 
     );
     //add caravanseri to silk road civs 
@@ -221,22 +241,13 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
             {TECH_DISABLE_PALADIN, -1},
             {TECH_HEAVY_CAMEL_RIDER, -1}
     });
-    //Add genitour to more civs that would have had them
-    //https://forums.ageofempires.com/t/give-cumans-heavy-camel-riders-and-remove-paladins-and-maybe-chevaliers/196455
-    addTechnologiesToCivs(df, {
-                CIV_SPANISH,
-                CIV_PORTUGUESE,
-                CIV_PERSIANS,
-                CIV_SARACENS,
-                CIV_TURKS
-            }, {
-                {TECH_GENITOUR_MAKE_AVAILABLE, -1}
-    });
 
     //Give more civs access to the camel scout
     //https://www.reddit.com/r/aoe2/comments/ukg4ko/should_other_civs_get_the_camel_scout_as_well
     addTechnologiesToCivs(df, {
                 CIV_HINDUSTANIS,
+                CIV_ETHIOPIANS,
+                CIV_MALIANS,
                 CIV_BERBERS,
                 CIV_SARACENS,
             }, {
@@ -271,7 +282,6 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
             {TECH_WINGED_HUSSARS, 6}
     });
 
-    //TODO need to make this work as war elephant is in the way
     //give ethiopians war elephants, no elite
     //https://forums.ageofempires.com/t/should-ethiopians-get-war-elephants/202217/12
     addExtraUniqueUnitToCiv(df,
@@ -294,6 +304,54 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
             }, {
             {TECH_IMPERIAL_CAMEL_RIDER, 8}
     });
+
+
+    //give portugeset conquistadors, no elite
+    //https://www.reddit.com/r/aoe2/comments/snpt20/how_unbalanced_would_making_the_conq_a_regional/
+    addExtraUniqueUnitToCiv(df,
+                CIV_PORTUGUESE, CONQUISTADOR, TECH_CONQUISTADOR_MAKE_AVAILABLE
+    );
+
+    //give missionaries to some more civs
+    //https://www.reddit.com/r/aoe2/comments/ka4jvi/why_dont_portuguese_have_access_to_missionaries/
+    //https://www.reddit.com/r/aoe2/comments/152bspg/should_missionaries_be_just_exclusive_to_spanish/
+    addTechnologiesToCivs(df, {
+               CIV_ITALIANS,
+               CIV_PORTUGUESE,
+               CIV_BYZANTINES
+            }, {
+            {TECH_MISSIONARY_MAKE_AVAILABLE, -1}
+    });
+
+    //give warrior priest to some more civs
+    //https://www.reddit.com/r/aoe2/comments/17egkrm/for_fun_what_if_the_new_warrior_priest_from/
+    addTechnologiesToCivs(df, {
+            CIV_VIKINGS,
+            CIV_CELTS,
+            CIV_AZTECS,
+            CIV_DRAVIDIANS,
+            CIV_MALIANS,
+            CIV_TEUTONS,
+            CIV_JAPANESE,
+            CIV_CHINESE
+            }, {
+            {TECH_WARRIOR_PRIEST_MAKE_AVAILABLE, -1}
+    });
+
+    /*NOTE EVERYTHING BELOW HERE IS EITHER IN DEBUG OR HAS NOT BEEN TESTED*/
+
+    //Add genitour to more civs that would have had them
+    //https://www.reddit.com/r/aoe2/comments/106i52l/genitours_for_middle_eastern_civs/
+    //https://www.reddit.com/r/aoe2/comments/rheysc/malians_civ_rework/
+    addGenitourToCivs(df, {
+            CIV_SPANISH,
+            CIV_PORTUGUESE,
+            CIV_PERSIANS,
+            CIV_SARACENS,
+            CIV_MALIANS,
+            CIV_TURKS
+    });
+
 }
 
 void configureRegionalAdditions(genie::DatFile *df) {
