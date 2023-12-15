@@ -23,14 +23,19 @@ int16_t getVectorAtIndex(std::vector<int16_t> vec, int16_t index, int16_t defaul
     return vec.at(index);
 }
 
-void updateUnitSkins(genie::DatFile *df, std::vector<int> civIds, int16_t unitId, int16_t replacementGraphicUnitId ) {
+void updateUnitSkins(genie::DatFile *df, std::vector<int> civIds, int16_t unitId, int16_t replacementGraphicUnitId, bool copyIcon=false, bool copyName=false ) {
     for (int16_t civId : civIds) {
         //get the civ and skins we want
         genie::Civ &chosenCiv = df->Civs.at(civId);
         genie::Unit &unitToUpdate = chosenCiv.Units.at(unitId);
         genie::Unit unitWhosSkinWeWant = chosenCiv.Units.at(replacementGraphicUnitId);
         //update it from old to new
-        unitToUpdate.IconID = unitWhosSkinWeWant.IconID;
+        if(copyIcon == true){
+            unitToUpdate.IconID = unitWhosSkinWeWant.IconID;
+        }
+        if(copyName == true){
+            unitToUpdate.LanguageDLLName = LANGFILE_ENGLISH_SAMURAI;
+        }
         unitToUpdate.StandingGraphic = unitWhosSkinWeWant.StandingGraphic;
         unitToUpdate.DyingGraphic = unitWhosSkinWeWant.DyingGraphic;
         unitToUpdate.UndeadGraphic = unitWhosSkinWeWant.UndeadGraphic;
@@ -376,14 +381,14 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
 
 void giveUnitsRegionalSkins(genie::DatFile *df){
     //give elite janissarys hats
-    updateUnitSkins(df, {CIV_TURKS }, ELITE_JANISSARY, ROYAL_JANISSARY);
+    updateUnitSkins(df, {CIV_TURKS }, ELITE_JANISSARY, ROYAL_JANISSARY, true);
     //https://forums.ageofempires.com/t/regional-skins-are-already-in-the-game-its-just-a-matter-of-allowing-through-non-data-mod-for-asian-african-civs/85404
     //give middle east civs imam for monks
-    updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_HINDUSTANIS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS }, MONK, IMAM);
+    updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_HINDUSTANIS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS }, MONK, IMAM, true);
     //give SE asian and chinese bui bi sking for monks
-    updateUnitSkins(df, {CIV_CHINESE, CIV_KHMER, CIV_MALAY, CIV_BURMESE, CIV_VIETNAMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, MONK, BUI_BI);
+    updateUnitSkins(df, {CIV_CHINESE, CIV_KHMER, CIV_MALAY, CIV_BURMESE, CIV_VIETNAMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, MONK, BUI_BI, true);
     //give some civs priest  for monks
-    updateUnitSkins(df, {CIV_ROMANS}, MONK, PRIEST);
+    updateUnitSkins(df, {CIV_ROMANS}, MONK, PRIEST, true);
     //atillia knight line upgrades
     const std::vector<int> atillaKnightLine = {CIV_JAPANESE, CIV_CHINESE, CIV_BYZANTINES, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_KOREANS, CIV_KHMER, CIV_TATARS, CIV_CUMANS, CIV_VIETNAMESE};
     //give atilla as knight for SR asia, east asia, hun etc...
@@ -396,9 +401,9 @@ void giveUnitsRegionalSkins(genie::DatFile *df){
     //give eastern europe paldins vayatas skin
     updateUnitSkins(df, {CIV_MAGYARS, CIV_SLAVS, CIV_BULGARIANS, CIV_LITHUANIANS, CIV_CUMANS, CIV_BURGUNDIANS, CIV_POLES, CIV_BOHEMIANS, CIV_ARMENIANS, CIV_GEORGIANS}, PALADIN, VYAUTAS_THE_GREAT);
     //give crusader paldins to crusader civs
-    updateUnitSkins(df, {CIV_TEUTONS, CIV_ITALIANS, CIV_SICILIANS}, PALADIN, CRUSADER_KNIGHT);
+    updateUnitSkins(df, {CIV_TEUTONS, CIV_ITALIANS, CIV_SICILIANS}, PALADIN, CRUSADER_KNIGHT, true, true);
     //give frank paldins to crusader civs
-    updateUnitSkins(df, {CIV_FRANKS}, PALADIN, FRANKISH_PALADIN);
+    updateUnitSkins(df, {CIV_FRANKS}, PALADIN, FRANKISH_PALADIN, true, true);
     //give civs east asian civs subotair heavy cav archers 
     updateUnitSkins(df, {CIV_CHINESE, CIV_VIETNAMESE, CIV_KOREANS, CIV_JAPANESE}, HEAVY_CAV_ARCHER, SUBOTAI );
     updateUnitSkins(df, {CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_KHMER, CIV_HINDUSTANIS, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, HEAVY_CAV_ARCHER, PRITHVIRAJ );
