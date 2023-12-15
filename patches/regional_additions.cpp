@@ -34,7 +34,7 @@ void updateUnitSkins(genie::DatFile *df, std::vector<int> civIds, int16_t unitId
             unitToUpdate.IconID = unitWhosSkinWeWant.IconID;
         }
         if(copyName == true){
-            unitToUpdate.LanguageDLLName = LANGFILE_ENGLISH_SAMURAI;
+            unitToUpdate.LanguageDLLName = unitWhosSkinWeWant.LanguageDLLName;
         }
         unitToUpdate.StandingGraphic = unitWhosSkinWeWant.StandingGraphic;
         unitToUpdate.DyingGraphic = unitWhosSkinWeWant.DyingGraphic;
@@ -264,7 +264,6 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
                 CIV_CUMANS,
                 CIV_HUNS
             }, {
-            {TECH_DISABLE_PALADIN, -1},
             {TECH_HEAVY_CAMEL_RIDER, -1}
     });
 
@@ -389,33 +388,108 @@ void giveUnitsRegionalSkins(genie::DatFile *df){
     updateUnitSkins(df, {CIV_CHINESE, CIV_KHMER, CIV_MALAY, CIV_BURMESE, CIV_VIETNAMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, MONK, BUI_BI, true);
     //give some civs priest  for monks
     updateUnitSkins(df, {CIV_ROMANS}, MONK, PRIEST, true);
+
+
+
+
     //atillia knight line upgrades
     const std::vector<int> atillaKnightLine = {CIV_JAPANESE, CIV_CHINESE, CIV_BYZANTINES, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_KOREANS, CIV_KHMER, CIV_TATARS, CIV_CUMANS, CIV_VIETNAMESE};
     //give atilla as knight for SR asia, east asia, hun etc...
     updateUnitSkins(df, atillaKnightLine, KNIGHT, ATILLA_THE_HUN);
     updateUnitSkins(df, atillaKnightLine, CAVALIER, WANG_TONG);
+    updateUnitSkins(df, {CIV_CUMANS, CIV_HUNS, CIV_MAGYARS, CIV_MONGOLS}, CAVALIER, CUMAN_CHIEF, true);
+
     //sumanguru knight line upgrades
     const std::vector<int> sumanguruKinghtLine = {CIV_PERSIANS, CIV_SARACENS, CIV_HINDUSTANIS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS};
     updateUnitSkins(df, sumanguruKinghtLine, KNIGHT, SUMANGURU);
     updateUnitSkins(df, sumanguruKinghtLine, CAVALIER, SUNDJATA );
+    updateUnitSkins(df, sumanguruKinghtLine, HUSSAR, ARAIYAN_RAJARAJAN);
+
     //give eastern europe paldins vayatas skin
-    updateUnitSkins(df, {CIV_MAGYARS, CIV_SLAVS, CIV_BULGARIANS, CIV_LITHUANIANS, CIV_CUMANS, CIV_BURGUNDIANS, CIV_POLES, CIV_BOHEMIANS, CIV_ARMENIANS, CIV_GEORGIANS}, PALADIN, VYAUTAS_THE_GREAT);
+    const std::vector<int> bohemondKnightLine = {CIV_MAGYARS, CIV_SLAVS, CIV_BULGARIANS, CIV_LITHUANIANS, CIV_CUMANS, CIV_BURGUNDIANS, CIV_BOHEMIANS, CIV_ARMENIANS};
+    updateUnitSkins(df, bohemondKnightLine, KNIGHT, BOHEMOND);
+    updateUnitSkins(df, bohemondKnightLine, CAVALIER, KESTUTIS);
+    updateUnitSkins(df, bohemondKnightLine, PALADIN, VYAUTAS_THE_GREAT);
+
+
+
+
+    //west europe style knight changes
+    const std::vector<int> westernEuropKnightLines = {CIV_BRITONS, CIV_GOTHS, CIV_TEUTONS, CIV_LITHUANIANS, CIV_SICILIANS, CIV_POLES, CIV_BOHEMIANS, CIV_GEORGIANS};
+    updateUnitSkins(df, westernEuropKnightLines, KNIGHT, GILBERT_DE_CLARE);
+    updateUnitSkins(df, westernEuropKnightLines, CAVALIER, ALGRIDAS);
+
     //give crusader paldins to crusader civs
-    updateUnitSkins(df, {CIV_TEUTONS, CIV_ITALIANS, CIV_SICILIANS}, PALADIN, CRUSADER_KNIGHT, true, true);
-    //give frank paldins to crusader civs
-    updateUnitSkins(df, {CIV_FRANKS}, PALADIN, FRANKISH_PALADIN, true, true);
+    updateUnitSkins(df, {CIV_ITALIANS, CIV_SICILIANS}, PALADIN, CRUSADER_KNIGHT, true, true);
+    updateUnitSkins(df, {CIV_TEUTONS}, PALADIN, ULRICH_VON_JUNGINGEN, true);
+    //give frank paldins to britains civs because franks get gold ones
+    updateUnitSkins(df, {CIV_BRITONS}, PALADIN, FRANKISH_PALADIN);
+
+
+    //update franks to be more fun
+    updateUnitSkins(df, {CIV_FRANKS}, KNIGHT, PALADIN);
+    updateUnitSkins(df, {CIV_FRANKS}, CAVALIER, ALGRIDAS);
+    updateUnitSkins(df, {CIV_FRANKS}, PALADIN, BERNARD);
+
+
+    //give romans some better knight lines
+    updateUnitSkins(df, {CIV_ROMANS}, KNIGHT, ALARIC_THE_GOTH);
+    updateUnitSkins(df, {CIV_ROMANS}, CAVALIER, LE_LAI);
+
+    //indian knight line skins
+    const std::vector<int> indianMiddleEachKnightLineCivs = {CIV_PERSIANS, CIV_SARACENS, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_KHMER, CIV_MALAY, CIV_HINDUSTANIS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS};
+    updateUnitSkins(df, indianMiddleEachKnightLineCivs, KNIGHT, RAJENDRA_CHOLA);
+    updateUnitSkins(df, indianMiddleEachKnightLineCivs, CAVALIER, SHAH_ISMAIL);
+
+
+
     //give civs east asian civs subotair heavy cav archers 
     updateUnitSkins(df, {CIV_CHINESE, CIV_VIETNAMESE, CIV_KOREANS, CIV_JAPANESE}, HEAVY_CAV_ARCHER, SUBOTAI );
     updateUnitSkins(df, {CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_KHMER, CIV_HINDUSTANIS, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, HEAVY_CAV_ARCHER, PRITHVIRAJ );
     //give cav archers into heavy cav archers for other civs
-    const std::vector<int> girgenCavArcherLine = {CIV_BYZANTINES, CIV_PERSIANS, CIV_TURKS, CIV_MAGYARS, CIV_SLAVS, CIV_BULGARIANS,CIV_TATARS, CIV_CUMANS, CIV_LITHUANIANS, CIV_BURGUNDIANS, CIV_POLES, CIV_GEORGIANS, CIV_ARMENIANS, CIV_HUNS};
+    const std::vector<int> girgenCavArcherLine = {CIV_BYZANTINES, CIV_PERSIANS, CIV_TURKS, CIV_MAGYARS, CIV_SLAVS, CIV_BULGARIANS, CIV_TATARS, CIV_LITHUANIANS, CIV_BURGUNDIANS, CIV_POLES, CIV_GEORGIANS, CIV_ARMENIANS};
     updateUnitSkins(df, girgenCavArcherLine, CAVALRY_ARCHER, GIRGEN_KHAN );
     updateUnitSkins(df, girgenCavArcherLine, HEAVY_CAV_ARCHER, KOTYAN_KHAN );
+    //steppe archers
+    const std::vector<int> steppeCavArcherLine = {CIV_MONGOLS, CIV_HUNS, CIV_TATARS, CIV_CUMANS};
+    updateUnitSkins(df, steppeCavArcherLine, CAVALRY_ARCHER, QUTLUGH );
+    updateUnitSkins(df, steppeCavArcherLine, HEAVY_CAV_ARCHER, SHAYBANI_KHAN );
 
-    //give champions better skins for some civs
+
+
+
+    //eastern civs leloi champ
     updateUnitSkins(df, {CIV_CHINESE, CIV_KOREANS, CIV_VIETNAMESE, CIV_JAPANESE}, CHAMPION, LE_LOI );
+
+    //lots of civs eastern swordmen champ
+    updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_KHMER, CIV_MALAY, CIV_HINDUSTANIS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, LONG_SWORDSMAN, EASTERN_SWORDSMEN);
+
+    //lots of civs gidajan champ
     updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_KHMER, CIV_MALAY, CIV_HINDUSTANIS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, CHAMPION, GIDAJAN );
+
+    //american civs pachacuti
     updateUnitSkins(df, {CIV_AZTECS, CIV_MAYANS, CIV_INCAS}, CHAMPION, PACHACUTI );
+
+    //romans heavy swordsmen
+    updateUnitSkins(df, {CIV_ROMANS}, LONG_SWORDSMAN, HEAVY_SWORDSMEN);
+
+    //"barbarian" civ unique units
+    const std::vector<int> barbarianLine = {CIV_CELTS, CIV_GOTHS, CIV_VIKINGS};
+    updateUnitSkins(df, barbarianLine, LONG_SWORDSMAN, NORSE_WARRIOR );
+    updateUnitSkins(df, barbarianLine, TWO_HANDED_SWORDSMAN, IVALYO_INFANTRY );
+    updateUnitSkins(df, barbarianLine, LONG_SWORDSMAN, ATAULF );
+    updateUnitSkins(df, barbarianLine, CHAMPION, IVALYO_INFANTRY );
+    //knights
+    updateUnitSkins(df, barbarianLine, KNIGHT, JANZIZKA );
+
+
+    //"euopean" civ unique units
+    const std::vector<int> europeanInfantryLine = {CIV_FRANKS, CIV_BRITONS, CIV_GOTHS, CIV_TEUTONS, CIV_BULGARIANS, CIV_LITHUANIANS, CIV_SICILIANS, CIV_POLES, CIV_BOHEMIANS, CIV_GEORGIANS};
+    updateUnitSkins(df, europeanInfantryLine, MAN_AT_ARMS, DAFYD_AP_GRUFFYD );
+    updateUnitSkins(df, europeanInfantryLine, LONG_SWORDSMAN, LLYWELYN_AP_GRUFFYD );
+
+    //give a pike upgrade here
+    updateUnitSkins(df, {CIV_BERBERS, CIV_SARACENS, CIV_MALIANS, CIV_ETHIOPIANS}, HALBERDIER, SOSSO_GUARD);
 
 }
 

@@ -490,8 +490,30 @@ static const int16_t KOTYAN_KHAN = 1267;
 static const int16_t LE_LOI = 1178;
 static const int16_t GIDAJAN = 1109;
 static const int16_t PACHACUTI = 1074;
-
-
+static const int16_t ALARIC_THE_GOTH = 223;
+static const int16_t ATAULF = 453;
+static const int16_t CUMAN_CHIEF = 1268;
+static const int16_t IVALYO_INFANTRY = 1290;
+static const int16_t SOSSO_GUARD = 1574;
+static const int16_t LE_LAI = 1574;
+static const int16_t BERNARD = 1687;
+static const int16_t BOHEMOND = 1681;
+static const int16_t DAFYD_AP_GRUFFYD = 1685;
+static const int16_t GILBERT_DE_CLARE = 1671;
+static const int16_t LLYWELYN_AP_GRUFFYD = 1683;
+static const int16_t PHILLIP_THE_GOOD = 1675;
+static const int16_t ALGRIDAS = 1725;
+static const int16_t JANZIZKA = 1713;
+static const int16_t KESTUTIS= 1721;
+static const int16_t ULRICH_VON_JUNGINGEN= 1727;
+static const int16_t ARAIYAN_RAJARAJAN= 1766;
+static const int16_t QUTLUGH= 1769;
+static const int16_t RAJENDRA_CHOLA= 1764;
+static const int16_t SHAYBANI_KHAN= 1772;
+static const int16_t SHAH_ISMAIL= 1815;
+static const int16_t NORSE_WARRIOR= 361;
+static const int16_t HEAVY_SWORDSMEN= 76;
+static const int16_t EASTERN_SWORDSMEN= 894;
 
 static const int CIV_BRITONS = 1;
 static const int CIV_FRANKS = 2;
