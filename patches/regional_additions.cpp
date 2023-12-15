@@ -462,7 +462,7 @@ void giveUnitsRegionalSkins(genie::DatFile *df){
     updateUnitSkins(df, {CIV_CHINESE, CIV_KOREANS, CIV_VIETNAMESE, CIV_JAPANESE}, CHAMPION, LE_LOI );
 
     //lots of civs eastern swordmen champ
-    updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_KHMER, CIV_MALAY, CIV_HINDUSTANIS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, LONG_SWORDSMAN, EASTERN_SWORDSMEN);
+    updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_KHMER, CIV_MALAY, CIV_HINDUSTANIS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, CHAMPION, EASTERN_SWORDSMEN);
 
     //lots of civs gidajan champ
     updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_KHMER, CIV_MALAY, CIV_HINDUSTANIS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, CHAMPION, GIDAJAN );
@@ -476,9 +476,8 @@ void giveUnitsRegionalSkins(genie::DatFile *df){
     //"barbarian" civ unique units
     const std::vector<int> barbarianLine = {CIV_CELTS, CIV_GOTHS, CIV_VIKINGS};
     updateUnitSkins(df, barbarianLine, MAN_AT_ARMS, NORSE_WARRIOR );
-    updateUnitSkins(df, barbarianLine, LONG_SWORDSMAN, NORSE_WARRIOR );
-    updateUnitSkins(df, barbarianLine, TWO_HANDED_SWORDSMAN, IVALYO_INFANTRY );
-    updateUnitSkins(df, barbarianLine, LONG_SWORDSMAN, ATAULF );
+    updateUnitSkins(df, barbarianLine, LONG_SWORDSMAN, IVALYO_INFANTRY );
+    updateUnitSkins(df, barbarianLine, TWO_HANDED_SWORDSMAN, ATAULF );
     updateUnitSkins(df, barbarianLine, CHAMPION, WILLIAM_WALLACE );
     //knights
     updateUnitSkins(df, barbarianLine, KNIGHT, JANZIZKA );
