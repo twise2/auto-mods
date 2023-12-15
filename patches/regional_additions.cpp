@@ -475,10 +475,11 @@ void giveUnitsRegionalSkins(genie::DatFile *df){
 
     //"barbarian" civ unique units
     const std::vector<int> barbarianLine = {CIV_CELTS, CIV_GOTHS, CIV_VIKINGS};
+    updateUnitSkins(df, barbarianLine, MAN_AT_ARMS, NORSE_WARRIOR );
     updateUnitSkins(df, barbarianLine, LONG_SWORDSMAN, NORSE_WARRIOR );
     updateUnitSkins(df, barbarianLine, TWO_HANDED_SWORDSMAN, IVALYO_INFANTRY );
     updateUnitSkins(df, barbarianLine, LONG_SWORDSMAN, ATAULF );
-    updateUnitSkins(df, barbarianLine, CHAMPION, IVALYO_INFANTRY );
+    updateUnitSkins(df, barbarianLine, CHAMPION, WILLIAM_WALLACE );
     //knights
     updateUnitSkins(df, barbarianLine, KNIGHT, JANZIZKA );
 

@@ -514,6 +514,7 @@ static const int16_t SHAH_ISMAIL= 1815;
 static const int16_t NORSE_WARRIOR= 361;
 static const int16_t HEAVY_SWORDSMEN= 76;
 static const int16_t EASTERN_SWORDSMEN= 894;
+static const int16_t WILLIAM_WALLACE= 432;
 
 static const int CIV_BRITONS = 1;
 static const int CIV_FRANKS = 2;
