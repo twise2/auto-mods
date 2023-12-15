@@ -375,11 +375,46 @@ void giveHistoricRegionalVarietyToCivs(genie::DatFile *df) {
 }
 
 void giveUnitsRegionalSkins(genie::DatFile *df){
-    updateUnitSkins(df, {CIV_CHINESE}, MONK, BUI_BI);
+    //give elite janissarys hats
+    updateUnitSkins(df, {CIV_TURKS }, ELITE_JANISSARY, ROYAL_JANISSARY);
+    //https://forums.ageofempires.com/t/regional-skins-are-already-in-the-game-its-just-a-matter-of-allowing-through-non-data-mod-for-asian-african-civs/85404
+    //give middle east civs imam for monks
+    updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_HINDUSTANIS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS }, MONK, IMAM);
+    //give SE asian and chinese bui bi sking for monks
+    updateUnitSkins(df, {CIV_CHINESE, CIV_KHMER, CIV_MALAY, CIV_BURMESE, CIV_VIETNAMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, MONK, BUI_BI);
+    //give some civs priest  for monks
+    updateUnitSkins(df, {CIV_ROMANS}, MONK, PRIEST);
+    //atillia knight line upgrades
+    const std::vector<int> atillaKnightLine = {CIV_JAPANESE, CIV_CHINESE, CIV_BYZANTINES, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_KOREANS, CIV_KHMER, CIV_TATARS, CIV_CUMANS, CIV_VIETNAMESE};
+    //give atilla as knight for SR asia, east asia, hun etc...
+    updateUnitSkins(df, atillaKnightLine, KNIGHT, ATILLA_THE_HUN);
+    updateUnitSkins(df, atillaKnightLine, CAVALIER, WANG_TONG);
+    //sumanguru knight line upgrades
+    const std::vector<int> sumanguruKinghtLine = {CIV_PERSIANS, CIV_SARACENS, CIV_HINDUSTANIS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS};
+    updateUnitSkins(df, sumanguruKinghtLine, KNIGHT, SUMANGURU);
+    updateUnitSkins(df, sumanguruKinghtLine, CAVALIER, SUNDJATA );
+    //give eastern europe paldins vayatas skin
+    updateUnitSkins(df, {CIV_MAGYARS, CIV_SLAVS, CIV_BULGARIANS, CIV_LITHUANIANS, CIV_CUMANS, CIV_BURGUNDIANS, CIV_POLES, CIV_BOHEMIANS, CIV_ARMENIANS, CIV_GEORGIANS}, PALADIN, VYAUTAS_THE_GREAT);
+    //give crusader paldins to crusader civs
+    updateUnitSkins(df, {CIV_TEUTONS, CIV_ITALIANS, CIV_SICILIANS}, PALADIN, CRUSADER_KNIGHT);
+    //give frank paldins to crusader civs
+    updateUnitSkins(df, {CIV_FRANKS}, PALADIN, FRANKISH_PALADIN);
+    //give civs east asian civs subotair heavy cav archers 
+    updateUnitSkins(df, {CIV_CHINESE, CIV_VIETNAMESE, CIV_KOREANS, CIV_JAPANESE}, HEAVY_CAV_ARCHER, SUBOTAI );
+    updateUnitSkins(df, {CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_KHMER, CIV_HINDUSTANIS, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, HEAVY_CAV_ARCHER, PRITHVIRAJ );
+    //give cav archers into heavy cav archers for other civs
+    const std::vector<int> girgenCavArcherLine = {CIV_BYZANTINES, CIV_PERSIANS, CIV_TURKS, CIV_MAGYARS, CIV_SLAVS, CIV_BULGARIANS,CIV_TATARS, CIV_CUMANS, CIV_LITHUANIANS, CIV_BURGUNDIANS, CIV_POLES, CIV_GEORGIANS, CIV_ARMENIANS, CIV_HUNS};
+    updateUnitSkins(df, girgenCavArcherLine, CAVALRY_ARCHER, GIRGEN_KHAN );
+    updateUnitSkins(df, girgenCavArcherLine, HEAVY_CAV_ARCHER, KOTYAN_KHAN );
+
+    //give champions better skins for some civs
+    updateUnitSkins(df, {CIV_CHINESE, CIV_KOREANS, CIV_VIETNAMESE, CIV_JAPANESE}, CHAMPION, LE_LOI );
+    updateUnitSkins(df, {CIV_PERSIANS, CIV_SARACENS, CIV_TURKS, CIV_MONGOLS, CIV_HUNS, CIV_ETHIOPIANS, CIV_MALIANS, CIV_BERBERS, CIV_KHMER, CIV_MALAY, CIV_HINDUSTANIS, CIV_MALAY, CIV_BURMESE, CIV_DRAVIDIANS, CIV_BENGALIS, CIV_GURJARAS}, CHAMPION, GIDAJAN );
+    updateUnitSkins(df, {CIV_AZTECS, CIV_MAYANS, CIV_INCAS}, CHAMPION, PACHACUTI );
+
 }
 
 void configureRegionalAdditions(genie::DatFile *df) {
-    //https://forums.ageofempires.com/t/regional-skins-are-already-in-the-game-its-just-a-matter-of-allowing-through-non-data-mod-for-asian-african-civs/85404
     giveUnitsRegionalSkins(df);
     allowSamuraiToSwapToArcherMode(df);
     makeLongboatsTransports(df);

@@ -469,10 +469,29 @@ static const int16_t ARCHER_OF_THE_EYES = 686;
 static const int16_t LANGFILE_ENGLISH_ARCHER_OF_THE_EYES = 5568;
 static const int16_t LANGFILE_ENGLISH_SAMURAI = 5110;
 
-static const int16_t BUI_BI = 1183;
-
 static const int ATTACK_TYPE_HERO_BONUS_DAMAGE = 19;
 static const int ACTION_TYPE_UNLOAD = 12;
+
+static const int16_t BUI_BI = 1183;
+static const int16_t IMAM = 842;
+static const int16_t PRIEST = 1023;
+static const int16_t ATILLA_THE_HUN = 777;
+static const int16_t WANG_TONG = 1185;
+static const int16_t SUMANGURU = 1080;
+static const int16_t SUNDJATA = 1035;
+static const int16_t VYAUTAS_THE_GREAT = 1281;
+static const int16_t FRANKISH_PALADIN = 632;
+static const int16_t CRUSADER_KNIGHT = 1723;
+static const int16_t ROYAL_JANISSARY = 52;
+static const int16_t SUBOTAI = 698;
+static const int16_t PRITHVIRAJ = 437;
+static const int16_t GIRGEN_KHAN = 1269;
+static const int16_t KOTYAN_KHAN = 1267;
+static const int16_t LE_LOI = 1178;
+static const int16_t GIDAJAN = 1109;
+static const int16_t PACHACUTI = 1074;
+
+
 
 static const int CIV_BRITONS = 1;
 static const int CIV_FRANKS = 2;
