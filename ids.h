@@ -464,14 +464,14 @@ static const int16_t TECH_PIKEMAN_REQUIREMENT = 955;
 static const int16_t TECH_CONQUISTADOR_MAKE_AVAILABLE = 58;
 static const int16_t TECH_MISSIONARY_MAKE_AVAILABLE = 84;
 static const int16_t TECH_WARRIOR_PRIEST_MAKE_AVAILABLE = 948;
-
-static const int16_t ARCHER_OF_THE_EYES = 686;
-static const int16_t LANGFILE_ENGLISH_ARCHER_OF_THE_EYES = 5568;
 static const int16_t LANGFILE_ENGLISH_SAMURAI = 5110;
+static const int16_t LANGFILE_ENGLISH_SAMURAI_ELITE = 105460;
 
 static const int ATTACK_TYPE_HERO_BONUS_DAMAGE = 19;
 static const int ACTION_TYPE_UNLOAD = 12;
 
+static const int16_t ARCHER_OF_THE_EYES = 686;
+static const int16_t LUU_NHAN_CHU = 1182; 
 static const int16_t BUI_BI = 1183;
 static const int16_t IMAM = 842;
 static const int16_t PRIEST = 1023;

@@ -94,40 +94,51 @@ void addExtraUniqueUnitToCiv(genie::DatFile *df, int civId, int16_t unitId, int 
     std::cout << "Added Unique Unit '" << duplicateUnit.Name << "' to civ '" << chosenCiv.Name << std::endl; 
 }
 
-void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
+void SwapSamuraiUnitToRanged(genie::DatFile *df, int16_t SAMURAI_UNIT_ID, int16_t UNIT_TO_SWAP_TO, int16_t LANGFILE) {
     for (genie::Civ &civ : df->Civs) {
         //use archer fo the eye for samuraiUnit swap
-        genie::Unit &samuraiUnit = civ.Units.at(SAMURAI);
-        samuraiUnit.Nothing = ARCHER_OF_THE_EYES;
+        genie::Unit &samuraiUnit = civ.Units.at(SAMURAI_UNIT_ID);
+        samuraiUnit.Nothing = UNIT_TO_SWAP_TO;
         samuraiUnit.Trait = samuraiUnit.Trait | 8;
 
         //make archer of the eye bad except against unique units
-        genie::Unit &samuraiUnitArcher = civ.Units.at(ARCHER_OF_THE_EYES);
+        genie::Unit samuraiUnitArcher = civ.Units.at(UNIT_TO_SWAP_TO);
         samuraiUnitArcher.Nothing = SAMURAI;
         samuraiUnitArcher.Trait = samuraiUnitArcher.Trait | 8;
 
         samuraiUnitArcher.Name = "Samurai (ranged)";
-        samuraiUnitArcher.LanguageDLLName = LANGFILE_ENGLISH_SAMURAI;
+        samuraiUnitArcher.LanguageDLLName = LANGFILE;
         //df->Langfile.setString(LANGFILE_ENGLISH_ARCHER_OF_THE_EYES, "Samurai (Ranged)").
         samuraiUnitArcher.Creatable.HeroGlowGraphic = -1;
         samuraiUnitArcher.Creatable.HeroMode = 0;
         //make sure its weaker in archer form but make it the same otherwise
-        samuraiUnitArcher.Type50.Armours = samuraiUnit.Type50.Armours; //make it same as samurai
-        samuraiUnitArcher.Type50.BaseArmor = 0; //dont give armor bonuses
         samuraiUnitArcher.HitPoints = samuraiUnit.HitPoints; //keep it's HP in line
+        samuraiUnitArcher.Type50.Armours = samuraiUnit.Type50.Armours; //make it same as samurai
+        samuraiUnitArcher.Type50.BaseArmor = samuraiUnit.Type50.BaseArmor; //dont give armor bonuses
+        samuraiUnitArcher.Type50.DisplayedMeleeArmour = samuraiUnit.Type50.DisplayedMeleeArmour; //dont give armor bonuses
+        samuraiUnitArcher.Creatable.DisplayedPierceArmour = samuraiUnit.Creatable.DisplayedPierceArmour; //dont give armor bonuses
         //make sure it's ranged mode is only good against unique units
         samuraiUnitArcher.Type50.DisplayedAttack = 1;
+
+        //
+        samuraiUnitArcher.Type50.DisplayedRange = 5; //same as arbalest 
+        samuraiUnitArcher.Type50.MaxRange = 4; //same as arbalest
         //super slow but heavy hitting to encourage shoot once than swap
-        samuraiUnitArcher.Type50.ReloadTime = 4;
-        samuraiUnitArcher.Type50.DisplayedReloadTime = 4;
-        //archer of the eye has 2 attacks like we need, unlikely to change
+        samuraiUnitArcher.Type50.ReloadTime = 5;
+        samuraiUnitArcher.Type50.DisplayedReloadTime = 5;
+        //archer of the eye and lhunhan chu have 2 attacks, unlikely to change so can just edit them
         samuraiUnitArcher.Type50.Attacks.at(0).Amount = 1;
-        samuraiUnitArcher.Type50.Attacks.at(1).Amount = 25;
+        samuraiUnitArcher.Type50.Attacks.at(1).Amount = 30;
         samuraiUnitArcher.Type50.Attacks.at(1).Class = ATTACK_TYPE_HERO_BONUS_DAMAGE;
         //slow them down for good measure to decrease odds of staying in this form
-        samuraiUnitArcher.Speed = .81;
+        samuraiUnitArcher.Speed = .8;
     }
     std::cout << "Added Ability 'Samurai can swap to Ranged Mode'" << std::endl;
+}
+
+void allowSamuraiToSwapToArcherMode(genie::DatFile *df) {
+    SwapSamuraiUnitToRanged(df, SAMURAI, ARCHER_OF_THE_EYES, LANGFILE_ENGLISH_SAMURAI);
+    SwapSamuraiUnitToRanged(df, ELITE_SAMURAI, LUU_NHAN_CHU, LANGFILE_ENGLISH_SAMURAI_ELITE);
 }
 
 int16_t addTechnologiesToCivs(genie::DatFile *df, std::vector<int16_t> civIds, std::vector<std::vector<int16_t>> techSetters){
