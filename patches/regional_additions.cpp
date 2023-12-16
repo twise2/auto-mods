@@ -96,13 +96,14 @@ void addExtraUniqueUnitToCiv(genie::DatFile *df, int civId, int16_t unitId, int 
 
 void SwapSamuraiUnitToRanged(genie::DatFile *df, int16_t SAMURAI_UNIT_ID, int16_t UNIT_TO_SWAP_TO, int16_t LANGFILE) {
     for (genie::Civ &civ : df->Civs) {
+
         //use archer fo the eye for samuraiUnit swap
         genie::Unit &samuraiUnit = civ.Units.at(SAMURAI_UNIT_ID);
         samuraiUnit.Nothing = UNIT_TO_SWAP_TO;
         samuraiUnit.Trait = samuraiUnit.Trait | 8;
 
         //make archer of the eye bad except against unique units
-        genie::Unit samuraiUnitArcher = civ.Units.at(UNIT_TO_SWAP_TO);
+        genie::Unit &samuraiUnitArcher = civ.Units.at(UNIT_TO_SWAP_TO);
         samuraiUnitArcher.Nothing = SAMURAI;
         samuraiUnitArcher.Trait = samuraiUnitArcher.Trait | 8;
 
