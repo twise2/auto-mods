@@ -105,6 +105,7 @@ void SwapSamuraiUnitToRanged(genie::DatFile *df, int16_t SAMURAI_UNIT_ID, int16_
         //make archer of the eye bad except against unique units
         genie::Unit &samuraiUnitArcher = civ.Units.at(UNIT_TO_SWAP_TO);
         samuraiUnitArcher.Nothing = SAMURAI;
+        samuraiUnitArcher.IconID = samuraiUnit.IconID;
         samuraiUnitArcher.Trait = samuraiUnitArcher.Trait | 8;
 
         samuraiUnitArcher.Name = "Samurai (ranged)";
