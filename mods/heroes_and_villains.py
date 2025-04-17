@@ -83,7 +83,10 @@ HERO_FOR_CIV = {
     "Achaemenids": [DARIUS],
     "Athenians": [THEMISTOCLES],
     "Khitans": [KUSHLUK], #fine but not amazing
-    "Jurchens": [WHITE_TIGER_YAN] #not great but they dont have great
+    "Jurchens": [WHITE_TIGER_YAN], #not great but they dont have great
+    #"Shu": [LIU_BEI],
+    #"Wu": [SUN_JIAN],
+    #"Wei": [CAO_CAO],  
 }
 
 class auraClass:
@@ -219,6 +222,9 @@ def giveAuraAndLangauge(unit: Unit, data: DatFile) -> Unit:
     auras = auraClass(data)
 
     #TODO see if you can change the names somehow?
+    #this is not currently possible because genieUtils.py does not support language files.
+    #can see about adding langfile support from genieUtils to genieutils.py
+    #https://github.com/Tapsa/genieutils/blob/master/src/lang/LangFile.cpp
     attackSpeedLanguageUnit = data.civs[0].units[CAO_CAO]
     healingLanguageUnit = data.civs[0].units[LIU_BEI]
     movementSpeedLanguageUnit = data.civs[0].units[SUN_JIAN]
@@ -252,8 +258,7 @@ def addUnitToTechTree(unitId: int, data: DatFile):
     caoCaoTech = [uc for uc in data.tech_tree.unit_connections if uc.id == CAO_CAO][0]
     newTech = clone(caoCaoTech, data.version)
     newTech.id = unitId
-    #TODO fix this, adding the unit connection is currently making the save error out.
-    #data.tech_tree.unit_connections.append(newTech)
+    data.tech_tree.unit_connections.append(newTech)
     
 def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, water_basilius_unit_id: int) -> int:
     #prevent_hp_increase(cloned_unit)
@@ -273,8 +278,6 @@ def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, w
         ResourceStorage(type=TYPE_CURRENT_POPULATION, amount=1, flag=2),
         ResourceStorage(type=TYPE_TOTAL_UNITS_OWNED, amount=1, flag=1),
     )
-
-    #TODO give the unit cost when you hover over the unit in the castle/dock
 
     #make unit trainable in the dock if waship and limit is with water basilius
     if(unit.class_ == WARSHIP_CLASS):
