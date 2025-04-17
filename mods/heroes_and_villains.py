@@ -32,7 +32,6 @@ NAME = 'heroes-and-villains'
 
 CIVS_WITH_HEROES_ALREADY = ['Shu', 'Wu', 'Wei']
 
-
 HERO_FOR_CIV = {
     "British": [EDWARD_LONGSHANKS],
     "Byzantine": [BELISARIUS],
@@ -252,13 +251,6 @@ def giveAuraAndLangauge(unit: Unit, data: DatFile) -> Unit:
     else:
         logging.error(f"Unit {unit.name} not given an aura")
     return unit
-
-def addUnitToTechTree(unitId: int, data: DatFile):
-    logging.info(f'Adding hero unit {unitId} to tech tree')
-    caoCaoTech = [uc for uc in data.tech_tree.unit_connections if uc.id == CAO_CAO][0]
-    newTech = clone(caoCaoTech, data.version)
-    newTech.id = unitId
-    data.tech_tree.unit_connections.append(newTech)
     
 def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, water_basilius_unit_id: int) -> int:
     #prevent_hp_increase(cloned_unit)
@@ -324,12 +316,7 @@ def mod(data: DatFile):
             for unit_id in HERO_FOR_CIV[civ.name]:
                 hero_unit_id = makeHero(unit_id, civ, data, land_dead_basilius_id, water_dead_basilius_id)
                 addUnitToCiv(civ_id, hero_unit_id, data)
-                
-            #add the unit to the tech tree so its visible
-            #print('data.tech_tree.unit_connections', list(filter(lambda uc: uc.id == 1954, data.tech_tree.unit_connections)))
-            addUnitToTechTree(hero_unit_id, data)
-            
-            logging.info(f'Creating hero for civ other civs')
+    
         else:
             if(civ.name not in CIVS_WITH_HEROES_ALREADY):
                 # If the civ is not in the list, log an error message
