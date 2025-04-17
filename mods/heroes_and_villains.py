@@ -11,7 +11,7 @@ from mods.util import clone
 from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE, WHITE_TIGER_YAN, \
     WANG_TONG, ALARIC_THE_GOTH, SUNDJATA, SHAH_ISHMAIL, SALADIN, HARALD_HARDRADA, QUTLUGH, TAMERLANE, \
     CUAUHTEMOC, ATTILA_THE_HUN, PACAL_II, EL_CID_CAMPEADOR, GENGHIS_KHAN, FRANCESCO_SFORZA, \
-    MIKLOS_TOLDI, ALEXANDER_NEVSKI, TARIQ_IBN_ZIYAD, DAGNAJAN, SURYAVARMAN_I, KUSHLUK, \
+    MIKLOS_TOLDI, ALEXANDER_NEVSKI, TARIQ_IBN_ZIYAD, DAGNAJAN, SURYAVARMAN_I, KUSHLUK, FRANSICO_DE_ORELLANA, \
     GAJAH_MADA, LE_LOI, KOTYAN_KHAN, VYTAUTAS_THE_GREAT, OSMAN, THEMISTOCLES, LEONIDAS, DARIUS, \
     JOHN_THE_FEARLESS, ROGER_BOSSO, JAN_ZIZKA, JADWIGA, IBRAHIM_LODI, PRITHVIRAJ, TAMAR, \
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
@@ -21,7 +21,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     TYPE_ENABLE_DISABLE_UNIT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY,  TYPE_TOTAL_UNITS_OWNED,\
     TYPE_SPAWN_UNIT, TOWN_CENTER, TYPE_TOWN_CENTER_BUILT, SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD, CONQUISTADOR_CLASS, \
     WARSHIP_CLASS, CAVLARY_CLASS, INFANTRY_CLASS, ARCHER_CLASS, CAVALRY_ARCHER_CLASS, HAND_CANNONEER_CLASS, \
-    CONQUISTADOR_CLASS, HEALER_CLASS, MONK_CLASS, \
+    HEALER_CLASS, MONK_CLASS, \
     CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH #auras
 
 #reserve spaces for hidden resouces. Dont use 501 as its used for sparta already.
@@ -48,7 +48,7 @@ HERO_FOR_CIV = {
     "Vikings": [HARALD_HARDRADA, LEIF_ERIKSON],
     "Aztecs": [CUAUHTEMOC],
     "Huns": [ATTILA_THE_HUN],
-    "Koreans": [ADMIRAL_YI_SHUN_SHIN],
+    "Koreans": [ADMIRAL_YI_SHUN_SHIN], #no lnad unit, could add one later i lang file setup.
     "Mayan": [PACAL_II],
     "Spanish": [EL_CID_CAMPEADOR],
     "Incas": [PACHACUTI],
@@ -58,7 +58,7 @@ HERO_FOR_CIV = {
     "Berbers": [TARIQ_IBN_ZIYAD],
     "Ethiopians": [DAGNAJAN],
     "Malians": [SUNDJATA],
-    "Portuguese": [VASCO_DA_GAMA],
+    "Portuguese": [FRANSICO_DE_ORELLANA, VASCO_DA_GAMA],  #stand in or francisco de almeida
     "Burmese": [TABINSHWEHTI],
     "Khmer": [SURYAVARMAN_I],
     "Malay": [GAJAH_MADA],
@@ -75,14 +75,14 @@ HERO_FOR_CIV = {
     "Bengalis": [MIHIRA_BHOJA], #maybe not bengalis but some people on forum said it could be both so better than nothing?
     "Gurjaras": [PRITHVIRAJ],
     "Dravidians": [RAJENDRA_CHOLA],
-    "Romans": [POPE_LEO_I],
+    "Romans": [POPE_LEO_I], #could be improved if custom unit is added. or lang script updated.
     "Armenians": [THOROS],
     "Georgians": [TAMAR],
     "Spartans": [LEONIDAS],
     "Achaemenids": [DARIUS],
     "Athenians": [THEMISTOCLES],
     "Khitans": [KUSHLUK], #fine but not amazing
-    "Jurchens": [WHITE_TIGER_YAN], #not great but they dont have great
+    "Jurchens": [WHITE_TIGER_YAN], #not great but they dont have great #Aguda if they add him would be a perfect campaign.
     #"Shu": [LIU_BEI],
     #"Wu": [SUN_JIAN],
     #"Wei": [CAO_CAO],  
