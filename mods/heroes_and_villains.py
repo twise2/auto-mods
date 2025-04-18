@@ -320,7 +320,7 @@ def mod(data: DatFile):
         if civ.name in HERO_FOR_CIV and HERO_FOR_CIV[civ.name] is not None:
             logging.info(f'Creating hero for civ {civ.name}')
             for unit_id in HERO_FOR_CIV[civ.name]:
-                hero_unit_id = makeHero(unit_id, civ, data, land_dead_basilius_id, land_dead_basilius_id)
+                hero_unit_id = makeHero(unit_id, civ, data, land_dead_basilius_id, water_dead_basilius_id)
                 enableUnitForCiv(civ_id, hero_unit_id, data)
     
         else:
