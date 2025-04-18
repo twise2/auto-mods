@@ -99,7 +99,13 @@ class auraClass:
         self.attackSpeed = getAuraFromUnit(CAO_CAO, data)
         self.movementSpeed = getAuraFromUnit(SUN_JIAN, data)
 
-def addUnitToCiv(civ_id: int, unit_id: int, data: DatFile):
+
+def addUnitToAllCivs(unit: Unit, data: DatFile):
+    #add the unit to all civs
+    for civ in data.civs:
+         civ.units.append(unit)
+
+def enableUnitForCiv(civ_id: int, unit_id: int, data: DatFile):
     #create unit
     logging.info(f'Making effect for hero unit for {data.civs[civ_id].units[unit_id].name} - {unit_id} for civ {data.civs[civ_id].name} - {civ_id}')
     enable_hero_unit_effect_command = EffectCommand(
@@ -129,7 +135,7 @@ def addUnitToCiv(civ_id: int, unit_id: int, data: DatFile):
         ),
         required_tech_count=1,
         civ=civ_id,
-        full_tech_mode=1,
+        full_tech_mode=0,
         research_location=-1,
         language_dll_name=0,
         language_dll_description=0,
@@ -147,12 +153,11 @@ def addUnitToCiv(civ_id: int, unit_id: int, data: DatFile):
     data.techs.append(enable_hero_tech)
 
 
-def limitHeroesForCiv(civ_id: int, data: DatFile, hidden_resource_id: int) -> int:
-    logging.info(f'Making effect for hero unit limit for civ {data.civs[civ_id].name} - {civ_id}')
-
+def limitHeroesForCiv(data: DatFile, hidden_resource_id: int) -> int:
+    logging.info(f'Settting up hero limit for civs')
     #copy dead basilius to give one of hiden resource at start of game.
-    dead_basilius = clone(data.civs[civ_id].units[SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD], data.version)
-    dead_basilius_id = len(data.civs[civ_id].units)
+    dead_basilius = clone(data.civs[0].units[SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD], data.version)
+    dead_basilius_id = len(data.civs[0].units)
     dead_basilius.id = dead_basilius_id
     dead_basilius.resource_storages = (
         ResourceStorage(type=12, amount=300.0, flag=0), 
@@ -163,43 +168,45 @@ def limitHeroesForCiv(civ_id: int, data: DatFile, hidden_resource_id: int) -> in
     dead_basilius.standing_graphic = (-1,-1)
     dead_basilius.dying_graphic = -1
     #add basilius to the civs unit list so it can be used in the effect.
-    data.civs[civ_id].units.append(dead_basilius)
+    addUnitToAllCivs(dead_basilius, data)
 
-    #create a dead basilieus at start to give one of needed resource for the unit. This one gives instant resource 501 when it dies instead of delayed
-    give_resource_at_first_tc_effect_command = EffectCommand(type=TYPE_SPAWN_UNIT, a=dead_basilius_id, b=TOWN_CENTER, c=1, d=0.0)
-    limit_unit_creatable_effect = Effect(
-        name=f'Limit Hero Amount Effect for {data.civs[civ_id].name}',
-        effect_commands=[give_resource_at_first_tc_effect_command]
-    )
-    limit_unit_creatable_effect_id = len(data.effects)
-    data.effects.append(limit_unit_creatable_effect)
-    #add the tech with the effect to the civ to give 1 hero value.
-    logging.info(f'Making tech for hero unit limit for {data.civs[civ_id].name} - {civ_id}')
-    limit_hero_unit_creatable_effect = Tech(
-        required_techs=(TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, -1, -1, -1, -1),
-        resource_costs=(
-            ResearchResourceCost(type=-1, amount=0, flag=0),
-            ResearchResourceCost(type=-1, amount=0, flag=0),
-            ResearchResourceCost(type=-1, amount=0, flag=0)
-        ),
-        required_tech_count=2,
-        civ=civ_id,
-        full_tech_mode=0,
-        research_location=-1,
-        language_dll_name=0,
-        language_dll_description=0,
-        research_time=0,
-        effect_id=limit_unit_creatable_effect_id,
-        type=0,
-        icon_id=-1,
-        button_id=0,
-        language_dll_help=0,
-        language_dll_tech_tree=0,
-        hot_key=-1,
-        name=f'Limit Hero Unit amount for civ {data.civs[civ_id].name}',
-        repeatable=0,
-    )
-    data.techs.append(limit_hero_unit_creatable_effect)
+    for civ_id, civ in enumerate(data.civs):
+        if(civ.name in HERO_FOR_CIV and HERO_FOR_CIV[civ.name] is not None):
+            #create a dead basilieus at start to give one of needed resource for the unit. This one gives instant resource 501 when it dies instead of delayed
+            give_resource_at_first_tc_effect_command = EffectCommand(type=TYPE_SPAWN_UNIT, a=dead_basilius_id, b=TOWN_CENTER, c=1, d=0.0)
+            limit_unit_creatable_effect = Effect(
+                name=f'Limit Hero Amount Effect for {data.civs[civ_id].name}',
+                effect_commands=[give_resource_at_first_tc_effect_command]
+            )
+            limit_unit_creatable_effect_id = len(data.effects)
+            data.effects.append(limit_unit_creatable_effect)
+            #add the tech with the effect to the civ to give 1 hero value.
+            logging.info(f'Making tech for hero unit limit for {data.civs[civ_id].name} - {civ_id}')
+            limit_hero_unit_creatable_effect = Tech(
+                required_techs=(TYPE_TOWN_CENTER_BUILT, -1, -1, -1, -1, -1),
+                resource_costs=(
+                    ResearchResourceCost(type=-1, amount=0, flag=0),
+                    ResearchResourceCost(type=-1, amount=0, flag=0),
+                    ResearchResourceCost(type=-1, amount=0, flag=0)
+                ),
+                required_tech_count=1,
+                civ=civ_id,
+                full_tech_mode=0,
+                research_location=-1,
+                language_dll_name=0,
+                language_dll_description=0,
+                research_time=0,
+                effect_id=limit_unit_creatable_effect_id,
+                type=0,
+                icon_id=-1,
+                button_id=0,
+                language_dll_help=0,
+                language_dll_tech_tree=0,
+                hot_key=-1,
+                name=f'Limit Hero Unit amount for civ {data.civs[civ_id].name}',
+                repeatable=0,
+            )
+            data.techs.append(limit_hero_unit_creatable_effect)
     return dead_basilius_id
 
 def extendTasks(unit: Unit, tasks) -> Unit:
@@ -301,21 +308,20 @@ def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, w
         ) 
 
     #add the new unit to the civ
-    civ.units.append(unit)
+    addUnitToAllCivs(unit, data)
     logging.info(f'Patched hero unit {unit.name} for civ {civ.name}')
     return new_unit_id
 
 def mod(data: DatFile):
     civs_missing_hero = []
+    land_dead_basilius_id = limitHeroesForCiv(data, LAND_BASILIUS_RESOURCE_VALUE)
+    water_dead_basilius_id = limitHeroesForCiv(data, WATER_BASILIUS_RESOURCE_VALUE)
     for civ_id, civ in enumerate(data.civs):
         if civ.name in HERO_FOR_CIV and HERO_FOR_CIV[civ.name] is not None:
             logging.info(f'Creating hero for civ {civ.name}')
-            land_dead_basilius_id = limitHeroesForCiv(civ_id, data, LAND_BASILIUS_RESOURCE_VALUE)
-            water_dead_basilius_id = limitHeroesForCiv(civ_id, data, WATER_BASILIUS_RESOURCE_VALUE)
-            unit_id = HERO_FOR_CIV[civ.name][0]
             for unit_id in HERO_FOR_CIV[civ.name]:
-                hero_unit_id = makeHero(unit_id, civ, data, land_dead_basilius_id, water_dead_basilius_id)
-                addUnitToCiv(civ_id, hero_unit_id, data)
+                hero_unit_id = makeHero(unit_id, civ, data, land_dead_basilius_id, land_dead_basilius_id)
+                enableUnitForCiv(civ_id, hero_unit_id, data)
     
         else:
             if(civ.name not in CIVS_WITH_HEROES_ALREADY):
