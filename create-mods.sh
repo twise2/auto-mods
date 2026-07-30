@@ -26,6 +26,8 @@ mkdir -p build/x3/resources/_common/dat
 mkdir -p build/x9/resources/_common/dat
 mkdir -p build/heroes_and_villains/resources/_common/dat
 mkdir -p build/heroes_and_villains_king_boom_rewarding_snipes/resources/_common/dat
+mkdir -p build/regional_heritage/resources/_common/dat
+mkdir -p build/civ_identity_expansion/resources/_common/dat
 
 
 ./auto-mod.py --cache ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./build/community_games/resources/_common/dat/empires2_x2_p1.dat --mods community-games 
@@ -53,6 +55,8 @@ mkdir -p build/heroes_and_villains_king_boom_rewarding_snipes/resources/_common/
 ./auto-mod.py --cache ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./build/x9/resources/_common/dat/empires2_x2_p1.dat --mods x9 
 ./auto-mod.py --cache ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./build/heroes_and_villains/resources/_common/dat/empires2_x2_p1.dat --mods heroes-and-villains
 ./auto-mod.py --cache ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./build/heroes_and_villains_king_boom_rewarding_snipes/resources/_common/dat/empires2_x2_p1.dat --mods exploding-kings rewarding-snipes heroes-and-villains
+./auto-mod.py --cache ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./build/regional_heritage/resources/_common/dat/empires2_x2_p1.dat --mods regional-heritage
+./auto-mod.py --cache ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./build/civ_identity_expansion/resources/_common/dat/empires2_x2_p1.dat --mods heroes-and-villains regional-heritage
 
 
 cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/community_games/resources/_common/dat/civilizations.json
@@ -80,6 +84,8 @@ cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/x3/reso
 cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/x9/resources/_common/dat/civilizations.json
 cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/heroes_and_villains/resources/_common/dat/civilizations.json
 cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/heroes_and_villains_king_boom_rewarding_snipes/resources/_common/dat/civilizations.json
+cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/regional_heritage/resources/_common/dat/civilizations.json
+cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/civ_identity_expansion/resources/_common/dat/civilizations.json
 
 
 cd build/community_games
@@ -180,4 +186,12 @@ cd ../..
 
 cd build/heroes_and_villains_king_boom_rewarding_snipes
 zip -r ../heroes_and_villains_king_boom_rewarding_snipes.zip *
+cd ../..
+
+cd build/regional_heritage
+zip -r ../regional_heritage.zip *
+cd ../..
+
+cd build/civ_identity_expansion
+zip -r ../civ_identity_expansion.zip *
 cd ../..

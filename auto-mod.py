@@ -11,7 +11,7 @@ from genieutils.datfile import DatFile
 
 from mods import community_games, duplicate_techs, exploding_kings, exploding_relic_monks, exploding_villagers, \
     flying_dutchman, kidnap, matryoshka, no_wall, nomadking, pocket_horse, random_cost, \
-    rewarding_snipes, teamwork, heroes_and_villains
+    rewarding_snipes, teamwork, heroes_and_villains, regional_heritage
 
 AVAILABLE_MODS: dict[str, Callable[[DatFile], None]] = {
     community_games.NAME: community_games.mod,
@@ -34,6 +34,7 @@ AVAILABLE_MODS: dict[str, Callable[[DatFile], None]] = {
     rewarding_snipes.NAME: rewarding_snipes.mod,
     teamwork.NAME: teamwork.mod,
     heroes_and_villains.NAME: heroes_and_villains.mod,
+    regional_heritage.NAME: regional_heritage.mod,
 }
 
 

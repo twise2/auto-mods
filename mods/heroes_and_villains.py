@@ -3,22 +3,24 @@ import logging
 from genieutils.civ import Civ
 from genieutils.unit import Unit
 from genieutils.effect import Effect, EffectCommand
-from genieutils.tech import Tech, ResearchResourceCost
+from genieutils.tech import Tech, ResearchResourceCost, ResearchLocation
 from genieutils.datfile import DatFile
 from genieutils.techtree import UnitConnection, Common
-from genieutils.unit import ResourceCost, ResourceStorage
-from mods.util import clone
+from genieutils.unit import ResourceCost, ResourceStorage, TrainLocation
+from mods.util import clone, enable_unit_for_civ
 from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE, WHITE_TIGER_YAN, \
-    WANG_TONG, ALARIC_THE_GOTH, SUNDJATA, SHAH_ISHMAIL, SALADIN, HARALD_HARDRADA, QUTLUGH, TAMERLANE, \
+    WANG_TONG, ALARIC_THE_GOTH, SUNDJATA, SHAH_ISHMAIL, SALADIN, HARALD_HARDRADA, QUTLUGH, \
     CUAUHTEMOC, ATTILA_THE_HUN, PACAL_II, EL_CID_CAMPEADOR, GENGHIS_KHAN, FRANCESCO_SFORZA, \
-    MIKLOS_TOLDI, ALEXANDER_NEVSKI, TARIQ_IBN_ZIYAD, DAGNAJAN, SURYAVARMAN_I, KUSHLUK, FRANSICO_DE_ORELLANA, \
-    GAJAH_MADA, LE_LOI, KOTYAN_KHAN, VYTAUTAS_THE_GREAT, OSMAN, THEMISTOCLES, LEONIDAS, DARIUS, \
-    JOHN_THE_FEARLESS, ROGER_BOSSO, JAN_ZIZKA, JADWIGA, IBRAHIM_LODI, PRITHVIRAJ, TAMAR, \
+    MIKLOS_TOLDI, ALEXANDER_NEVSKI, TARIQ_IBN_ZIYAD, DAGNAJAN, SURYAVARMAN_I, KUSHLUK, \
+    GAJAH_MADA, LE_LOI, KOTYAN_KHAN, VYTAUTAS_THE_GREAT, OSMAN, THEMISTOCLES, THEMISTOCLES_WARSHIP, \
+    LEONIDAS, DARIUS, ARTEMISIA, \
+    JOHN_THE_FEARLESS, ROGER_BOSSO, JAN_ZIZKA, JOGAILA, IBRAHIM_LODI, PRITHVIRAJ, TAMAR, \
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
-    VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, \
+    VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, FRANSICO_DE_ORELLANA, \
+    ALEXANDER_THE_GREAT, PORUS, THRACIAN_CHIEFTAIN, LAUTARO, PACANCHIQUE, ARARIBOIA, \
     TYPE_POPULATION_HEADROOM, TYPE_CURRENT_POPULATION, TYPE_TOTAL_UNITS_OWNED, TYPE_FOOD_STORAGE, \
     TYPE_GOLD_STORAGE, TYPE_CASTLE_TRAIN_LOCATION, TYPE_DOCK_TRAIN_LOCATION, TYPE_POPULATION_HEADROOM, \
-    TYPE_ENABLE_DISABLE_UNIT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY,  TYPE_TOTAL_UNITS_OWNED,\
+    TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
     TYPE_SPAWN_UNIT, TOWN_CENTER, TYPE_TOWN_CENTER_BUILT, SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD, CONQUISTADOR_CLASS, \
     WARSHIP_CLASS, CAVLARY_CLASS, INFANTRY_CLASS, ARCHER_CLASS, CAVALRY_ARCHER_CLASS, HAND_CANNONEER_CLASS, \
     HEALER_CLASS, MONK_CLASS, \
@@ -58,7 +60,7 @@ HERO_FOR_CIV = {
     "Berbers": [TARIQ_IBN_ZIYAD],
     "Ethiopians": [DAGNAJAN],
     "Malians": [SUNDJATA],
-    "Portuguese": [FRANSICO_DE_ORELLANA, VASCO_DA_GAMA],  #stand in or francisco de almeida
+    "Portuguese": [FRANSICO_DE_ORELLANA, VASCO_DA_GAMA],  # Orellana served the Spanish crown, but kept as a stand-in rather than leaving Portuguese with just one hero
     "Burmese": [TABINSHWEHTI],
     "Khmer": [SURYAVARMAN_I],
     "Malay": [GAJAH_MADA],
@@ -66,23 +68,29 @@ HERO_FOR_CIV = {
     "Bulgarians": [TSAR_KONSTANTIN],
     "Cumans": [KOTYAN_KHAN],
     "Lithuanians": [VYTAUTAS_THE_GREAT],
-    "Tatars": [TAMERLANE], #QUTLUGH
+    "Tatars": [QUTLUGH],
     "Burgundians": [JOHN_THE_FEARLESS],
     "Sicilians": [ROGER_BOSSO],
     "Bohemians": [JAN_ZIZKA],
-    "Poles": [JADWIGA], #Jogaila
+    "Poles": [JOGAILA],
     "Hindustanis": [IBRAHIM_LODI],
-    "Bengalis": [MIHIRA_BHOJA], #maybe not bengalis but some people on forum said it could be both so better than nothing?
-    "Gurjaras": [PRITHVIRAJ],
+    "Bengalis": [PRITHVIRAJ],
+    "Gurjaras": [MIHIRA_BHOJA],  # Mihira Bhoja ruled the Gurjara-Pratihara dynasty - namesake fit
     "Dravidians": [RAJENDRA_CHOLA],
     "Romans": [POPE_LEO_I], #could be improved if custom unit is added. or lang script updated.
     "Armenians": [THOROS],
     "Georgians": [TAMAR],
     "Spartans": [LEONIDAS],
-    "Achaemenids": [DARIUS],
-    "Athenians": [THEMISTOCLES],
+    "Achaemenids": [DARIUS, ARTEMISIA],  # Artemisia commanded ships for Xerxes, Darius's son, at Salamis
+    "Athenians": [THEMISTOCLES, THEMISTOCLES_WARSHIP],  # architect of the navy that won at Salamis
     "Khitans": [KUSHLUK], #fine but not amazing
     "Jurchens": [WHITE_TIGER_YAN], #not great but they dont have great #Aguda if they add him would be a perfect campaign.
+    "Macedonians": [ALEXANDER_THE_GREAT],
+    "Thracians": [THRACIAN_CHIEFTAIN],
+    "Puru": [PORUS],
+    "Mapuche": [LAUTARO],
+    "Muisca": [PACANCHIQUE],
+    "Tupi": [ARARIBOIA],
     #"Shu": [LIU_BEI],
     #"Wu": [SUN_JIAN],
     #"Wei": [CAO_CAO],  
@@ -106,51 +114,7 @@ def addUnitToAllCivs(unit: Unit, data: DatFile):
          civ.units.append(clone(unit, data.version))
 
 def enableUnitForCiv(civ_id: int, unit_id: int, data: DatFile):
-    #create unit
-    logging.info(f'Making effect for hero unit for {data.civs[civ_id].units[unit_id].name} - {unit_id} for civ {data.civs[civ_id].name} - {civ_id}')
-    enable_hero_unit_effect_command = EffectCommand(
-        type=TYPE_ENABLE_DISABLE_UNIT,
-        a=unit_id,
-        b=1,
-        c=-1,
-        d=0.0,
-    )
-
-    #create effect to enable unit
-    enable_hero_unit_effect = Effect(
-        name=f'Create Hero Unit for {data.civs[civ_id].units[unit_id].name}',
-        effect_commands=[enable_hero_unit_effect_command]
-    )
-    enable_hero_unit_effect_id = len(data.effects)
-    data.effects.append(enable_hero_unit_effect)
-
-    #create tech to trigger effect
-    logging.info(f'Making tech for hero unit {data.civs[civ_id].units[unit_id].name} for civ {data.civs[civ_id].name} for effect {enable_hero_unit_effect_id}')
-    enable_hero_tech = Tech(
-        required_techs=(TECH_REQUIREMENT_IMPERIAL_AGE, -1, -1, -1, -1, -1), #imperial age
-        resource_costs=(
-            ResearchResourceCost(type=-1, amount=0, flag=0),
-            ResearchResourceCost(type=-1, amount=0, flag=0),
-            ResearchResourceCost(type=-1, amount=0, flag=0)
-        ),
-        required_tech_count=1,
-        civ=civ_id,
-        full_tech_mode=0,
-        research_location=-1,
-        language_dll_name=0,
-        language_dll_description=0,
-        research_time=0,
-        effect_id=enable_hero_unit_effect_id,
-        type=0,
-        icon_id=-1,
-        button_id=0,
-        language_dll_help=0,
-        language_dll_tech_tree=0,
-        hot_key=-1,
-        name=f'Make Hero Unit Available for {data.civs[civ_id].units[unit_id].name}',
-        repeatable=1,
-    )
-    data.techs.append(enable_hero_tech)
+    enable_unit_for_civ(data, civ_id, unit_id, TECH_REQUIREMENT_IMPERIAL_AGE)
 
 
 def limitHeroesForCiv(data: DatFile, hidden_resource_id: int) -> int:
@@ -192,17 +156,14 @@ def limitHeroesForCiv(data: DatFile, hidden_resource_id: int) -> int:
                 required_tech_count=1,
                 civ=civ_id,
                 full_tech_mode=0,
-                research_location=-1,
                 language_dll_name=0,
                 language_dll_description=0,
-                research_time=0,
                 effect_id=limit_unit_creatable_effect_id,
                 type=0,
                 icon_id=-1,
-                button_id=0,
                 language_dll_help=0,
                 language_dll_tech_tree=0,
-                hot_key=-1,
+                research_locations=[ResearchLocation(location_id=-1, research_time=0, button_id=0, hot_key_id=-1)],
                 name=f'Limit hero for {data.civs[civ_id].name} resource {hidden_resource_id}',
                 repeatable=0,
             )
@@ -277,8 +238,9 @@ def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, w
     #make unit trainable in the dock if waship and limit is with water basilius
     if(unit.class_ == WARSHIP_CLASS):
         logging.info(f'chose dock for hero unit {unit.name} for civ {civ.name}')
-        unit.creatable.train_location_id = TYPE_DOCK_TRAIN_LOCATION
-        unit.creatable.button_id = 30
+        #button 24 at the Dock is already the game's own "hero ship" slot (Leif
+        #Erikson, Vasco da Gama, Yi Sun-sin, etc all use it) - nothing else does.
+        unit.creatable.train_locations = [TrainLocation(train_time=30, unit_id=TYPE_DOCK_TRAIN_LOCATION, button_id=24, hot_key_id=-1)]
         #this gives back a resource when the unit dies that the unit costs to spawn. This limits us to one.
         unit.dead_unit_id = water_basilius_unit_id
         #make unit cost resources 
@@ -291,8 +253,11 @@ def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, w
     #make unit trainable in the castle if other unit type and limit is with land basilius
     else:
         logging.info(f'chose castle for hero unit {unit.name} for civ {civ.name}')
-        unit.creatable.train_location_id = TYPE_CASTLE_TRAIN_LOCATION
-        unit.creatable.button_id = 4
+        #button 2 at the Castle is already the game's own "hero" slot - this mod's
+        #whole hero model is built on how Shu/Wu/Wei's own native heroes (Cao Cao,
+        #Liu Bei, Sun Jian) already work in real multiplayer, so match their exact
+        #train_time/hot_key, not just the button.
+        unit.creatable.train_locations = [TrainLocation(train_time=60, unit_id=TYPE_CASTLE_TRAIN_LOCATION, button_id=2, hot_key_id=16381)]
         #this gives back a resource when the unit dies that the unit costs to spawn. This limits us to one.
         unit.dead_unit_id = land_basilius_unit_id
         #make unit cost resources 

@@ -4,11 +4,13 @@ from typing import TypeVar
 from genieutils.civ import Civ
 from genieutils.common import GenieClass, ByteHandler
 from genieutils.datfile import DatFile
-from genieutils.effect import EffectCommand
-from genieutils.unit import Unit
+from genieutils.effect import Effect, EffectCommand
+from genieutils.tech import Tech, ResearchResourceCost, ResearchLocation
+from genieutils.unit import Unit, TrainLocation
 from genieutils.versions import Version
 
-from mods.ids import CLASS_PETARD, MONUMENT, CLASS_HERO, TYPE_UPGRADE_UNIT, TYPE_COMBATANT
+from mods.ids import CLASS_PETARD, MONUMENT, CLASS_HERO, TYPE_UPGRADE_UNIT, TYPE_COMBATANT, \
+    TYPE_ENABLE_DISABLE_UNIT
 
 GC = TypeVar('GC', bound=GenieClass)
 
@@ -24,6 +26,12 @@ def disable_unit(data: DatFile, unit_id: int):
         civ.units[unit_id].enabled = 0
 
 
+def disable_unit_for_civ(data: DatFile, civ_id: int, unit_id: int):
+    civ = data.civs[civ_id]
+    logging.info(f'Disabling {civ.units[unit_id].name} for {civ.name}')
+    civ.units[unit_id].enabled = 0
+
+
 def disable_tech_effect(data: DatFile, tech_id: int):
     logging.info(f'Disabling the effect of tech with id {tech_id} ({data.techs[tech_id].name})')
     data.techs[tech_id].effect_id = -1
@@ -31,7 +39,8 @@ def disable_tech_effect(data: DatFile, tech_id: int):
 
 def disable_tech_research_location(data: DatFile, tech_id: int):
     logging.info(f'Disabling the research location of tech with id {tech_id} ({data.techs[tech_id].name})')
-    data.techs[tech_id].research_location = -1
+    for research_location in data.techs[tech_id].research_locations:
+        research_location.location_id = -1
 
 def patch_unit_for_explosion(unit_it: int, attack_indexes: list[int], range_: int, civ: Civ):
     unit = civ.units[unit_it]
@@ -67,6 +76,77 @@ def is_unit_upgrade(effect_command: EffectCommand) -> bool:
 
 def is_unit(data: DatFile, unit_id: int) -> bool:
     return data.civs[0].units[unit_id] and data.civs[0].units[unit_id].type == TYPE_COMBATANT
+
+
+def grant_effect_to_civ(data: DatFile, civ_id: int, effect_commands: list, required_tech: int, name: str) -> int:
+    """Give one civ a self-triggering tech that fires `effect_commands` as soon as
+    `required_tech` is satisfied (e.g. Castle built, Imperial Age reached).
+
+    This is how the game itself grants hero units, so it's a proven way to hand a
+    civ something (a unit, an upgrade) without needing it to already be wired into
+    that civ's normal researchable tech tree.
+    """
+    effect = Effect(name=name, effect_commands=effect_commands)
+    effect_id = len(data.effects)
+    data.effects.append(effect)
+
+    unlock_tech = Tech(
+        required_techs=(required_tech, -1, -1, -1, -1, -1),
+        resource_costs=(
+            ResearchResourceCost(type=-1, amount=0, flag=0),
+            ResearchResourceCost(type=-1, amount=0, flag=0),
+            ResearchResourceCost(type=-1, amount=0, flag=0),
+        ),
+        required_tech_count=1,
+        civ=civ_id,
+        full_tech_mode=0,
+        language_dll_name=0,
+        language_dll_description=0,
+        effect_id=effect_id,
+        type=0,
+        icon_id=-1,
+        language_dll_help=0,
+        language_dll_tech_tree=0,
+        research_locations=[ResearchLocation(location_id=-1, research_time=0, button_id=0, hot_key_id=-1)],
+        name=name,
+        repeatable=0,
+    )
+    data.techs.append(unlock_tech)
+    return effect_id
+
+
+def enable_unit_for_civ(data: DatFile, civ_id: int, unit_id: int, required_tech: int):
+    """Make an existing (but disabled) unit trainable for one civ."""
+    civ = data.civs[civ_id]
+    unit_name = civ.units[unit_id].name
+    logging.info(f'Enabling {unit_name} for {civ.name}')
+    enable_command = EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=unit_id, b=1, c=-1, d=0.0)
+    grant_effect_to_civ(data, civ_id, [enable_command], required_tech, f'Enable {unit_name} for {civ.name}')
+
+
+def upgrade_unit_for_civ(data: DatFile, civ_id: int, base_unit_id: int, upgraded_unit_id: int, required_tech: int):
+    """Give one civ the free upgrade from `base_unit_id` to `upgraded_unit_id`
+    (e.g. a unit's Elite tier) once `required_tech` is satisfied."""
+    civ = data.civs[civ_id]
+    base_name = civ.units[base_unit_id].name
+    logging.info(f'Upgrading {base_name} to {civ.units[upgraded_unit_id].name} for {civ.name}')
+    upgrade_command = EffectCommand(type=TYPE_UPGRADE_UNIT, a=base_unit_id, b=upgraded_unit_id, c=-1, d=0.0)
+    grant_effect_to_civ(data, civ_id, [upgrade_command], required_tech, f'Upgrade {base_name} for {civ.name}')
+
+
+def set_train_button_for_civ(data: DatFile, civ_id: int, unit_id: int, building_id: int, button_id: int):
+    """Move where one civ's copy of a unit trains from, without affecting any
+    other civ's copy of the same unit.
+
+    Needed when a granted unit's vanilla training button collides with
+    something the target civ already has at that same building (its own
+    native unique unit, or another grant) - each civ owns its own unit
+    objects, so this only touches the one civ's copy.
+    """
+    unit = data.civs[civ_id].units[unit_id]
+    logging.info(f'Moving {unit.name} to building {building_id} button {button_id} for {data.civs[civ_id].name}')
+    unit.creatable.train_locations = [TrainLocation(train_time=unit.creatable.train_locations[0].train_time,
+                                                      unit_id=building_id, button_id=button_id, hot_key_id=-1)]
 
 
 def affects_units(data: DatFile, effect_command: EffectCommand) -> bool:

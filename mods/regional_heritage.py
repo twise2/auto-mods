@@ -1,0 +1,273 @@
+import logging
+
+from genieutils.datfile import DatFile
+from genieutils.effect import EffectCommand
+
+from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, set_train_button_for_civ, grant_effect_to_civ
+from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
+    TYPE_CASTLE_TRAIN_LOCATION, TYPE_ENABLE_DISABLE_UNIT, \
+    STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
+    SIEGE_ELEPHANT, GENITOUR, ELITE_GENITOUR, CAMEL_RIDER, HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, \
+    CAMEL_SCOUT, CARAVANSERAI, MULE_CART, LEGIONARY, MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN, WARRIOR_PRIEST, \
+    CONQUISTADOR, ELITE_CONQUISTADOR, MISSIONARY, WAR_ELEPHANT, ELITE_WAR_ELEPHANT, SCOUT_CAVALRY, \
+    LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, SKIRMISHER, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, \
+    SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
+    CENTURION, ELITE_CENTURION
+
+# The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
+# give civs units/buildings they plausibly would have fielded historically, focused on
+# regional identity rather than balance. Every grant below cites the community
+# discussion it's drawn from. New units become trainable once a civ has built a
+# Castle (or, for early economic helpers, a Town Center) - no manual research click
+# needed, the same mechanism the game itself uses to unlock hero units.
+
+NAME = 'regional-heritage'
+
+
+def civ_ids_named(data: DatFile, names: list[str]) -> list[int]:
+    return [civ_id for civ_id, civ in enumerate(data.civs) if civ.name in names]
+
+
+def give_steppe_lancers_to_civs_with_horse_archer_heritage(data: DatFile):
+    # Steppe Lancers are currently a Cuman/Mongol-family exclusive, but plenty of
+    # other horse-archer and steppe-adjacent civs would plausibly have fielded them.
+    # https://www.reddit.com/r/aoe2/comments/y6b17r/disproportionate_spread_of_regional_units/
+    civs = ['Chinese', 'Bulgarians', 'Lithuanians', 'Hindustanis', 'Magyars', 'Slavs', 'Persians', 'Huns', 'Turks']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, STEPPE_LANCER, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, STEPPE_LANCER, ELITE_STEPPE_LANCER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_elephant_archers_to_civs_with_elephant_heritage(data: DatFile):
+    # Elephant Archers are currently Bengali/Dravidian/Gurjaran only, despite several
+    # other civs having a strong historical elephant-warfare tradition.
+    # https://www.reddit.com/r/aoe2/comments/10mqm64/sotl_should_more_civs_get_elephant_archers/
+    civs = ['Persians', 'Burmese', 'Malay', 'Khmer', 'Vietnamese']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, ELEPHANT_ARCHER, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_armored_elephants_to_other_elephant_civs(data: DatFile):
+    # https://www.reddit.com/r/aoe2/comments/ubkjoa/armored_elephants_for_khmer_burmese_and_malay
+    civs = ['Khmer', 'Burmese', 'Malay', 'Ethiopians']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, ARMORED_ELEPHANT, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, ARMORED_ELEPHANT, SIEGE_ELEPHANT, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_genitours_to_civs_with_light_cavalry_heritage(data: DatFile):
+    # Genitours (Iberian/North African light skirmish cavalry) are currently
+    # Berber-only despite the broader Mediterranean/Islamic world using them -
+    # Italy and Sicily both had deep, centuries-long Muslim-Mediterranean contact
+    # (Norman-Arab-Byzantine Sicily especially) that fits the same light-cavalry
+    # tradition.
+    # https://www.reddit.com/r/aoe2/comments/106i52l/genitours_for_middle_eastern_civs/
+    civs = ['Spanish', 'Portuguese', 'Persians', 'Saracens', 'Malians', 'Turks', 'Italians', 'Sicilians']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, GENITOUR, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, GENITOUR, ELITE_GENITOUR, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_camel_line_to_steppe_civs_without_camels(data: DatFile):
+    # Cumans genuinely lack Paladin in the current game, so this is a real
+    # gap-filling alternative late-game answer for them, not just flavor. Huns
+    # already have full Paladin access (one of only two "fully upgraded" Paladin
+    # civs), so for them this is historical flavor only - steppe peoples had
+    # plausible camel contact, but it isn't fixing a mechanical gap the way it is
+    # for Cumans.
+    # https://forums.ageofempires.com/t/give-cumans-heavy-camel-riders-and-remove-paladins-and-maybe-chevaliers/196455
+    for civ_id in civ_ids_named(data, ['Cumans', 'Huns']):
+        enable_unit_for_civ(data, civ_id, CAMEL_RIDER, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, CAMEL_RIDER, HEAVY_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        # Complete the line to the same finishing tier Berbers/Saracens/Turks get
+        # below, rather than stopping one tier short of a full late-game answer.
+        upgrade_unit_for_civ(data, civ_id, HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_imperial_camel_riders_to_other_camel_civs(data: DatFile):
+    # https://forums.ageofempires.com/t/imperial-camels-for-saracens-turks-and-berbers/245239
+    civs = ['Berbers', 'Saracens', 'Turks']
+    for civ_id in civ_ids_named(data, civs):
+        upgrade_unit_for_civ(data, civ_id, CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        upgrade_unit_for_civ(data, civ_id, HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_caravanserai_to_silk_road_civs(data: DatFile):
+    # Caravanserai are currently Hindustani/Persian only; the wider Silk Road trade
+    # network ran straight through these civs too.
+    # https://www.reddit.com/r/aoe2/comments/10a3jg9/historically_persian_should_also_have_access_to/
+    civs = ['Saracens', 'Chinese', 'Mongols', 'Turks', 'Tatars']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, CARAVANSERAI, TECH_CASTLE_BUILT)
+
+
+def give_mule_carts_to_nomadic_civs(data: DatFile):
+    # Mule carts (a mobile drop-off point) are currently Georgian/Armenian only, but
+    # the mechanic fits any historically nomadic/steppe civ just as well.
+    # https://www.reddit.com/r/aoe2/comments/17stxfy/should_all_nomad_civs_be_given_mule_carts/
+    #
+    # Vanilla's own Mule Cart tech doesn't just enable it - it also disables the
+    # Lumber Camp and Mining Camp, since Mule Cart replaces that build-menu slot
+    # for Georgians/Armenians rather than sitting alongside it. Matching that
+    # exactly rather than bolting Mule Cart on as a pure addition. All three
+    # commands are bundled into one tech so the swap happens atomically - the
+    # civ never has a moment with neither the camps nor Mule Cart available.
+    civs = ['Mongols', 'Huns', 'Tatars', 'Cumans', 'Magyars']
+    for civ_id in civ_ids_named(data, civs):
+        commands = [
+            EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=MULE_CART, b=1, c=-1, d=0.0),
+            EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=LUMBER_CAMP, b=0, c=-1, d=0.0),
+            EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=MINING_CAMP, b=0, c=-1, d=0.0),
+        ]
+        grant_effect_to_civ(data, civ_id, commands, TYPE_TOWN_CENTER_BUILT,
+                             f'Swap Lumber/Mining Camp for Mule Cart for {data.civs[civ_id].name}')
+
+
+def give_legionaries_to_byzantines(data: DatFile):
+    # The Byzantine Empire was the direct continuation of Rome and kept fielding
+    # legions long after the west fell; Legionary is currently Roman-only.
+    # https://www.reddit.com/r/aoe2/comments/13tw143/so_i_read_some_comments_about_how_byzantine_civ/
+    for civ_id in civ_ids_named(data, ['Byzantine']):
+        for base_unit in (MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN):
+            upgrade_unit_for_civ(data, civ_id, base_unit, LEGIONARY, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_winged_hussars_to_other_eastern_european_civs(data: DatFile):
+    # Winged Hussars are currently Polish/Lithuanian only, but Hungary and the Cuman
+    # cavalry tradition both fed directly into the same eastern-European hussar style.
+    # https://www.reddit.com/r/aoe2/comments/qu6b4a/should_magyars_get_winged_hussars_too/
+    for civ_id in civ_ids_named(data, ['Magyars', 'Cumans']):
+        for base_unit in (SCOUT_CAVALRY, LIGHT_CAVALRY, HUSSAR):
+            upgrade_unit_for_civ(data, civ_id, base_unit, WINGED_HUSSAR, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_imperial_skirmisher_to_civs_with_great_skirmishers(data: DatFile):
+    # https://www.reddit.com/r/aoe2/comments/17h70lv/imperial_skirmisher_would_be_nice_if_it_wasnt/
+    civs = ['Malians', 'Romans']
+    for civ_id in civ_ids_named(data, civs):
+        upgrade_unit_for_civ(data, civ_id, SKIRMISHER, IMPERIAL_SKIRMISHER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        upgrade_unit_for_civ(data, civ_id, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_war_elephants_to_ethiopians(data: DatFile):
+    # https://forums.ageofempires.com/t/should-ethiopians-get-war-elephants/202217/12
+    for civ_id in civ_ids_named(data, ['Ethiopians']):
+        enable_unit_for_civ(data, civ_id, WAR_ELEPHANT, TECH_CASTLE_BUILT)
+        # Persians (War Elephant's vanilla owner) get the Elite tier too - match it
+        upgrade_unit_for_civ(data, civ_id, WAR_ELEPHANT, ELITE_WAR_ELEPHANT, TECH_REQUIREMENT_IMPERIAL_AGE)
+        # War Elephant's vanilla Castle button (1) is the universal unique-unit
+        # slot - Ethiopians' own Shotel Warrior already lives there. Move to
+        # button 4, confirmed unused by any Ethiopian content.
+        set_train_button_for_civ(data, civ_id, WAR_ELEPHANT, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_conquistadors_to_portuguese(data: DatFile):
+    # Portugal ran its own conquistador-style expeditions in the Americas and Africa;
+    # Conquistador is currently Spanish-only.
+    # https://www.reddit.com/r/aoe2/comments/snpt20/how_unbalanced_would_making_the_conq_a_regional/
+    for civ_id in civ_ids_named(data, ['Portuguese']):
+        enable_unit_for_civ(data, civ_id, CONQUISTADOR, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, CONQUISTADOR, ELITE_CONQUISTADOR, TECH_REQUIREMENT_IMPERIAL_AGE)
+        # Conquistador's vanilla Castle button (1) is the universal unique-unit
+        # slot - Portugal's own Organ Gun already lives there. Move to button 4.
+        set_train_button_for_civ(data, civ_id, CONQUISTADOR, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_missionaries_to_civs_with_missionary_heritage(data: DatFile):
+    # https://www.reddit.com/r/aoe2/comments/ka4jvi/why_dont_portuguese_have_access_to_missionaries/
+    civs = ['Italians', 'Portuguese', 'Byzantine']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, MISSIONARY, TECH_CASTLE_BUILT)
+
+
+def give_warrior_priests_to_civs_with_shamanic_heritage(data: DatFile):
+    # https://www.reddit.com/r/aoe2/comments/17egkrm/for_fun_what_if_the_new_warrior_priest_from/
+    civs = ['Vikings', 'Celts', 'Aztecs', 'Dravidians', 'Malians', 'Teutons', 'Japanese', 'Chinese']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, WARRIOR_PRIEST, TECH_CASTLE_BUILT)
+
+
+def give_settlements_to_mesoamerican_and_andean_civs(data: DatFile):
+    # The Settlement (a scaling frontier outpost) is the signature building of the
+    # newest South American civs (Muisca, Mapuche, Tupi). Aztecs, Mayans, and Incas
+    # are the same Mesoamerican/Andean world but predate the mechanic entirely -
+    # they'd plausibly have it too if designed today. Their civ-specific bonus techs
+    # (cheaper/healing, garrison, combat bonuses) stay exclusive to the three newer
+    # civs; this just gives the base building and its age upgrades.
+    # Settlement occupies the same build-menu slot as the Mill (Poland's Folwark,
+    # the other Mill-replacement building in the game, uses the same slot for the
+    # same reason) - it's a replacement, not an addition, same as Mule Cart above.
+    # Bundled into one tech so Mill disappears at the exact moment Settlement
+    # becomes available, not before.
+    civs = ['Aztecs', 'Mayan', 'Incas']
+    for civ_id in civ_ids_named(data, civs):
+        commands = [
+            EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=SETTLEMENT, b=1, c=-1, d=0.0),
+            EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=MILL, b=0, c=-1, d=0.0),
+        ]
+        grant_effect_to_civ(data, civ_id, commands, TECH_CASTLE_BUILT,
+                             f'Swap Mill for Settlement for {data.civs[civ_id].name}')
+        # Skip the intermediate Age 2 tier - jump straight to the final tier once
+        # Imperial is reached, same simplification used for every other elite/upgrade
+        # grant in this file.
+        upgrade_unit_for_civ(data, civ_id, SETTLEMENT, SETTLEMENT_AGE_3, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_fire_lancers_to_japanese(data: DatFile):
+    # Fire Lancers (East Asian gunpowder cavalry) are currently Chinese/Jurchen/
+    # Khitan/Korean/Vietnamese only. Japan had plausible gunpowder-technology
+    # contact with China/Korea and hasn't been given any gunpowder-flavored unit
+    # by this mod yet.
+    for civ_id in civ_ids_named(data, ['Japanese']):
+        enable_unit_for_civ(data, civ_id, FIRE_LANCER, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, FIRE_LANCER, ELITE_FIRE_LANCER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_camel_scout_start_to_true_camel_civs(data: DatFile):
+    # Gurjaras start scouting with a Camel Scout instead of a normal Scout
+    # Cavalry, which then grows into the same Camel Rider line. Civs whose whole
+    # identity is already built around camels in this mod (Cumans/Huns via the
+    # camel line above, Berbers/Saracens/Turks via the Imperial Camel Rider grant
+    # below) would plausibly scout the same way from the very start, not just
+    # field camels once a Castle goes up.
+    civs = ['Cumans', 'Huns', 'Berbers', 'Saracens', 'Turks']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, CAMEL_SCOUT, TYPE_TOWN_CENTER_BUILT)
+        upgrade_unit_for_civ(data, civ_id, CAMEL_SCOUT, CAMEL_RIDER, TECH_CASTLE_BUILT)
+
+
+def give_centurions_to_byzantines(data: DatFile):
+    # Rome fields two separate unique units: Legionary (already given to
+    # Byzantines above) and Centurion, a standalone Castle-trained unit, not an
+    # upgrade of the sword-infantry line. Byzantium inherited the whole legion
+    # system from Rome, not just half of it.
+    for civ_id in civ_ids_named(data, ['Byzantine']):
+        enable_unit_for_civ(data, civ_id, CENTURION, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, CENTURION, ELITE_CENTURION, TECH_REQUIREMENT_IMPERIAL_AGE)
+        # Centurion's vanilla Castle button (1) is the universal unique-unit slot;
+        # move to button 4, same fix as Conquistador/War Elephant above.
+        set_train_button_for_civ(data, civ_id, CENTURION, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def mod(data: DatFile):
+    logging.info('Applying regional heritage grants')
+    give_steppe_lancers_to_civs_with_horse_archer_heritage(data)
+    give_elephant_archers_to_civs_with_elephant_heritage(data)
+    give_armored_elephants_to_other_elephant_civs(data)
+    give_genitours_to_civs_with_light_cavalry_heritage(data)
+    give_camel_line_to_steppe_civs_without_camels(data)
+    give_imperial_camel_riders_to_other_camel_civs(data)
+    give_caravanserai_to_silk_road_civs(data)
+    give_mule_carts_to_nomadic_civs(data)
+    give_legionaries_to_byzantines(data)
+    give_winged_hussars_to_other_eastern_european_civs(data)
+    give_imperial_skirmisher_to_civs_with_great_skirmishers(data)
+    give_war_elephants_to_ethiopians(data)
+    give_conquistadors_to_portuguese(data)
+    give_missionaries_to_civs_with_missionary_heritage(data)
+    give_warrior_priests_to_civs_with_shamanic_heritage(data)
+    give_settlements_to_mesoamerican_and_andean_civs(data)
+    give_fire_lancers_to_japanese(data)
+    give_camel_scout_start_to_true_camel_civs(data)
+    give_centurions_to_byzantines(data)
