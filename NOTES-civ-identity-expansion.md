@@ -473,3 +473,42 @@ change at all.
 - **Serjeant** (Sicilian) → Italians - held back pending verification that
   Italians' new Donjon doesn't already grant equivalent access, to avoid a
   possible duplicate.
+
+## regional-heritage v8: exhaustive civ-by-civ audit
+
+Built a proper ground-truth audit: traced every `enable`/`upgrade`/bundled
+`grant_effect_to_civ` call this mod makes and grouped by civ, rather than
+relying on memory of what's been added across eight passes. Confirmed:
+
+- **Serjeant → Italians**: verified Serjeant is gated by its own dedicated
+  tech (752), completely independent of Donjon's - no duplicate, safe to add.
+  Implemented.
+- **Building sweep**: searched for any other high-HP (1000+) unique buildings
+  beyond the five already covered. Found four more candidates (`Hall of
+  Heroes`, `Shipyard`, `Port`, `Oracle Temple`) but none have any real
+  civ-bonus enabling tech in the data - they're placed directly in specific
+  campaign scenarios (Paphos, etc) with no player-buildable mechanism to
+  replicate. Confirmed rather than guessed, then left alone.
+- **Completed the Poland/Bohemia/Lithuania trio**: these three already had
+  one-way pieces from earlier passes (Folwark, Houfnice). Finished the
+  three-way exchange - Leitis (Lithuania's own unique) → Poland + Bohemia,
+  Obuch (Poland's own) → Bohemia + Lithuania, Hussite Wagon (Bohemia's own)
+  → Poland + Lithuania. Two civs receiving two new grants each in the same
+  pass meant tracking button 4 vs 5 per civ carefully to avoid a same-civ
+  collision - documented per-function.
+- **Shotel Warrior** (Ethiopian) → Malians, Berbers - completes the African
+  trio started by Gbeto.
+- **Kamayuk** (Incan) → Aztecs, Mayan - the three civs already sharing
+  Settlement, now also sharing a defensive infantry unique.
+- **Final gap check**: audited all 60 civs for which have zero grants from
+  this mod. After excluding Shu/Wu/Wei (already complete native Three
+  Kingdoms kits), Muisca/Mapuche/Tupi (the newest civs - sources for
+  backporting, not targets), and the Chronicles civs (still insufficient
+  research confidence, consistent with every earlier pass), three genuinely
+  under-served civs remained: **British, Koreans, Burgundians**. Added all
+  three to Missionary (British/Burgundians - Catholic Europe theme) or
+  Warrior Priest (Koreans - mudang shamanism, same "shamanism alongside an
+  organized religion" pattern Japanese/Chinese already represent).
+
+After this pass, every playable civ has at least one grant from this mod
+except the five deliberately-excluded categories above.
