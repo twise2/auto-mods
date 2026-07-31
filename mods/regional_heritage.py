@@ -3,7 +3,8 @@ import logging
 from genieutils.datfile import DatFile
 from genieutils.effect import EffectCommand
 
-from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, set_train_button_for_civ, grant_effect_to_civ
+from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, set_train_button_for_civ, grant_effect_to_civ, \
+    reskin_unit_for_civ
 from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     TYPE_CASTLE_TRAIN_LOCATION, TYPE_ENABLE_DISABLE_UNIT, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
@@ -12,7 +13,9 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     CONQUISTADOR, ELITE_CONQUISTADOR, MISSIONARY, WAR_ELEPHANT, ELITE_WAR_ELEPHANT, SCOUT_CAVALRY, \
     LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, SKIRMISHER, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, \
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
-    CENTURION, ELITE_CENTURION
+    CENTURION, ELITE_CENTURION, PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
+    KARAMBIT_WARRIOR, ELITE_KARAMBIT_WARRIOR, RATTAN_ARCHER, ELITE_RATTAN_ARCHER, THIRISADAI, \
+    CONDOTTIERO, KONNIK, ELITE_KONNIK, BOYAR, ELITE_BOYAR, CAMEL_ARCHER, ELITE_CAMEL_ARCHER
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -250,6 +253,94 @@ def give_centurions_to_byzantines(data: DatFile):
         set_train_button_for_civ(data, civ_id, CENTURION, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
+def give_franks_a_frankish_paladin_skin(data: DatFile):
+    # Persians already do exactly this: Savar is a cosmetic swap-in for Paladin,
+    # not a new unit with new stats. Franks' Paladin (already their civ bonus -
+    # cheaper, no Blacksmith upgrades needed) gets the same treatment: same
+    # name, same stats, same upgrade path, different look. Purely visual -
+    # doesn't touch balance at all.
+    for civ_id in civ_ids_named(data, ['French']):
+        reskin_unit_for_civ(data, civ_id, PALADIN, FRANKISH_PALADIN_SKIN)
+
+
+def give_teutons_a_crusader_knight_skin(data: DatFile):
+    # Same idea for the Teutonic Order's own Paladins - the Teutons already have
+    # a separate, real "Teutonic Knight" unique unit (infantry), so this isn't a
+    # duplicate of that; it's their mounted knights visually matching the
+    # crusading-Order identity their whole civ is built around.
+    for civ_id in civ_ids_named(data, ['Teutons']):
+        reskin_unit_for_civ(data, civ_id, PALADIN, CRUSADER_KNIGHT_SKIN)
+
+
+def give_karambit_warriors_to_other_southeast_asian_civs(data: DatFile):
+    # Karambit Warrior is currently Malay-only. Khmer and Vietnamese are the
+    # same Southeast Asian world already tied together by the Elephant Archer/
+    # Armored Elephant/Battle Elephant grants above.
+    for civ_id in civ_ids_named(data, ['Khmer', 'Vietnamese']):
+        enable_unit_for_civ(data, civ_id, KARAMBIT_WARRIOR, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, KARAMBIT_WARRIOR, ELITE_KARAMBIT_WARRIOR, TECH_REQUIREMENT_IMPERIAL_AGE)
+        # Vanilla Castle button 1 is the universal unique-unit slot - both civs'
+        # own native unique already lives there.
+        set_train_button_for_civ(data, civ_id, KARAMBIT_WARRIOR, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_rattan_archers_to_malay(data: DatFile):
+    # Malay's own Karambit Warrior is no longer exclusive (see above) - Rattan
+    # Archer (Vietnamese's real native unique, not Burmese's as originally
+    # thought - verified against civilizations.json) is the natural thing to
+    # trade back the other way in the same regional group.
+    for civ_id in civ_ids_named(data, ['Malay']):
+        enable_unit_for_civ(data, civ_id, RATTAN_ARCHER, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, RATTAN_ARCHER, ELITE_RATTAN_ARCHER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, RATTAN_ARCHER, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_thirisadai_to_other_indian_ocean_civs(data: DatFile):
+    # Thirisadai (a Dravidian warship) fits the same Indian Ocean/Bay of Bengal
+    # naval tradition Bengalis and Gurjaras already share culturally. No elite
+    # tier exists in the game to extend. Low risk - it's a ship, not a
+    # land-army staple.
+    for civ_id in civ_ids_named(data, ['Bengalis', 'Gurjaras']):
+        enable_unit_for_civ(data, civ_id, THIRISADAI, TECH_CASTLE_BUILT)
+
+
+def give_condottiero_to_sicilians(data: DatFile):
+    # Sicily's Mediterranean mercenary-captain tradition overlaps heavily with
+    # Italy's - Sicilians already get Genitour in this mod on the same
+    # "Mediterranean multicultural contact" logic. No elite tier exists.
+    for civ_id in civ_ids_named(data, ['Sicilians']):
+        enable_unit_for_civ(data, civ_id, CONDOTTIERO, TECH_CASTLE_BUILT)
+
+
+def give_konnik_and_boyar_to_each_other(data: DatFile):
+    # Konnik is actually Bulgarians' own native unique unit (not Slavs', as
+    # originally thought - verified against civilizations.json), and Boyar is
+    # Slavs' own native unique. Both are heavy Orthodox-Slavic cavalry from the
+    # same shared heritage, so rather than a one-way grant, trade them: Slavs
+    # get access to Konnik too, Bulgarians get access to Boyar too.
+    for civ_id in civ_ids_named(data, ['Slavs']):
+        enable_unit_for_civ(data, civ_id, KONNIK, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, KONNIK, ELITE_KONNIK, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, KONNIK, TYPE_CASTLE_TRAIN_LOCATION, 4)
+    for civ_id in civ_ids_named(data, ['Bulgarians']):
+        enable_unit_for_civ(data, civ_id, BOYAR, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, BOYAR, ELITE_BOYAR, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, BOYAR, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_camel_archers_to_other_camel_civs(data: DatFile):
+    # Camel Archer is currently Berber-only. Saracens, Turks, Cumans, and Huns
+    # are the same "true camel civs" this mod already built out (camel line,
+    # camel scout, imperial camel). Gated to Imperial Age only, unlike Berbers'
+    # own Castle-Age access, so it stays a late-game bonus option for these four
+    # rather than diluting what makes it special for Berbers specifically.
+    civs = ['Saracens', 'Turks', 'Cumans', 'Huns']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, CAMEL_ARCHER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        upgrade_unit_for_civ(data, civ_id, CAMEL_ARCHER, ELITE_CAMEL_ARCHER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, CAMEL_ARCHER, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
 def mod(data: DatFile):
     logging.info('Applying regional heritage grants')
     give_steppe_lancers_to_civs_with_horse_archer_heritage(data)
@@ -271,3 +362,11 @@ def mod(data: DatFile):
     give_fire_lancers_to_japanese(data)
     give_camel_scout_start_to_true_camel_civs(data)
     give_centurions_to_byzantines(data)
+    give_franks_a_frankish_paladin_skin(data)
+    give_teutons_a_crusader_knight_skin(data)
+    give_karambit_warriors_to_other_southeast_asian_civs(data)
+    give_rattan_archers_to_malay(data)
+    give_thirisadai_to_other_indian_ocean_civs(data)
+    give_condottiero_to_sicilians(data)
+    give_konnik_and_boyar_to_each_other(data)
+    give_camel_archers_to_other_camel_civs(data)

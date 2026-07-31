@@ -269,3 +269,66 @@ and riskier than anything above — all of it so far has been purely additive
 
 Kept out of this pass deliberately so the already-verified, already-shipped
 work here doesn't get tangled up with a genuinely new, unverified mechanic.
+
+## regional-heritage v4: cosmetic reskins, and a batch of true-unique-unit grants
+
+### New mechanism: cosmetic-only reskins
+
+Persians' "Savar" is a cosmetic swap-in for Paladin in vanilla - same name,
+stats, and upgrade path, different graphics (`standing_graphic`,
+`dying_graphic`, `undead_graphic`, `damage_graphics`, `type_50.attack_graphic`
+copied from a donor unit). Built `mods.util.reskin_unit_for_civ` to do the same
+thing for any unit/civ, and used it for:
+- **Franks' Paladin** now looks like unit 632 (`HEROF`), which the old C++
+  branch's own `ids.h` already labeled `FRANKISH_PALADIN` - re-verified this
+  unit still exists with the same stats/class in the current `.dat` before
+  reusing the old research.
+- **Teutons' Paladin** now looks like `CRUSADERKNIGHT` (1723) - fits the
+  crusading-Order identity the whole civ is built around, distinct from their
+  real "Teutonic Knight" unique unit (which is infantry, untouched).
+
+Can't change the unit's *displayed name* this way - genieutils-py has no
+language-file support, confirmed earlier this session - so these are visual
+only, which is exactly what was asked for.
+
+### True-unique-unit grants, and a training-location correction
+
+Went through the remaining true-single-civ unique units looking for ones that
+could sensibly extend to (or trade between) other civs. This is a step further
+than the "regional, already-shared" content from earlier passes - Karambit
+Warrior/Rattan Archer/Konnik/Boyar/Camel Archer are all real, one-of-a-kind
+unique units elsewhere in the game, so each of these decisions was made
+explicitly rather than defaulted.
+
+Added:
+- **Karambit Warrior** (Malay's own) → Khmer, Vietnamese - same Southeast
+  Asian world already tied together by earlier Elephant Archer/Armored
+  Elephant grants.
+- **Rattan Archer** → Malay, to compensate for Karambit Warrior no longer
+  being exclusive. *Correction while researching this*: Rattan Archer is
+  actually Vietnamese's own native unique unit, not Burmese's as originally
+  written up - verified against `civilizations.json`'s `unique_unit_id`
+  before implementing, not assumed from the earlier (wrong) writeup.
+- **Thirisadai** (Dravidian warship) → Bengalis, Gurjaras - same Bay of
+  Bengal/Indian Ocean naval tradition.
+- **Condottiero** (Italian) → Sicilians - same Mediterranean mercenary-captain
+  tradition, pairs with the Genitour grant they already have.
+- **Konnik ↔ Boyar trade** between Bulgarians and Slavs. *Another correction*:
+  Konnik is actually Bulgarians' own native unique unit, not Slavs' - the
+  original writeup had this backwards too. Rather than a one-way grant that
+  didn't actually make sense once corrected, made it a real trade: Slavs get
+  access to Konnik, Bulgarians get access to Boyar (Slavs' real native unique).
+- **Camel Archer** (Berber) → Saracens, Turks, Cumans, Huns - the same "true
+  camel civs" this mod already built out. Gated to Imperial Age specifically
+  (not Castle-built like Berbers' own access), per explicit direction, so it
+  stays a late-game bonus for these four rather than diluting what makes early
+  access special for Berbers.
+
+Every one of these six additions turned out to collide with the target civ's
+own native unique unit at Castle button 1 (true unique units are almost always
+Castle-trained in vanilla, unlike the more "regional" content from earlier
+passes) - confirmed individually via `civilizations.json` for each civ rather
+than assumed, and fixed with the same `set_train_button_for_civ` → Castle
+button 4 move used for Conquistador/War Elephant/Centurion. Thirisadai
+(Dock) and Condottiero (Barracks) didn't collide with anything and needed no
+change.

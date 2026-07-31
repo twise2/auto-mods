@@ -134,6 +134,26 @@ def upgrade_unit_for_civ(data: DatFile, civ_id: int, base_unit_id: int, upgraded
     grant_effect_to_civ(data, civ_id, [upgrade_command], required_tech, f'Upgrade {base_name} for {civ.name}')
 
 
+def reskin_unit_for_civ(data: DatFile, civ_id: int, unit_id: int, donor_unit_id: int):
+    """Give one civ's copy of a unit a different appearance, borrowed from
+    `donor_unit_id`, without changing its name, stats, or upgrade path.
+
+    Purely cosmetic - the donor unit itself is untouched and can still be used
+    (or reused as a donor) elsewhere. genieutils-py can't rewrite language-file
+    strings, so the unit's displayed name can't change this way, only how it
+    looks - matches how the old regionalAdditions branch did civ skins.
+    """
+    civ = data.civs[civ_id]
+    unit = civ.units[unit_id]
+    donor = civ.units[donor_unit_id]
+    logging.info(f'Reskinning {unit.name} to look like {donor.name} for {civ.name}')
+    unit.standing_graphic = donor.standing_graphic
+    unit.dying_graphic = donor.dying_graphic
+    unit.undead_graphic = donor.undead_graphic
+    unit.damage_graphics = donor.damage_graphics
+    unit.type_50.attack_graphic = donor.type_50.attack_graphic
+
+
 def set_train_button_for_civ(data: DatFile, civ_id: int, unit_id: int, building_id: int, button_id: int):
     """Move where one civ's copy of a unit trains from, without affecting any
     other civ's copy of the same unit.

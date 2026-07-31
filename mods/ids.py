@@ -408,6 +408,11 @@ MINING_CAMP = 584
 CENTURION = 1790
 ELITE_CENTURION = 1792
 
+# Graphic donors for cosmetic reskins (reskin_unit_for_civ) - not trainable
+# units in their own right for this purpose, just a source of visuals.
+FRANKISH_PALADIN_SKIN = 632
+CRUSADER_KNIGHT_SKIN = 1723
+
 FARMER_F = 214
 FARMER_M = 259
 FARM = 50
