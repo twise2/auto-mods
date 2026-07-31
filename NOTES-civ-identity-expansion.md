@@ -332,3 +332,14 @@ than assumed, and fixed with the same `set_train_button_for_civ` → Castle
 button 4 move used for Conquistador/War Elephant/Centurion. Thirisadai
 (Dock) and Condottiero (Barracks) didn't collide with anything and needed no
 change.
+
+### Vietnamese Armored Elephant
+
+Rattan Archer (Vietnamese's real native unique) no longer being exclusive to
+them, now that Malay has it too, warranted giving something back - added
+Vietnamese to the existing `give_armored_elephants_to_other_elephant_civs`
+civ list. Also closes a real gap on its own merits: Vietnamese was the one
+mainland Southeast Asian elephant civ (Khmer/Burmese/Malay/Vietnamese) that
+didn't already have Armored Elephant from this mod. Confirmed no new
+collision risk - Armored Elephant replaces the Battering Ram line at Siege
+Workshop button 1, same mechanism already proven safe for the other three.

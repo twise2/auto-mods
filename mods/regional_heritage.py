@@ -53,7 +53,11 @@ def give_elephant_archers_to_civs_with_elephant_heritage(data: DatFile):
 
 def give_armored_elephants_to_other_elephant_civs(data: DatFile):
     # https://www.reddit.com/r/aoe2/comments/ubkjoa/armored_elephants_for_khmer_burmese_and_malay
-    civs = ['Khmer', 'Burmese', 'Malay', 'Ethiopians']
+    # Vietnamese is the one mainland Southeast Asian elephant civ that didn't
+    # have this already - also doubles as their thank-you for Rattan Archer (a
+    # Vietnamese native unique unit) no longer being exclusive to them, now
+    # that Malay has it too.
+    civs = ['Khmer', 'Burmese', 'Malay', 'Ethiopians', 'Vietnamese']
     for civ_id in civ_ids_named(data, civs):
         enable_unit_for_civ(data, civ_id, ARMORED_ELEPHANT, TECH_CASTLE_BUILT)
         upgrade_unit_for_civ(data, civ_id, ARMORED_ELEPHANT, SIEGE_ELEPHANT, TECH_REQUIREMENT_IMPERIAL_AGE)
