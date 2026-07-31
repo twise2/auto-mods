@@ -10,15 +10,15 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
     SIEGE_ELEPHANT, GENITOUR, ELITE_GENITOUR, CAMEL_RIDER, HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, \
     CAMEL_SCOUT, CARAVANSERAI, MULE_CART, LEGIONARY, MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN, WARRIOR_PRIEST, \
-    CONQUISTADOR, ELITE_CONQUISTADOR, MISSIONARY, WAR_ELEPHANT, ELITE_WAR_ELEPHANT, SCOUT_CAVALRY, \
+    CONQUISTADOR, MISSIONARY, WAR_ELEPHANT, SCOUT_CAVALRY, \
     LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, SKIRMISHER, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, \
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
-    CENTURION, ELITE_CENTURION, PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
-    KARAMBIT_WARRIOR, ELITE_KARAMBIT_WARRIOR, RATTAN_ARCHER, ELITE_RATTAN_ARCHER, THIRISADAI, \
-    CONDOTTIERO, KONNIK, ELITE_KONNIK, BOYAR, ELITE_BOYAR, CAMEL_ARCHER, ELITE_CAMEL_ARCHER, \
-    KIPCHAK, ELITE_KIPCHAK, URUMI_SWORDSMAN, ELITE_URUMI_SWORDSMAN, RATHA, ELITE_RATHA, \
-    CHAKRAM_THROWER, ELITE_CHAKRAM_THROWER, COMPOSITE_BOWMAN, ELITE_COMPOSITE_BOWMAN, \
-    MONASPA, ELITE_MONASPA, IRON_PAGODA, ELITE_IRON_PAGODA, LIAO_DAO, ELITE_LIAO_DAO, \
+    CENTURION, PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
+    KARAMBIT_WARRIOR, RATTAN_ARCHER, THIRISADAI, \
+    CONDOTTIERO, KONNIK, BOYAR, CAMEL_ARCHER, \
+    KIPCHAK, URUMI_SWORDSMAN, RATHA, \
+    CHAKRAM_THROWER, COMPOSITE_BOWMAN, \
+    MONASPA, IRON_PAGODA, LIAO_DAO, \
     FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
     DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION
 
@@ -163,11 +163,13 @@ def give_imperial_skirmisher_to_civs_with_great_skirmishers(data: DatFile):
 
 
 def give_war_elephants_to_ethiopians(data: DatFile):
+    # War Elephant is Persians' real native unique unit (civilizations.json).
     # https://forums.ageofempires.com/t/should-ethiopians-get-war-elephants/202217/12
     for civ_id in civ_ids_named(data, ['Ethiopians']):
         enable_unit_for_civ(data, civ_id, WAR_ELEPHANT, TECH_CASTLE_BUILT)
-        # Persians (War Elephant's vanilla owner) get the Elite tier too - match it
-        upgrade_unit_for_civ(data, civ_id, WAR_ELEPHANT, ELITE_WAR_ELEPHANT, TECH_REQUIREMENT_IMPERIAL_AGE)
+        # Deliberately no Elite tier - Persians keep the more complete version of
+        # their own unique unit, matching the principle that a unique unit given
+        # to a second civ should still stay a notch behind the original owner.
         # War Elephant's vanilla Castle button (1) is the universal unique-unit
         # slot - Ethiopians' own Shotel Warrior already lives there. Move to
         # button 4, confirmed unused by any Ethiopian content.
@@ -176,11 +178,11 @@ def give_war_elephants_to_ethiopians(data: DatFile):
 
 def give_conquistadors_to_portuguese(data: DatFile):
     # Portugal ran its own conquistador-style expeditions in the Americas and Africa;
-    # Conquistador is currently Spanish-only.
+    # Conquistador is Spanish's real native unique unit (civilizations.json).
     # https://www.reddit.com/r/aoe2/comments/snpt20/how_unbalanced_would_making_the_conq_a_regional/
     for civ_id in civ_ids_named(data, ['Portuguese']):
         enable_unit_for_civ(data, civ_id, CONQUISTADOR, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, CONQUISTADOR, ELITE_CONQUISTADOR, TECH_REQUIREMENT_IMPERIAL_AGE)
+        # No Elite tier - keeps Spanish's own version the more complete one.
         # Conquistador's vanilla Castle button (1) is the universal unique-unit
         # slot - Portugal's own Organ Gun already lives there. Move to button 4.
         set_train_button_for_civ(data, civ_id, CONQUISTADOR, TYPE_CASTLE_TRAIN_LOCATION, 4)
@@ -253,10 +255,10 @@ def give_centurions_to_byzantines(data: DatFile):
     # Rome fields two separate unique units: Legionary (already given to
     # Byzantines above) and Centurion, a standalone Castle-trained unit, not an
     # upgrade of the sword-infantry line. Byzantium inherited the whole legion
-    # system from Rome, not just half of it.
+    # system from Rome, not just half of it. Centurion is Romans' real native
+    # unique unit though, so no Elite tier here - Rome keeps the fuller version.
     for civ_id in civ_ids_named(data, ['Byzantine']):
         enable_unit_for_civ(data, civ_id, CENTURION, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, CENTURION, ELITE_CENTURION, TECH_REQUIREMENT_IMPERIAL_AGE)
         # Centurion's vanilla Castle button (1) is the universal unique-unit slot;
         # move to button 4, same fix as Conquistador/War Elephant above.
         set_train_button_for_civ(data, civ_id, CENTURION, TYPE_CASTLE_TRAIN_LOCATION, 4)
@@ -285,9 +287,9 @@ def give_karambit_warriors_to_other_southeast_asian_civs(data: DatFile):
     # Karambit Warrior is currently Malay-only. Khmer and Vietnamese are the
     # same Southeast Asian world already tied together by the Elephant Archer/
     # Armored Elephant/Battle Elephant grants above.
+    # No Elite tier - Malay keeps the fuller version of their own unique unit.
     for civ_id in civ_ids_named(data, ['Khmer', 'Vietnamese']):
         enable_unit_for_civ(data, civ_id, KARAMBIT_WARRIOR, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, KARAMBIT_WARRIOR, ELITE_KARAMBIT_WARRIOR, TECH_REQUIREMENT_IMPERIAL_AGE)
         # Vanilla Castle button 1 is the universal unique-unit slot - both civs'
         # own native unique already lives there.
         set_train_button_for_civ(data, civ_id, KARAMBIT_WARRIOR, TYPE_CASTLE_TRAIN_LOCATION, 4)
@@ -298,9 +300,9 @@ def give_rattan_archers_to_malay(data: DatFile):
     # Archer (Vietnamese's real native unique, not Burmese's as originally
     # thought - verified against civilizations.json) is the natural thing to
     # trade back the other way in the same regional group.
+    # No Elite tier - Vietnamese keeps the fuller version of their own unique.
     for civ_id in civ_ids_named(data, ['Malay']):
         enable_unit_for_civ(data, civ_id, RATTAN_ARCHER, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, RATTAN_ARCHER, ELITE_RATTAN_ARCHER, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, RATTAN_ARCHER, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
@@ -326,14 +328,14 @@ def give_konnik_and_boyar_to_each_other(data: DatFile):
     # originally thought - verified against civilizations.json), and Boyar is
     # Slavs' own native unique. Both are heavy Orthodox-Slavic cavalry from the
     # same shared heritage, so rather than a one-way grant, trade them: Slavs
-    # get access to Konnik too, Bulgarians get access to Boyar too.
+    # get access to Konnik too, Bulgarians get access to Boyar too. Neither side
+    # gets the Elite tier of the borrowed unit - each civ's own version stays
+    # the more complete one.
     for civ_id in civ_ids_named(data, ['Slavs']):
         enable_unit_for_civ(data, civ_id, KONNIK, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, KONNIK, ELITE_KONNIK, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, KONNIK, TYPE_CASTLE_TRAIN_LOCATION, 4)
     for civ_id in civ_ids_named(data, ['Bulgarians']):
         enable_unit_for_civ(data, civ_id, BOYAR, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, BOYAR, ELITE_BOYAR, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, BOYAR, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
@@ -343,10 +345,11 @@ def give_camel_archers_to_other_camel_civs(data: DatFile):
     # camel scout, imperial camel). Gated to Imperial Age only, unlike Berbers'
     # own Castle-Age access, so it stays a late-game bonus option for these four
     # rather than diluting what makes it special for Berbers specifically.
+    # No Elite tier either, on top of the Imperial-Age gate - Berbers keep both
+    # the earlier access and the more complete version of their own unique.
     civs = ['Saracens', 'Turks', 'Cumans', 'Huns']
     for civ_id in civ_ids_named(data, civs):
         enable_unit_for_civ(data, civ_id, CAMEL_ARCHER, TECH_REQUIREMENT_IMPERIAL_AGE)
-        upgrade_unit_for_civ(data, civ_id, CAMEL_ARCHER, ELITE_CAMEL_ARCHER, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, CAMEL_ARCHER, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
@@ -357,9 +360,9 @@ def give_kipchak_to_tatars(data: DatFile):
     # already the most heavily-served civ in this mod (camel line, camel
     # scout, imperial camel, winged hussar, camel archer), so this one is
     # one-way rather than forcing a trade that isn't needed.
+    # No Elite tier - Cumans keep the fuller version of their own unique unit.
     for civ_id in civ_ids_named(data, ['Tatars']):
         enable_unit_for_civ(data, civ_id, KIPCHAK, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, KIPCHAK, ELITE_KIPCHAK, TECH_REQUIREMENT_IMPERIAL_AGE)
         # Tatars already have Camel Archer at Castle button 4 from this mod -
         # button 5 is confirmed free (nothing native uses Castle buttons 5+).
         set_train_button_for_civ(data, civ_id, KIPCHAK, TYPE_CASTLE_TRAIN_LOCATION, 5)
@@ -369,9 +372,9 @@ def give_urumi_swordsman_to_hindustanis(data: DatFile):
     # Urumi Swordsman is Dravidians' real primary unique unit (a flexible South
     # Indian sword) - Hindustanis are the broader Indian-subcontinent civ in
     # this mod that hasn't received a true-unique-unit grant yet.
+    # No Elite tier - Dravidians keep the fuller version of their own unique.
     for civ_id in civ_ids_named(data, ['Hindustanis']):
         enable_unit_for_civ(data, civ_id, URUMI_SWORDSMAN, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, URUMI_SWORDSMAN, ELITE_URUMI_SWORDSMAN, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, URUMI_SWORDSMAN, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
@@ -379,13 +382,12 @@ def give_ratha_and_chakram_to_each_other(data: DatFile):
     # Ratha (Bengalis' unique war chariot) and Chakram Thrower (Gurjaras'
     # unique disc-thrower) are both Indian-subcontinent regional neighbors
     # already sharing Thirisadai from this mod - trade their land uniques too.
+    # Neither side gets the Elite tier of the borrowed unit.
     for civ_id in civ_ids_named(data, ['Bengalis']):
         enable_unit_for_civ(data, civ_id, CHAKRAM_THROWER, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, CHAKRAM_THROWER, ELITE_CHAKRAM_THROWER, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, CHAKRAM_THROWER, TYPE_CASTLE_TRAIN_LOCATION, 4)
     for civ_id in civ_ids_named(data, ['Gurjaras']):
         enable_unit_for_civ(data, civ_id, RATHA, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, RATHA, ELITE_RATHA, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, RATHA, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
@@ -393,26 +395,24 @@ def give_composite_bowman_and_monaspa_to_each_other(data: DatFile):
     # Composite Bowman (Armenians) and Monaspa (Georgians) are both Caucasus
     # neighbors with deeply intertwined history - trade their uniques the same
     # way Konnik/Boyar were traded between Bulgarians and Slavs.
+    # Neither side gets the Elite tier of the borrowed unit.
     for civ_id in civ_ids_named(data, ['Armenians']):
         enable_unit_for_civ(data, civ_id, MONASPA, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, MONASPA, ELITE_MONASPA, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, MONASPA, TYPE_CASTLE_TRAIN_LOCATION, 4)
     for civ_id in civ_ids_named(data, ['Georgians']):
         enable_unit_for_civ(data, civ_id, COMPOSITE_BOWMAN, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, COMPOSITE_BOWMAN, ELITE_COMPOSITE_BOWMAN, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, COMPOSITE_BOWMAN, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
 def give_iron_pagoda_and_liao_dao_to_each_other(data: DatFile):
     # Iron Pagoda (Jurchens) and Liao Dao (Khitans) are the two Liao/Jin-era
     # Manchurian rival-then-successor states - same trade pattern again.
+    # Neither side gets the Elite tier of the borrowed unit.
     for civ_id in civ_ids_named(data, ['Jurchens']):
         enable_unit_for_civ(data, civ_id, LIAO_DAO, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, LIAO_DAO, ELITE_LIAO_DAO, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, LIAO_DAO, TYPE_CASTLE_TRAIN_LOCATION, 4)
     for civ_id in civ_ids_named(data, ['Khitans']):
         enable_unit_for_civ(data, civ_id, IRON_PAGODA, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, IRON_PAGODA, ELITE_IRON_PAGODA, TECH_REQUIREMENT_IMPERIAL_AGE)
         set_train_button_for_civ(data, civ_id, IRON_PAGODA, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
