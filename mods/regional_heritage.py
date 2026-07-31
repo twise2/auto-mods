@@ -18,7 +18,9 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     CONDOTTIERO, KONNIK, ELITE_KONNIK, BOYAR, ELITE_BOYAR, CAMEL_ARCHER, ELITE_CAMEL_ARCHER, \
     KIPCHAK, ELITE_KIPCHAK, URUMI_SWORDSMAN, ELITE_URUMI_SWORDSMAN, RATHA, ELITE_RATHA, \
     CHAKRAM_THROWER, ELITE_CHAKRAM_THROWER, COMPOSITE_BOWMAN, ELITE_COMPOSITE_BOWMAN, \
-    MONASPA, ELITE_MONASPA, IRON_PAGODA, ELITE_IRON_PAGODA, LIAO_DAO, ELITE_LIAO_DAO
+    MONASPA, ELITE_MONASPA, IRON_PAGODA, ELITE_IRON_PAGODA, LIAO_DAO, ELITE_LIAO_DAO, \
+    FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
+    DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -414,6 +416,52 @@ def give_iron_pagoda_and_liao_dao_to_each_other(data: DatFile):
         set_train_button_for_civ(data, civ_id, IRON_PAGODA, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
+def give_feitoria_to_spanish(data: DatFile):
+    # Feitoria (Portuguese's passive-resource-generating trade post) is the
+    # signature building of Iberian colonial trade. Spanish share the exact
+    # same Age-of-Exploration period and already have their own Conquistador -
+    # this is the other half of the same historical picture.
+    for civ_id in civ_ids_named(data, ['Spanish']):
+        enable_unit_for_civ(data, civ_id, FEITORIA, TECH_CASTLE_BUILT)
+
+
+def give_folwark_to_bohemians(data: DatFile):
+    # Folwark (Poland's Mill-replacing farm-manor building) fits Bohemians
+    # just as well - Dawn of the Dukes introduced Poles and Bohemians as a
+    # pair, and they share the same Central European agrarian economy.
+    for civ_id in civ_ids_named(data, ['Bohemians']):
+        for mill_tier in (MILL, MILL_AGE2, MILL_AGE3, MILL_AGE4):
+            upgrade_unit_for_civ(data, civ_id, mill_tier, FOLWARK1, TECH_CASTLE_BUILT)
+        # Skip the intermediate tier, same simplification used everywhere else
+        # in this file - straight to the final tier once Imperial is reached.
+        upgrade_unit_for_civ(data, civ_id, FOLWARK1, FOLWARK3, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_donjon_to_italians(data: DatFile):
+    # Donjon (Sicily's cheap mini-Castle that also trains Serjeants) fits
+    # Italians just as well - same Mediterranean peninsula, already sharing
+    # Genitour with Sicilians in this mod.
+    for civ_id in civ_ids_named(data, ['Italians']):
+        enable_unit_for_civ(data, civ_id, DONJON, TECH_CASTLE_BUILT)
+
+
+def give_krepost_to_slavs(data: DatFile):
+    # Krepost (Bulgaria's defensive tower that also trains Konnik) fits Slavs
+    # just as well - the same Orthodox Balkan-Slavic connection already behind
+    # the Konnik/Boyar trade between these two civs.
+    for civ_id in civ_ids_named(data, ['Slavs']):
+        enable_unit_for_civ(data, civ_id, KREPOST, TECH_CASTLE_BUILT)
+
+
+def give_harbor_to_vietnamese(data: DatFile):
+    # Harbor (Malay's unique Dock upgrade) fits Vietnamese just as well - the
+    # same coastal Southeast Asian maritime-trade economy already tying
+    # Vietnamese to Malay/Khmer/Burmese throughout this mod.
+    for civ_id in civ_ids_named(data, ['Vietnamese']):
+        for dock_tier in (TYPE_DOCK_TRAIN_LOCATION, DOCK_AGE2, DOCK_AGE3, DOCK_AGE4):
+            upgrade_unit_for_civ(data, civ_id, dock_tier, HARBOR, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
 def mod(data: DatFile):
     logging.info('Applying regional heritage grants')
     give_steppe_lancers_to_civs_with_horse_archer_heritage(data)
@@ -448,3 +496,8 @@ def mod(data: DatFile):
     give_ratha_and_chakram_to_each_other(data)
     give_composite_bowman_and_monaspa_to_each_other(data)
     give_iron_pagoda_and_liao_dao_to_each_other(data)
+    give_feitoria_to_spanish(data)
+    give_folwark_to_bohemians(data)
+    give_donjon_to_italians(data)
+    give_krepost_to_slavs(data)
+    give_harbor_to_vietnamese(data)

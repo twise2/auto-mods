@@ -382,3 +382,34 @@ units that had been missed:
   much bigger call than anything else in this file, which has consistently
   only extended newer/secondary regional content. Consistent with the
   boundary drawn in every earlier pass, not a new decision.
+
+## regional-heritage v6: unique economic/defensive buildings
+
+Corrected course after user feedback: the "original 13" boundary above is
+about not diluting the foundational combat unique units (Longbowman, Huskarl,
+etc) - it was never meant to extend to unique *buildings* or *economic*
+mechanics, which are exactly the kind of DLC-era addition later civs got that
+earlier ones plausibly would have too if designed today (the explicit example
+given: Indians splitting into Hindustanis/Bengalis/Dravidians/Gurjaras with
+new unique content each). Implemented:
+
+- **Feitoria** (Portuguese's passive-resource trade post) → Spanish - same
+  Age-of-Exploration period, already has its own Conquistador.
+- **Folwark** (Poland's Mill-replacing farm manor) → Bohemians - Dawn of the
+  Dukes introduced these two as a pair; verified the real mechanism first
+  (upgrades every Mill age-tier into Folwark, not a separate add-on) and
+  replicated it exactly, including skipping the Age 2 intermediate tier the
+  same way every other elite/upgrade grant in this file does.
+- **Donjon** (Sicily's cheap mini-Castle, also trains Serjeant) → Italians -
+  same Mediterranean peninsula, already sharing Genitour with Sicilians.
+- **Krepost** (Bulgaria's defensive tower, also trains Konnik) → Slavs - same
+  Orthodox Balkan-Slavic connection already behind the Konnik/Boyar trade.
+- **Harbor** (Malay's unique Dock-line upgrade tech) → Vietnamese - verified
+  this is actually a tech that upgrades every Dock age-tier into Harbor (not
+  a plain enable like the other three), replicated that exact 4-tier chain.
+
+All five checked for collision risk the same way as every prior addition;
+none needed a button move (the "same numeric button in a different build-menu
+tab" pattern from Caravanserai/Castle applies to Feitoria/Donjon/Krepost, and
+Folwark/Harbor are in-place upgrades of buildings the target civ already has,
+not new additions).

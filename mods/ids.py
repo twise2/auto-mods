@@ -422,6 +422,21 @@ ELITE_IRON_PAGODA = 1910
 LIAO_DAO = 1920
 ELITE_LIAO_DAO = 1922
 
+# Unique economic/defensive buildings
+FEITORIA = 1021
+DONJON = 1665
+KREPOST = 1251
+HARBOR = 1189
+FOLWARK1 = 1734
+FOLWARK2 = 1711
+FOLWARK3 = 1720
+MILL_AGE2 = 129
+MILL_AGE3 = 130
+MILL_AGE4 = 131
+DOCK_AGE2 = 133
+DOCK_AGE3 = 47
+DOCK_AGE4 = 51
+
 # Graphic donors for cosmetic reskins (reskin_unit_for_civ) - not trainable
 # units in their own right for this purpose, just a source of visuals.
 FRANKISH_PALADIN_SKIN = 632
