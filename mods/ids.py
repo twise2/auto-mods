@@ -436,6 +436,13 @@ MILL_AGE4 = 131
 DOCK_AGE2 = 133
 DOCK_AGE3 = 47
 DOCK_AGE4 = 51
+CHURCH = 104
+CHURCH_AGE2 = 30
+CHURCH_AGE3 = 31
+CHURCH_AGE4 = 32
+HOUFNICE = 1709
+CHAMPI_WARRIOR = 2552
+GHULAM = 1747
 
 # Graphic donors for cosmetic reskins (reskin_unit_for_civ) - not trainable
 # units in their own right for this purpose, just a source of visuals.

@@ -413,3 +413,63 @@ none needed a button move (the "same numeric button in a different build-menu
 tab" pattern from Caravanserai/Castle applies to Feitoria/Donjon/Krepost, and
 Folwark/Harbor are in-place upgrades of buildings the target civ already has,
 not new additions).
+
+## regional-heritage v7: no more Elite for secondary civs, and a large backport batch
+
+### Design rule: unique units stay unique
+
+Per explicit direction: when a civ's real native unique unit is shared with
+another civ, the original owner should keep the more complete version.
+Retroactively stripped the Elite tier from all 16 previously-shared true
+unique units (War Elephant, Conquistador, Centurion, Karambit Warrior, Rattan
+Archer, Konnik, Boyar, Camel Archer, Kipchak, Urumi Swordsman, Ratha, Chakram
+Thrower, Monaspa, Composite Bowman, Iron Pagoda, Liao Dao) - base tier only
+for whoever receives the unit second. Every new true-unique grant below
+follows the same rule from the start. Units that were already multi-civ
+regional content in vanilla (Steppe Lancer, Elephant Archer, Genitour, etc)
+are unaffected - they were never any single civ's signature unit.
+
+### Extending existing grants
+
+- **Warrior Priest**: added Mayan, Incas (same Mesoamerican/Andean shamanic
+  tradition Aztecs already represents), Goths (same Germanic pagan-warband
+  religion as Vikings/Celts).
+- **Missionary**: added Teutons (a crusading military-religious Order),
+  Romans (birthplace of the Catholic Church), French (Frankish Crusader
+  kingdoms).
+- **Folwark**: added Lithuanians (Poland-Lithuania was one unified
+  Commonwealth for centuries - if anything a stronger fit than Bohemians).
+- **Harbor**: added Vikings (Norse maritime trade, a different angle on the
+  same "coastal trade economy" idea Vietnamese represents).
+- **Fortified Church**: turned out to already be a genuinely shared regional
+  tech in vanilla (both Armenians and Georgians have their own copy, not a
+  single civ's unique) - added Teutons and Spanish, both militant-Catholic
+  civs built around the same idea.
+
+### New true-unique-unit backports (no Elite tier, per the rule above)
+
+Coustillier (Burgundian) → French. War Wagon + Keshik (Korean + Tatar) →
+Mongols. Genoese Crossbowman (Italian) → Sicilians, completing the reciprocal
+started by Donjon going the other way. Ghulam (Hindustani) → Bengalis/
+Gurjaras. Magyar Huszar (Hungarian) → Bulgarians. Organ Gun (Portuguese) →
+Spanish. Gbeto (Malian) → Berbers (trans-Saharan trade contact). Ballista
+Elephant ↔ Arambai traded between Burmese ↔ Khmer. Champi Warrior (Muisca,
+the newest civs' own content) → Incas, the older Andean civilization -
+directly backporting brand-new DLC content the way the user's stated goal
+describes. Houfnice (Bohemian) → Poles, completing the Folwark reciprocal.
+
+Every one of these needed the same Castle-button-1 collision check as every
+prior true-unique grant. Several target civs already had something at button
+4 from earlier passes (Tatars/Cumans, Khmer, Bengalis/Gurjaras, Bulgarians) -
+button 5 confirmed free and used instead, same as the earlier Kipchak case.
+Champi Warrior trains at the Barracks, not the Castle, so needed no button
+change at all.
+
+### Deliberately not implemented
+
+- **Slinger**, and the newest Chronicles civs' other content generally -
+  same "not enough confident research" reasoning as every earlier pass.
+  Flagged again rather than guessed at.
+- **Serjeant** (Sicilian) → Italians - held back pending verification that
+  Italians' new Donjon doesn't already grant equivalent access, to avoid a
+  possible duplicate.

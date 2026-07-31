@@ -20,7 +20,10 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     CHAKRAM_THROWER, COMPOSITE_BOWMAN, \
     MONASPA, IRON_PAGODA, LIAO_DAO, \
     FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
-    DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION
+    DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION, \
+    CHURCH, CHURCH_AGE2, CHURCH_AGE3, CHURCH_AGE4, FORTIFIED_CHURCH, \
+    WAR_WAGON, GENOESE_CROSSBOWMAN, GHULAM, MAGYAR_HUSZAR, ORGAN_GUN, GBETO, \
+    BALLISTA_ELEPHANT, ARAMBAI, COUSTILLIER, HOUFNICE, CHAMPI_WARRIOR, KESHIK
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -190,14 +193,21 @@ def give_conquistadors_to_portuguese(data: DatFile):
 
 def give_missionaries_to_civs_with_missionary_heritage(data: DatFile):
     # https://www.reddit.com/r/aoe2/comments/ka4jvi/why_dont_portuguese_have_access_to_missionaries/
-    civs = ['Italians', 'Portuguese', 'Byzantine']
+    # Teutons (a crusading Catholic military order) and Romans (birthplace of the
+    # Catholic Church itself) fit at least as well as the original three. French
+    # inherit the same Frankish-Crusader-kingdoms Catholic tradition.
+    civs = ['Italians', 'Portuguese', 'Byzantine', 'Teutons', 'Romans', 'French']
     for civ_id in civ_ids_named(data, civs):
         enable_unit_for_civ(data, civ_id, MISSIONARY, TECH_CASTLE_BUILT)
 
 
 def give_warrior_priests_to_civs_with_shamanic_heritage(data: DatFile):
     # https://www.reddit.com/r/aoe2/comments/17egkrm/for_fun_what_if_the_new_warrior_priest_from/
-    civs = ['Vikings', 'Celts', 'Aztecs', 'Dravidians', 'Malians', 'Teutons', 'Japanese', 'Chinese']
+    # Mayans and Incas share the same Mesoamerican/Andean shamanic-religious
+    # tradition Aztecs already have this from; Goths fit the same Germanic
+    # pagan-warband religion already represented by Vikings/Celts here.
+    civs = ['Vikings', 'Celts', 'Aztecs', 'Dravidians', 'Malians', 'Teutons', 'Japanese', 'Chinese',
+            'Mayan', 'Incas', 'Goths']
     for civ_id in civ_ids_named(data, civs):
         enable_unit_for_civ(data, civ_id, WARRIOR_PRIEST, TECH_CASTLE_BUILT)
 
@@ -429,7 +439,9 @@ def give_folwark_to_bohemians(data: DatFile):
     # Folwark (Poland's Mill-replacing farm-manor building) fits Bohemians
     # just as well - Dawn of the Dukes introduced Poles and Bohemians as a
     # pair, and they share the same Central European agrarian economy.
-    for civ_id in civ_ids_named(data, ['Bohemians']):
+    # Lithuanians fit at least as well, if not better - Poland-Lithuania were
+    # literally one unified Commonwealth for centuries.
+    for civ_id in civ_ids_named(data, ['Bohemians', 'Lithuanians']):
         for mill_tier in (MILL, MILL_AGE2, MILL_AGE3, MILL_AGE4):
             upgrade_unit_for_civ(data, civ_id, mill_tier, FOLWARK1, TECH_CASTLE_BUILT)
         # Skip the intermediate tier, same simplification used everywhere else
@@ -456,10 +468,126 @@ def give_krepost_to_slavs(data: DatFile):
 def give_harbor_to_vietnamese(data: DatFile):
     # Harbor (Malay's unique Dock upgrade) fits Vietnamese just as well - the
     # same coastal Southeast Asian maritime-trade economy already tying
-    # Vietnamese to Malay/Khmer/Burmese throughout this mod.
-    for civ_id in civ_ids_named(data, ['Vietnamese']):
+    # Vietnamese to Malay/Khmer/Burmese throughout this mod. Vikings fit the
+    # same idea from a completely different angle - Norse maritime trade routes
+    # were just as central to their identity.
+    for civ_id in civ_ids_named(data, ['Vietnamese', 'Vikings']):
         for dock_tier in (TYPE_DOCK_TRAIN_LOCATION, DOCK_AGE2, DOCK_AGE3, DOCK_AGE4):
             upgrade_unit_for_civ(data, civ_id, dock_tier, HARBOR, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_fortified_church_to_teutons_and_spanish(data: DatFile):
+    # Fortified Church (a Church that can garrison and fight back) is already
+    # shared natively by Armenians and Georgians - a genuinely regional Caucasus
+    # tech, not a single-civ unique. Teutons (a crusading military-religious
+    # Order literally built around fortified churches) and Spanish (Reconquista-
+    # era militant Catholicism) both fit the theme at least as well.
+    # https://www.reddit.com/r/aoe2/comments/17lanmw/
+    for civ_id in civ_ids_named(data, ['Teutons', 'Spanish']):
+        for church_tier in (CHURCH, CHURCH_AGE2, CHURCH_AGE3, CHURCH_AGE4):
+            upgrade_unit_for_civ(data, civ_id, church_tier, FORTIFIED_CHURCH, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_coustillier_to_french(data: DatFile):
+    # Coustillier (Burgundy's own unique heavy lancer) fits French just as well -
+    # Burgundy was a French-cultural-sphere duchy, and Franks are one of the
+    # civs whose own foundational unique (Throwing Axeman) this mod deliberately
+    # leaves untouched, so this backports newer French-adjacent DLC content
+    # without touching that.
+    for civ_id in civ_ids_named(data, ['French']):
+        enable_unit_for_civ(data, civ_id, COUSTILLIER, TECH_CASTLE_BUILT)
+        set_train_button_for_civ(data, civ_id, COUSTILLIER, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_war_wagon_and_keshik_to_mongols(data: DatFile):
+    # War Wagon (Korean mobile gunpowder fortress) and Keshik (Tatar Golden
+    # Horde gold-generating guard cavalry) both fit the Mongols - the original
+    # steppe empire both Korea's northern border wars and the Golden Horde trace
+    # back to. Two separate grants, so two separate free Castle buttons needed.
+    for civ_id in civ_ids_named(data, ['Mongols']):
+        enable_unit_for_civ(data, civ_id, WAR_WAGON, TECH_CASTLE_BUILT)
+        set_train_button_for_civ(data, civ_id, WAR_WAGON, TYPE_CASTLE_TRAIN_LOCATION, 4)
+        enable_unit_for_civ(data, civ_id, KESHIK, TECH_CASTLE_BUILT)
+        set_train_button_for_civ(data, civ_id, KESHIK, TYPE_CASTLE_TRAIN_LOCATION, 5)
+
+
+def give_genoese_crossbowman_to_sicilians(data: DatFile):
+    # Genoese Crossbowman (Italy's own unique elite crossbowman) fits Sicilians
+    # just as well - completes the reciprocal relationship already started by
+    # giving Italians Sicily's Donjon.
+    for civ_id in civ_ids_named(data, ['Sicilians']):
+        enable_unit_for_civ(data, civ_id, GENOESE_CROSSBOWMAN, TECH_CASTLE_BUILT)
+        set_train_button_for_civ(data, civ_id, GENOESE_CROSSBOWMAN, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_ghulam_to_other_indian_civs(data: DatFile):
+    # Ghulam (Hindustanis' own unique Delhi-Sultanate/Mughal infantry) fits the
+    # broader Indian subcontinent civs already tightly interconnected in this
+    # mod (Ratha/Chakram/Thirisadai/Urumi all cross the same four civs).
+    civs = ['Bengalis', 'Gurjaras']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, GHULAM, TECH_CASTLE_BUILT)
+        # Both already have another grant at Castle button 4 from this mod
+        # (Chakram Thrower/Ratha respectively) - button 5 confirmed free.
+        set_train_button_for_civ(data, civ_id, GHULAM, TYPE_CASTLE_TRAIN_LOCATION, 5)
+
+
+def give_magyar_huszar_to_bulgarians(data: DatFile):
+    # Magyar Huszar (Hungary's own unique light raiding cavalry) fits Bulgaria's
+    # already-established steppe-cavalry-adjacent identity (Steppe Lancer,
+    # Konnik) - the Balkans had extensive Hungarian border-war history too.
+    for civ_id in civ_ids_named(data, ['Bulgarians']):
+        enable_unit_for_civ(data, civ_id, MAGYAR_HUSZAR, TECH_CASTLE_BUILT)
+        # Bulgarians already have Boyar at Castle button 4 from this mod.
+        set_train_button_for_civ(data, civ_id, MAGYAR_HUSZAR, TYPE_CASTLE_TRAIN_LOCATION, 5)
+
+
+def give_organ_gun_to_spanish(data: DatFile):
+    # Organ Gun (Portugal's own unique multi-barrel gunpowder cart) fits Spanish
+    # just as well - the closest Iberian sibling, already sharing Feitoria and
+    # Genitour with Portuguese in this mod.
+    for civ_id in civ_ids_named(data, ['Spanish']):
+        enable_unit_for_civ(data, civ_id, ORGAN_GUN, TECH_CASTLE_BUILT)
+        set_train_button_for_civ(data, civ_id, ORGAN_GUN, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_gbeto_to_berbers(data: DatFile):
+    # Gbeto (Mali's own unique female warrior) fits Berbers - trans-Saharan
+    # trade routes gave North African Berbers and West African Mali centuries
+    # of direct, sustained contact.
+    for civ_id in civ_ids_named(data, ['Berbers']):
+        enable_unit_for_civ(data, civ_id, GBETO, TECH_CASTLE_BUILT)
+        set_train_button_for_civ(data, civ_id, GBETO, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_ballista_elephant_and_arambai_to_each_other(data: DatFile):
+    # Ballista Elephant (Khmer's own unique siege elephant) and Arambai
+    # (Burmese's own unique boomerang cavalry) are both Southeast Asian
+    # mainland neighbors already tied together throughout this mod.
+    for civ_id in civ_ids_named(data, ['Burmese']):
+        enable_unit_for_civ(data, civ_id, BALLISTA_ELEPHANT, TECH_CASTLE_BUILT)
+        set_train_button_for_civ(data, civ_id, BALLISTA_ELEPHANT, TYPE_CASTLE_TRAIN_LOCATION, 4)
+    for civ_id in civ_ids_named(data, ['Khmer']):
+        enable_unit_for_civ(data, civ_id, ARAMBAI, TECH_CASTLE_BUILT)
+        # Khmer already has Karambit Warrior at Castle button 4 from this mod.
+        set_train_button_for_civ(data, civ_id, ARAMBAI, TYPE_CASTLE_TRAIN_LOCATION, 5)
+
+
+def give_champi_warrior_to_incas(data: DatFile):
+    # Champi Warrior (Muisca's own unique unit) is a Bogota-region Andean
+    # warrior - Incas are the other, older major Andean civilization already
+    # sharing the Settlement building with Muisca/Mapuche/Tupi. Trains at the
+    # Barracks, not the Castle, so no button conflict with Incas' own Kamayuk.
+    for civ_id in civ_ids_named(data, ['Incas']):
+        enable_unit_for_civ(data, civ_id, CHAMPI_WARRIOR, TECH_CASTLE_BUILT)
+
+
+def give_houfnice_to_poles(data: DatFile):
+    # Houfnice (Bohemia's own unique early cannon) fits Poland just as well -
+    # completes the reciprocal relationship already started by giving Bohemians
+    # Poland's Folwark. No Elite tier exists to worry about.
+    for civ_id in civ_ids_named(data, ['Poles']):
+        enable_unit_for_civ(data, civ_id, HOUFNICE, TECH_CASTLE_BUILT)
 
 
 def mod(data: DatFile):
@@ -501,3 +629,14 @@ def mod(data: DatFile):
     give_donjon_to_italians(data)
     give_krepost_to_slavs(data)
     give_harbor_to_vietnamese(data)
+    give_fortified_church_to_teutons_and_spanish(data)
+    give_coustillier_to_french(data)
+    give_war_wagon_and_keshik_to_mongols(data)
+    give_genoese_crossbowman_to_sicilians(data)
+    give_ghulam_to_other_indian_civs(data)
+    give_magyar_huszar_to_bulgarians(data)
+    give_organ_gun_to_spanish(data)
+    give_gbeto_to_berbers(data)
+    give_ballista_elephant_and_arambai_to_each_other(data)
+    give_champi_warrior_to_incas(data)
+    give_houfnice_to_poles(data)
