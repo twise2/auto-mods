@@ -343,3 +343,42 @@ mainland Southeast Asian elephant civ (Khmer/Burmese/Malay/Vietnamese) that
 didn't already have Armored Elephant from this mod. Confirmed no new
 collision risk - Armored Elephant replaces the Battering Ram line at Siege
 Workshop button 1, same mechanism already proven safe for the other three.
+
+## regional-heritage v5: exhaustive unique-unit sweep via civilizations.json
+
+Went through `civilizations.json`'s full `unique_unit_id` list for all 60 civs
+directly rather than relying on the partial mental list built up over earlier
+passes - this is the authoritative source and surfaced several real unique
+units that had been missed:
+
+- **Naming gotcha**: `civilizations.json`'s `internal_name` differs from the
+  `.dat`'s `Civ.name` for several civs (`Britons`/`British`, `Franks`/`French`,
+  `Byzantines`/`Byzantine`, `Mayans`/`Mayan`, and `Indians`/`Hindustanis` - the
+  last one is a stale label left over from before Dynasties of India split
+  "Indians" into four civs; confirmed `Hindustanis` genuinely has no separate
+  entry and `Ghulam` (1747) is really theirs).
+- Added: **Kipchak** (Cumans' unique) → Tatars, one-way (Cumans already the
+  most heavily-served civ in this mod, so no reciprocal was forced).
+  **Urumi Swordsman** (Dravidians' real primary unique, distinct from
+  Thirisadai which is their secondary naval unit) → Hindustanis.
+  **Ratha ↔ Chakram Thrower** traded between Bengalis and Gurjaras.
+  **Composite Bowman ↔ Monaspa** traded between Armenians and Georgians.
+  **Iron Pagoda ↔ Liao Dao** traded between Jurchens and Khitans.
+- Every one of these again collided with Castle button 1 - all confirmed
+  individually. Tatars and Cumans already had something at button 4 from
+  earlier passes (Camel Archer), so Kipchak went to button 5 instead - first
+  time button 4 wasn't available; confirmed nothing native uses Castle
+  buttons 5+ before choosing it.
+- Also checked unique **buildings** (Feitoria/Portuguese, Donjon/Burgundians,
+  Krepost/Bulgarians, Harbor/Malay) - Feitoria auto-generates resources
+  (a real economic mechanic, not just a unit), so extending it is a bigger
+  balance call than anything granted so far; flagged rather than added
+  without explicit sign-off. The other three didn't have an obviously strong
+  second-civ case.
+- Deliberately left untouched: the "original 13" civs' foundational unique
+  units (Longbowman, Huskarl, Woad Raider, Berserk, Throwing Axeman,
+  Cataphract, Janissary, Mangudai, Chu Ko Nu, Samurai, Teutonic Knight) - these
+  are the most iconic, identity-defining units in the game; diluting them is a
+  much bigger call than anything else in this file, which has consistently
+  only extended newer/secondary regional content. Consistent with the
+  boundary drawn in every earlier pass, not a new decision.

@@ -15,7 +15,10 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
     CENTURION, ELITE_CENTURION, PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
     KARAMBIT_WARRIOR, ELITE_KARAMBIT_WARRIOR, RATTAN_ARCHER, ELITE_RATTAN_ARCHER, THIRISADAI, \
-    CONDOTTIERO, KONNIK, ELITE_KONNIK, BOYAR, ELITE_BOYAR, CAMEL_ARCHER, ELITE_CAMEL_ARCHER
+    CONDOTTIERO, KONNIK, ELITE_KONNIK, BOYAR, ELITE_BOYAR, CAMEL_ARCHER, ELITE_CAMEL_ARCHER, \
+    KIPCHAK, ELITE_KIPCHAK, URUMI_SWORDSMAN, ELITE_URUMI_SWORDSMAN, RATHA, ELITE_RATHA, \
+    CHAKRAM_THROWER, ELITE_CHAKRAM_THROWER, COMPOSITE_BOWMAN, ELITE_COMPOSITE_BOWMAN, \
+    MONASPA, ELITE_MONASPA, IRON_PAGODA, ELITE_IRON_PAGODA, LIAO_DAO, ELITE_LIAO_DAO
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -345,6 +348,72 @@ def give_camel_archers_to_other_camel_civs(data: DatFile):
         set_train_button_for_civ(data, civ_id, CAMEL_ARCHER, TYPE_CASTLE_TRAIN_LOCATION, 4)
 
 
+def give_kipchak_to_tatars(data: DatFile):
+    # Kipchak (Cumans' own unique) fits the Tatars just as well - the Cuman-
+    # Kipchak confederation and the Golden Horde/Tatars are one continuous
+    # steppe people. No reciprocal grant back to Cumans here - Cumans are
+    # already the most heavily-served civ in this mod (camel line, camel
+    # scout, imperial camel, winged hussar, camel archer), so this one is
+    # one-way rather than forcing a trade that isn't needed.
+    for civ_id in civ_ids_named(data, ['Tatars']):
+        enable_unit_for_civ(data, civ_id, KIPCHAK, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, KIPCHAK, ELITE_KIPCHAK, TECH_REQUIREMENT_IMPERIAL_AGE)
+        # Tatars already have Camel Archer at Castle button 4 from this mod -
+        # button 5 is confirmed free (nothing native uses Castle buttons 5+).
+        set_train_button_for_civ(data, civ_id, KIPCHAK, TYPE_CASTLE_TRAIN_LOCATION, 5)
+
+
+def give_urumi_swordsman_to_hindustanis(data: DatFile):
+    # Urumi Swordsman is Dravidians' real primary unique unit (a flexible South
+    # Indian sword) - Hindustanis are the broader Indian-subcontinent civ in
+    # this mod that hasn't received a true-unique-unit grant yet.
+    for civ_id in civ_ids_named(data, ['Hindustanis']):
+        enable_unit_for_civ(data, civ_id, URUMI_SWORDSMAN, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, URUMI_SWORDSMAN, ELITE_URUMI_SWORDSMAN, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, URUMI_SWORDSMAN, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_ratha_and_chakram_to_each_other(data: DatFile):
+    # Ratha (Bengalis' unique war chariot) and Chakram Thrower (Gurjaras'
+    # unique disc-thrower) are both Indian-subcontinent regional neighbors
+    # already sharing Thirisadai from this mod - trade their land uniques too.
+    for civ_id in civ_ids_named(data, ['Bengalis']):
+        enable_unit_for_civ(data, civ_id, CHAKRAM_THROWER, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, CHAKRAM_THROWER, ELITE_CHAKRAM_THROWER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, CHAKRAM_THROWER, TYPE_CASTLE_TRAIN_LOCATION, 4)
+    for civ_id in civ_ids_named(data, ['Gurjaras']):
+        enable_unit_for_civ(data, civ_id, RATHA, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, RATHA, ELITE_RATHA, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, RATHA, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_composite_bowman_and_monaspa_to_each_other(data: DatFile):
+    # Composite Bowman (Armenians) and Monaspa (Georgians) are both Caucasus
+    # neighbors with deeply intertwined history - trade their uniques the same
+    # way Konnik/Boyar were traded between Bulgarians and Slavs.
+    for civ_id in civ_ids_named(data, ['Armenians']):
+        enable_unit_for_civ(data, civ_id, MONASPA, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, MONASPA, ELITE_MONASPA, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, MONASPA, TYPE_CASTLE_TRAIN_LOCATION, 4)
+    for civ_id in civ_ids_named(data, ['Georgians']):
+        enable_unit_for_civ(data, civ_id, COMPOSITE_BOWMAN, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, COMPOSITE_BOWMAN, ELITE_COMPOSITE_BOWMAN, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, COMPOSITE_BOWMAN, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
+def give_iron_pagoda_and_liao_dao_to_each_other(data: DatFile):
+    # Iron Pagoda (Jurchens) and Liao Dao (Khitans) are the two Liao/Jin-era
+    # Manchurian rival-then-successor states - same trade pattern again.
+    for civ_id in civ_ids_named(data, ['Jurchens']):
+        enable_unit_for_civ(data, civ_id, LIAO_DAO, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, LIAO_DAO, ELITE_LIAO_DAO, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, LIAO_DAO, TYPE_CASTLE_TRAIN_LOCATION, 4)
+    for civ_id in civ_ids_named(data, ['Khitans']):
+        enable_unit_for_civ(data, civ_id, IRON_PAGODA, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, IRON_PAGODA, ELITE_IRON_PAGODA, TECH_REQUIREMENT_IMPERIAL_AGE)
+        set_train_button_for_civ(data, civ_id, IRON_PAGODA, TYPE_CASTLE_TRAIN_LOCATION, 4)
+
+
 def mod(data: DatFile):
     logging.info('Applying regional heritage grants')
     give_steppe_lancers_to_civs_with_horse_archer_heritage(data)
@@ -374,3 +443,8 @@ def mod(data: DatFile):
     give_condottiero_to_sicilians(data)
     give_konnik_and_boyar_to_each_other(data)
     give_camel_archers_to_other_camel_civs(data)
+    give_kipchak_to_tatars(data)
+    give_urumi_swordsman_to_hindustanis(data)
+    give_ratha_and_chakram_to_each_other(data)
+    give_composite_bowman_and_monaspa_to_each_other(data)
+    give_iron_pagoda_and_liao_dao_to_each_other(data)
