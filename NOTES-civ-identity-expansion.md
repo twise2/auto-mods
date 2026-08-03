@@ -512,3 +512,61 @@ relying on memory of what's been added across eight passes. Confirmed:
 
 After this pass, every playable civ has at least one grant from this mod
 except the five deliberately-excluded categories above.
+
+## sync_tech_trees.py: keeping the F11 tech tree screen accurate
+
+Every grant so far has been verified to actually work in a real game (the
+`.dat` controls that), but the in-game tech tree popup (F11) is generated
+from a completely separate set of files -
+`resources/_common/dat/CivTechTrees/<CIV>.json`, one per civ - that
+`auto-mod.py` never touches. Without patching these too, every unit/building
+this mod grants would work correctly in a match but silently not show up
+when a player opens the tech tree screen to check what they can build.
+
+Verified the JSON schema against real examples (Cumans' native Steppe
+Lancer, Slavs' native Boyar) before writing anything: each node's `Node ID`
+is the same real `.dat` unit id used everywhere else in this branch,
+`Node Status: "ResearchedCompleted"` is exactly how vanilla represents a
+unit a civ can already build with no manual research click - which is
+exactly how every grant in this mod works
+(`mods.util.enable_unit_for_civ`/`upgrade_unit_for_civ`). Units live in a
+`civ_techs_units` array, buildings in `civ_techs_buildings`.
+
+`sync_tech_trees.py` (new, top-level, mirrors `auto-mod.py`'s CLI style):
+traces every grant `regional_heritage.mod()` makes (same interception
+technique as this branch's collision-checker), finds an existing civ's node
+for that same unit id anywhere in the real `CivTechTrees` directory to use
+as a copyable template, and writes a patched copy of every civ's file with
+the new nodes added (marked `ResearchedCompleted`, dropping the donor's own
+`Trigger Tech ID` since it references a specific vanilla tech id that
+wouldn't apply the same way to the new civ).
+
+One naming gotcha caught before it could cause a silent failure: most
+filenames are `civilizations.json`'s `internal_name` in caps
+(`BRITONS.json`), but Magyars' file is singular (`MAGYAR.json`, not
+`MAGYARS.json`) - confirmed by diffing the full expected list against the
+real directory rather than assuming the pattern held everywhere.
+
+Ran against the real data: patched 47 of 59 civ files cleanly. Two node ids
+(the final-tier Folwark and Settlement upgrades, both using this branch's
+usual "skip the intermediate tier" simplification) have no existing template
+anywhere to copy - a minor, known cosmetic gap: those two civs' tech tree
+will show the base Folwark/Settlement correctly, just not the very last
+upgrade icon specifically.
+
+Wired into `create-mods.sh` for the three civ-identity-expansion builds
+(`heroes_and_villains`, `regional_heritage`, `civ_identity_expansion`), and
+deployed by hand once to `localDataMod/resources/_common/dat/CivTechTrees/`
+for local testing.
+
+## Ideas not yet pursued, worth a future pass
+
+- More cosmetic reskins in the same vein as the Frankish Paladin/Crusader
+  Knight skins - the "old C++ branch" research already identified several
+  more verified-to-exist donor units (Bohemond, Kestutis, Gilbert de Clare,
+  Ataulf) for regional Knight-line skins that haven't been applied to any
+  civ yet.
+- The Chronicles civs (Achaemenids/Athenians/Spartans/Macedonians/
+  Thracians/Puru) still don't have anything beyond a hero - would need a
+  dedicated research pass into what each one's existing kit actually looks
+  like before proposing additions responsibly.

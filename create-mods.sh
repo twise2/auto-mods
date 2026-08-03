@@ -58,6 +58,13 @@ mkdir -p build/civ_identity_expansion/resources/_common/dat
 ./auto-mod.py --cache ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./build/regional_heritage/resources/_common/dat/empires2_x2_p1.dat --mods regional-heritage
 ./auto-mod.py --cache ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ./build/civ_identity_expansion/resources/_common/dat/empires2_x2_p1.dat --mods heroes-and-villains regional-heritage
 
+# regional-heritage grants units/buildings the .dat alone doesn't advertise in
+# the in-game F11 tech tree screen (that's driven by a separate set of JSON
+# files) - patch those too so the two stay in sync.
+./sync_tech_trees.py ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ~/aoe/Aoe2DE\ proton/resources/_common/dat/CivTechTrees ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/heroes_and_villains/resources/_common/dat/CivTechTrees
+./sync_tech_trees.py ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ~/aoe/Aoe2DE\ proton/resources/_common/dat/CivTechTrees ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/regional_heritage/resources/_common/dat/CivTechTrees
+./sync_tech_trees.py ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ~/aoe/Aoe2DE\ proton/resources/_common/dat/CivTechTrees ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/civ_identity_expansion/resources/_common/dat/CivTechTrees
+
 
 cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/community_games/resources/_common/dat/civilizations.json
 cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/flying_dutchman/resources/_common/dat/civilizations.json
