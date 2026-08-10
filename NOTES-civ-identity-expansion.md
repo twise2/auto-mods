@@ -559,6 +559,94 @@ Wired into `create-mods.sh` for the three civ-identity-expansion builds
 deployed by hand once to `localDataMod/resources/_common/dat/CivTechTrees/`
 for local testing.
 
+## regional-heritage v9: reversing the true-unique-unit backports
+
+v4 through v8 spent several passes handing out true single-civ Castle-trained
+unique units to other civs (Karambit Warrior to Khmer/Vietnamese, Camel Archer
+to Saracens/Turks/Cumans/Huns, Konnik/Boyar traded between Slavs/Bulgarians,
+and about twenty more like it). On reflection this was the wrong call: a civ's
+own Castle unique unit *is* its identity, not just another piece of regional
+flavor to redistribute. Camel Archer going to the Huns was the clearest example
+of why - it isn't "in line with the game," it's a headline feature of a
+specific civ (Berbers) showing up on someone else's civ.
+
+**The boundary rule, refined twice this pass:**
+
+1. A civ's own true unique unit, if it trains from the Castle, stays
+   Castle-exclusive to that civ. Never granted elsewhere by this mod, full
+   stop - this is the "core identity" slot.
+2. A civ's own true unique unit that trains from somewhere *other* than the
+   Castle (a Dock, a Barracks) was never occupying that identity slot to begin
+   with, so sharing it doesn't touch the rule above. Thirisadai (Dravidians,
+   Dock) and Condottiero (Italians, Barracks) fall in this bucket - removed in
+   the first sweep below on a too-literal reading of "castle", then restored
+   and expanded once this distinction was made explicit.
+3. Line upgrades/replacements stay fine regardless of building - Legionary
+   replacing Byzantines' Militia/Man-at-Arms/Long Swordsman line is not a new
+   unit sitting next to their existing kit, it's a re-skin of an existing line
+   into a different named/statted endpoint, the same mechanism Savar already
+   uses on Paladin for Persians natively. Centurion (a standalone Castle
+   button, not a line replacement) does not qualify and was removed alongside
+   the rest.
+
+### Removed entirely (Castle-trained true uniques, all `enable_unit_for_civ` +
+`set_train_button_for_civ(..., TYPE_CASTLE_TRAIN_LOCATION, ...)`)
+
+Centurion, Karambit Warrior, Rattan Archer, Konnik, Boyar, Camel Archer,
+Kipchak, Urumi Swordsman, Ratha, Chakram Thrower, Composite Bowman, Monaspa,
+Iron Pagoda, Liao Dao, Coustillier, War Wagon, Keshik, Genoese Crossbowman,
+Ghulam, Magyar Huszar, Organ Gun, Gbeto, Ballista Elephant, Arambai, Champi
+Warrior, Houfnice, Serjeant, Leitis, Obuch, Hussite Wagon, Shotel Warrior,
+Kamayuk, Conquistador, War Elephant. All associated collision-avoidance button
+placements (Castle buttons 4/5) went with them, since nothing needs those
+slots freed anymore.
+
+### Kept as-is
+
+Every regional unit (Steppe Lancer, Elephant Archer, Armored Elephant,
+Genitour, the camel line, Fire Lancer), every unique economic/defensive
+building (Feitoria, Donjon, Krepost, Harbor, Folwark, Fortified Church,
+Caravanserai, Mule Cart, Settlement), the Camel Scout starting-unit swap, the
+two cosmetic reskins (Frankish Paladin, Crusader Knight), and Legionary for
+Byzantines - none of these are a civ's own Castle-exclusive identity piece.
+
+### Restored and expanded (non-Castle true uniques)
+
+- **Thirisadai** (Dravidians, Dock button 15): kept Bengalis/Gurjaras, added
+  Persians (Persian Gulf trade through Siraf/Hormuz) and Saracens (Arab dhow
+  trade across the Arabian Sea to the Malabar coast) - the wider medieval
+  Indian Ocean trade network this unit's flavor is drawn from.
+- **Condottiero** (Italians, Barracks button 3): kept Sicilians, added
+  Byzantine - in the Empire's final century it leaned directly on hired
+  Italian condottieri-style captains, most famously Giovanni Giustiniani
+  Longo's Genoese mercenary company leading the defense of Constantinople in
+  1453.
+
+Verified no button collisions for any of the four newly-added civs (checked
+Persians'/Saracens' Dock button 15 and Byzantines' Barracks button 3 directly
+against the real `.dat` before adding).
+
+### Investigated and declined: Camel Archer via the Archery Range
+
+Idea floated: give Camel Archer to the other "true camel civs" (Saracens,
+Turks, Cumans, Huns) by re-routing *their* copy of the unit to train from the
+Archery Range instead of the Castle (with a slower train time), leaving
+Berbers' own Castle-trained copy completely untouched - this would technically
+satisfy rule 2 above, since the recipients' copy would no longer be a Castle
+unit for them at all. The condition attached: only worth doing if Berbers get
+some compensating unique unit in return, since Camel Archer is most of what
+makes them feel distinct.
+
+Searched the `.dat` for any unused/disabled North African or Berber-flavored
+unit (checked unit and tech names for Zenata/Maghreb/Marinid/Almoravid/
+Almohad/Moor/Tuareg/Sanhaja/Kasbah) - found nothing beyond the two vanilla
+"Berber UT" techs already active for them (Kasbah, Zealotry). No genuine
+unused asset exists to hand back. Per the condition, **not implemented** - the
+Archery Range re-route stays a live idea if a Berbers compensation surfaces
+later (a Caravanserai grant, tying into their trans-Saharan caravan trade
+identity, was the best building-flavored alternative found, though the ask
+was specifically for a unit).
+
 ## Ideas not yet pursued, worth a future pass
 
 - More cosmetic reskins in the same vein as the Frankish Paladin/Crusader
@@ -570,3 +658,6 @@ for local testing.
   Thracians/Puru) still don't have anything beyond a hero - would need a
   dedicated research pass into what each one's existing kit actually looks
   like before proposing additions responsibly.
+- More regional/line-upgrade/starting-mechanic ideas in the spirit of Camel
+  Scout, Legionary, and the Savar-style reskins - the categories confirmed as
+  the right kind of grant going forward. Not yet researched.
