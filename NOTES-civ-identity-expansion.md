@@ -708,6 +708,65 @@ before and after), and confirmed the F11 tech tree regeneration correctly
 adds zero new entries for any of it, since reskins don't change what's
 trainable, only what it looks like.
 
+## regional-heritage v11: most of v10 reversed - reskins can't reuse hero graphics
+
+v10 shipped, then got checked against `heroes_and_villains.py` and turned out
+to have a real problem: `heroes_and_villains.py` and `regional_heritage.py`
+are meant to be run together (that's what the `civ_identity_expansion` build
+target in `create-mods.sh` is) - and 8 of v10's "donor" units turned out to be
+the exact same unit id already used as that civ's own real hero. Ulrich von
+Jungingen (Teutons' own hero, id 1727) was the one that got caught first, but
+the same thing was true for Attila the Hun (Huns), Sundjata (Malians),
+Pachacuti (Incas), Le Loi (Vietnamese), Qutlugh (Tatars), Kotyan Khan (Cumans),
+and Rajendra Chola (Dravidians) - all real `HERO_FOR_CIV` entries, all reused
+as generic Knight/Cavalier/Cavalry-Archer/Champion skins in v10.
+
+Mechanically this doesn't corrupt anything - `makeHero()` clones the donor
+into a brand-new unit slot rather than mutating it in place, so the hero and
+the reskin would both render correctly. The problem is entirely thematic: a
+civ getting a real, named, Castle-trained hero *and* having its basic troops
+reskinned to look like that exact same hero is redundant and undercuts what
+makes the hero distinct. Confirmed via a script diffing every `HERO_FOR_CIV`
+unit id against every reskin donor id in `mods/ids.py` - this needs to be a
+standing rule, not a one-off fix, since most well-known named units with a
+fitting look for a given civ turn out to already be claimed as that civ's hero.
+
+**New rule, going forward: reskins only touch the Paladin line and/or a civ's
+final Militia-line upgrade (Champion), never reuse a `HERO_FOR_CIV` unit id as
+a donor, and only apply when there's an obviously-fitting unit for that
+specific civ** - not a loosely-justified regional group. This is stricter
+than v10's approach (which leaned on broad cultural groupings) and rules out
+most of what v10 added outright, since there wasn't a confident non-hero
+substitute readily available for several of them.
+
+Removed: the Teutons/Ulrich Paladin skin (merged back into the Crusader
+Knight grant - Teutons, Italians, and Sicilians all now share that one, per
+direct correction), Royal Janissary for Turks (redundant - Elite Janissary
+already has its own distinct look from regular Janissary in vanilla, no reskin
+needed), Pachacuti/Champion for Aztecs-Mayan-Incas, Le Loi/Champion for
+Chinese-Koreans-Vietnamese-Japanese, Sosso Guard/Halberdier for the West
+African/Islamic group (Halberdier is outside the new Paladin/Champion-only
+scope), Attila/Knight and Qutlugh+Kotyan Khan/Cavalry-Archer-line for the
+steppe civs, and Sumanguru+Sundjata/Knight-Cavalier and Rajendra+Araiyan/
+Knight-Cavalier for the West African and South/Southeast Asian groups (Knight/
+Cavalier tier is also outside the new scope, and half of each pair was a hero
+conflict anyway).
+
+Kept: Frankish Paladin (Franks) and the merged Crusader Knight (Teutons,
+Italians, Sicilians) - both Paladin tier, both single well-justified fits, no
+hero conflict. Imam and Bui Bi (Monk) were left as-is - explicitly confirmed
+good and not something that needs further work, even though Monk itself falls
+outside the new Paladin/Champion-only scope going forward.
+
+All 9 now-orphaned skin-donor constants (`ULRICH_SKIN`, `ATTILA_SKIN`,
+`SUMANGURU_SKIN`, `SUNDJATA_SKIN`, `RAJENDRA_SKIN`, `ARAIYAN_SKIN`,
+`ROYAL_JANISSARY_SKIN`, `PACHACUTI_SKIN`, `LE_LOI_SKIN`, `SOSSO_GUARD_SKIN`,
+`QUTLUGH_SKIN`, `KOTYAN_KHAN_SKIN`) removed from `mods/ids.py`. Re-verified
+the combined `heroes-and-villains regional-heritage` build (the same
+`civ_identity_expansion` target `create-mods.sh` already produces) after the
+cleanup - round-trips clean, tech count unchanged at 1844, and the reskin log
+lines now only show the 4 surviving grants.
+
 ## Ideas not yet pursued, worth a future pass
 
 - The Western/Eastern-European Knight-line reskins deferred in v10 above

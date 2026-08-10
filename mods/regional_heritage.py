@@ -12,14 +12,12 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     MISSIONARY, SCOUT_CAVALRY, \
     LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, SKIRMISHER, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, \
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
-    PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, ULRICH_SKIN, \
+    PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
     FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
     DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION, \
     CHURCH, CHURCH_AGE2, CHURCH_AGE3, CHURCH_AGE4, FORTIFIED_CHURCH, \
     THIRISADAI, CONDOTTIERO, \
-    KNIGHT, CAVALIER, MONK, CHAMPION, HALBERDIER, CAVALRY_ARCHER, HEAVY_CAV_ARCHER, ELITE_JANISSARY, \
-    ATTILA_SKIN, SUMANGURU_SKIN, SUNDJATA_SKIN, RAJENDRA_SKIN, ARAIYAN_SKIN, ROYAL_JANISSARY_SKIN, \
-    IMAM_SKIN, BUI_BI_SKIN, PACHACUTI_SKIN, LE_LOI_SKIN, SOSSO_GUARD_SKIN, QUTLUGH_SKIN, KOTYAN_KHAN_SKIN
+    MONK, IMAM_SKIN, BUI_BI_SKIN
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -259,32 +257,16 @@ def give_franks_a_frankish_paladin_skin(data: DatFile):
         reskin_unit_for_civ(data, civ_id, PALADIN, FRANKISH_PALADIN_SKIN)
 
 
-def give_teutons_an_ulrich_von_jungingen_skin(data: DatFile):
-    # Same idea for the Teutonic Order's own Paladins - the Teutons already have
-    # a separate, real "Teutonic Knight" unique unit (infantry), so this isn't a
-    # duplicate of that; it's their mounted knights visually matching the
-    # crusading-Order identity their whole civ is built around. Ulrich von
-    # Jungingen was the Order's own Grand Master, killed leading it at Grunwald
-    # in 1410 - a more specific fit than a generic "Crusader Knight" look.
-    for civ_id in civ_ids_named(data, ['Teutons']):
-        reskin_unit_for_civ(data, civ_id, PALADIN, ULRICH_SKIN)
-
-
-def give_crusader_knight_skin_to_italians_and_sicilians(data: DatFile):
-    # The generic "Crusader Knight" skin fits the Italian maritime republics
-    # (Genoa, Venice, Sicily's own Norman-Crusader kingdom) better than any
-    # single civ - they were the ones who actually shipped, funded, and fought
-    # alongside the Crusades in the Levant.
-    for civ_id in civ_ids_named(data, ['Italians', 'Sicilians']):
+def give_crusader_knight_skin_to_crusader_states(data: DatFile):
+    # The Teutonic Order, and the Italian maritime republics (Genoa, Venice,
+    # Sicily's own Norman-Crusader kingdom) were the civs that actually shipped,
+    # funded, fought, and in the Teutons' case were literally founded by the
+    # Crusades - the "Crusader Knight" look fits all three at least as well as
+    # any single one of them alone. Their own real unique units (Teutonic
+    # Knight for Teutons, Genoese Crossbowman for Italians/Sicilians via other
+    # grants in this file) are untouched - this is only their Paladin's look.
+    for civ_id in civ_ids_named(data, ['Teutons', 'Italians', 'Sicilians']):
         reskin_unit_for_civ(data, civ_id, PALADIN, CRUSADER_KNIGHT_SKIN)
-
-
-def give_royal_janissary_skin_to_turks(data: DatFile):
-    # Elite Janissary is already Turks' own unit - this just swaps their look
-    # to the more ornate "Royal Janissary" variant already sitting in the game
-    # files unused, the same self-flavor treatment Franks' Paladin gets above.
-    for civ_id in civ_ids_named(data, ['Turks']):
-        reskin_unit_for_civ(data, civ_id, ELITE_JANISSARY, ROYAL_JANISSARY_SKIN)
 
 
 def give_imam_skin_to_islamic_world_civs(data: DatFile):
@@ -303,70 +285,6 @@ def give_bui_bi_skin_to_east_and_south_asian_civs(data: DatFile):
     civs = ['Chinese', 'Khmer', 'Malay', 'Burmese', 'Vietnamese', 'Dravidians', 'Bengalis', 'Gurjaras']
     for civ_id in civ_ids_named(data, civs):
         reskin_unit_for_civ(data, civ_id, MONK, BUI_BI_SKIN)
-
-
-def give_pachacuti_skin_to_american_civs(data: DatFile):
-    # Pachacuti - the Inca emperor who built the empire the game already
-    # represents - reskins Champion for the three Mesoamerican/Andean civs
-    # already tied together by the Settlement building in this mod.
-    for civ_id in civ_ids_named(data, ['Aztecs', 'Mayan', 'Incas']):
-        reskin_unit_for_civ(data, civ_id, CHAMPION, PACHACUTI_SKIN)
-
-
-def give_le_loi_skin_to_east_asian_civs(data: DatFile):
-    # Le Loi (Vietnam's own Champion-tier hero clone) reskins Champion for the
-    # broader East Asian world - Chinese, Koreans, and Japanese share enough of
-    # the same late-game infantry aesthetic for the look to fit.
-    for civ_id in civ_ids_named(data, ['Chinese', 'Koreans', 'Vietnamese', 'Japanese']):
-        reskin_unit_for_civ(data, civ_id, CHAMPION, LE_LOI_SKIN)
-
-
-def give_sosso_guard_skin_to_west_african_islamic_civs(data: DatFile):
-    # The Sosso Empire (defeated by Sundjata's Mali in the 13th century) sits
-    # in the same West African/Islamic world as Berbers, Saracens, Malians, and
-    # Ethiopians - reskins their Halberdier line.
-    civs = ['Berbers', 'Saracens', 'Malians', 'Ethiopians']
-    for civ_id in civ_ids_named(data, civs):
-        reskin_unit_for_civ(data, civ_id, HALBERDIER, SOSSO_GUARD_SKIN)
-
-
-def give_attila_skin_to_steppe_civs(data: DatFile):
-    # Attila the Hun reskins Knight for the steppe-cavalry civs this mod
-    # already treats as one connected world (camel line, mule cart, winged
-    # hussar all cross this same civ group).
-    civs = ['Huns', 'Mongols', 'Turks', 'Tatars', 'Cumans']
-    for civ_id in civ_ids_named(data, civs):
-        reskin_unit_for_civ(data, civ_id, KNIGHT, ATTILA_SKIN)
-
-
-def give_qutlugh_and_kotyan_khan_skins_to_steppe_civs(data: DatFile):
-    # Qutlugh and Kotyan Khan (a real historical Cuman khan) reskin the Cavalry
-    # Archer line for the same steppe civ group above - a regular rider growing
-    # into a named khan at the Heavy Cavalry Archer tier.
-    civs = ['Mongols', 'Huns', 'Tatars', 'Cumans']
-    for civ_id in civ_ids_named(data, civs):
-        reskin_unit_for_civ(data, civ_id, CAVALRY_ARCHER, QUTLUGH_SKIN)
-        reskin_unit_for_civ(data, civ_id, HEAVY_CAV_ARCHER, KOTYAN_KHAN_SKIN)
-
-
-def give_sumanguru_and_sundjata_skins_to_west_african_islamic_civs(data: DatFile):
-    # Sumanguru Kante and Sundjata Keita - the defeated ruler and the founder
-    # of the Mali Empire that succeeded him - reskin Knight/Cavalier for the
-    # same West African/Islamic civ group as the Sosso Guard grant above.
-    civs = ['Malians', 'Berbers', 'Saracens', 'Ethiopians']
-    for civ_id in civ_ids_named(data, civs):
-        reskin_unit_for_civ(data, civ_id, KNIGHT, SUMANGURU_SKIN)
-        reskin_unit_for_civ(data, civ_id, CAVALIER, SUNDJATA_SKIN)
-
-
-def give_rajendra_and_araiyan_skins_to_south_and_southeast_asian_civs(data: DatFile):
-    # Rajendra Chola and Araiyan Rajarajan - Chola Empire figures from South
-    # India - reskin Knight/Cavalier for the Indian-subcontinent/mainland
-    # Southeast Asian civs this mod already ties together via Elephant Archer.
-    civs = ['Hindustanis', 'Dravidians', 'Bengalis', 'Gurjaras', 'Malay', 'Burmese', 'Khmer']
-    for civ_id in civ_ids_named(data, civs):
-        reskin_unit_for_civ(data, civ_id, KNIGHT, RAJENDRA_SKIN)
-        reskin_unit_for_civ(data, civ_id, CAVALIER, ARAIYAN_SKIN)
 
 
 def give_feitoria_to_spanish(data: DatFile):
@@ -478,18 +396,9 @@ def mod(data: DatFile):
     give_fire_lancers_to_japanese(data)
     give_camel_scout_start_to_true_camel_civs(data)
     give_franks_a_frankish_paladin_skin(data)
-    give_teutons_an_ulrich_von_jungingen_skin(data)
-    give_crusader_knight_skin_to_italians_and_sicilians(data)
-    give_royal_janissary_skin_to_turks(data)
+    give_crusader_knight_skin_to_crusader_states(data)
     give_imam_skin_to_islamic_world_civs(data)
     give_bui_bi_skin_to_east_and_south_asian_civs(data)
-    give_pachacuti_skin_to_american_civs(data)
-    give_le_loi_skin_to_east_asian_civs(data)
-    give_sosso_guard_skin_to_west_african_islamic_civs(data)
-    give_attila_skin_to_steppe_civs(data)
-    give_qutlugh_and_kotyan_khan_skins_to_steppe_civs(data)
-    give_sumanguru_and_sundjata_skins_to_west_african_islamic_civs(data)
-    give_rajendra_and_araiyan_skins_to_south_and_southeast_asian_civs(data)
     give_thirisadai_to_other_indian_ocean_civs(data)
     give_condottiero_to_other_mercenary_civs(data)
     give_feitoria_to_spanish(data)

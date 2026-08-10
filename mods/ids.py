@@ -445,23 +445,14 @@ CHAMPI_WARRIOR = 2552
 GHULAM = 1747
 
 # Graphic donors for cosmetic reskins (reskin_unit_for_civ) - not trainable
-# units in their own right for this purpose, just a source of visuals.
+# units in their own right for this purpose, just a source of visuals. Never a
+# unit id also used as a hero donor in heroes_and_villains.py - the two mods
+# are meant to run together, and reusing a hero's own look elsewhere would
+# undercut what makes that hero distinct.
 FRANKISH_PALADIN_SKIN = 632
 CRUSADER_KNIGHT_SKIN = 1723
-ULRICH_SKIN = 1727
-ATTILA_SKIN = 777
-SUMANGURU_SKIN = 1080
-SUNDJATA_SKIN = 1035
-RAJENDRA_SKIN = 1764
-ARAIYAN_SKIN = 1766
-ROYAL_JANISSARY_SKIN = 52
 IMAM_SKIN = 842
 BUI_BI_SKIN = 1183
-PACHACUTI_SKIN = 1074
-LE_LOI_SKIN = 1178
-SOSSO_GUARD_SKIN = 1574
-QUTLUGH_SKIN = 1769
-KOTYAN_KHAN_SKIN = 1267
 
 FARMER_F = 214
 FARMER_M = 259
