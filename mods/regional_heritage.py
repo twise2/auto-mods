@@ -1,22 +1,26 @@
+import dataclasses
 import logging
 
 from genieutils.datfile import DatFile
 from genieutils.effect import EffectCommand
+from genieutils.unit import AttackOrArmor
 
 from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ
 from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     TYPE_ENABLE_DISABLE_UNIT, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
-    SIEGE_ELEPHANT, GENITOUR, ELITE_GENITOUR, CAMEL_RIDER, HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, \
+    SIEGE_ELEPHANT, GENITOUR, ELITE_GENITOUR, CAMEL_RIDER, HEAVY_CAMEL_RIDER, \
     CAMEL_SCOUT, CARAVANSERAI, MULE_CART, LEGIONARY, MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN, WARRIOR_PRIEST, \
     MISSIONARY, SCOUT_CAVALRY, \
-    LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, SKIRMISHER, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, \
+    LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, \
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
     PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
     FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
     DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION, \
     CHURCH, CHURCH_AGE2, CHURCH_AGE3, CHURCH_AGE4, FORTIFIED_CHURCH, \
-    THIRISADAI, CONDOTTIERO, SLINGER
+    THIRISADAI, CONDOTTIERO, SLINGER, \
+    SAMURAI, ELITE_SAMURAI, FIRE_ARCHER, ELITE_FIRE_ARCHER, ATTACK_CLASS_UNIQUE_UNIT, \
+    LONGBOAT, ELITE_LONGBOAT, CLASS_TRANSPORT_BOAT, TRANSPORT_SHIP
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -94,22 +98,13 @@ def give_camel_line_to_steppe_civs_without_camels(data: DatFile):
     # already have full Paladin access (one of only two "fully upgraded" Paladin
     # civs), so for them this is historical flavor only - steppe peoples had
     # plausible camel contact, but it isn't fixing a mechanical gap the way it is
-    # for Cumans.
+    # for Cumans. Stops at Heavy Camel Rider - no Imperial tier, which stays a
+    # true Berber/Saracen/Turk-only endgame option (camels already carry a big
+    # bonus vs cavalry, and stacking that on more civs risks real balance harm).
     # https://forums.ageofempires.com/t/give-cumans-heavy-camel-riders-and-remove-paladins-and-maybe-chevaliers/196455
     for civ_id in civ_ids_named(data, ['Cumans', 'Huns']):
         enable_unit_for_civ(data, civ_id, CAMEL_RIDER, TECH_CASTLE_BUILT)
         upgrade_unit_for_civ(data, civ_id, CAMEL_RIDER, HEAVY_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
-        # Complete the line to the same finishing tier Berbers/Saracens/Turks get
-        # below, rather than stopping one tier short of a full late-game answer.
-        upgrade_unit_for_civ(data, civ_id, HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
-
-
-def give_imperial_camel_riders_to_other_camel_civs(data: DatFile):
-    # https://forums.ageofempires.com/t/imperial-camels-for-saracens-turks-and-berbers/245239
-    civs = ['Berbers', 'Saracens', 'Turks']
-    for civ_id in civ_ids_named(data, civs):
-        upgrade_unit_for_civ(data, civ_id, CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
-        upgrade_unit_for_civ(data, civ_id, HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
 
 
 def give_caravanserai_to_silk_road_civs(data: DatFile):
@@ -162,19 +157,6 @@ def give_winged_hussars_to_other_eastern_european_civs(data: DatFile):
     for civ_id in civ_ids_named(data, ['Magyars', 'Cumans']):
         for base_unit in (SCOUT_CAVALRY, LIGHT_CAVALRY, HUSSAR):
             upgrade_unit_for_civ(data, civ_id, base_unit, WINGED_HUSSAR, TECH_REQUIREMENT_IMPERIAL_AGE)
-
-
-def give_imperial_skirmisher_to_civs_with_great_skirmishers(data: DatFile):
-    # https://www.reddit.com/r/aoe2/comments/17h70lv/imperial_skirmisher_would_be_nice_if_it_wasnt/
-    # Byzantines (cheaper Skirmisher+Pikeman), Lithuanians (faster-training
-    # Skirmisher+Pikeman), and Dravidians (faster Skirmisher/Elephant Archer
-    # attack) all have a real, dedicated civ bonus built around Skirmishers
-    # specifically - the same "this civ's whole identity already points here"
-    # signal Malians/Romans were picked on originally.
-    civs = ['Malians', 'Romans', 'Byzantine', 'Lithuanians', 'Dravidians']
-    for civ_id in civ_ids_named(data, civs):
-        upgrade_unit_for_civ(data, civ_id, SKIRMISHER, IMPERIAL_SKIRMISHER, TECH_REQUIREMENT_IMPERIAL_AGE)
-        upgrade_unit_for_civ(data, civ_id, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, TECH_REQUIREMENT_IMPERIAL_AGE)
 
 
 def give_slingers_to_other_american_civs(data: DatFile):
@@ -248,6 +230,61 @@ def give_fire_lancers_to_japanese(data: DatFile):
     for civ_id in civ_ids_named(data, ['Japanese']):
         enable_unit_for_civ(data, civ_id, FIRE_LANCER, TECH_CASTLE_BUILT)
         upgrade_unit_for_civ(data, civ_id, FIRE_LANCER, ELITE_FIRE_LANCER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def _configure_samurai_ranged_form(base_unit, ranged_unit):
+    # Port of the old regionalAdditions branch's SwapSamuraiUnitToRanged
+    # (patches/regional_additions.cpp, commit 99abeaf) - the `nothing`/`trait`
+    # fields are the same DE-native "activate to swap unit" mechanic
+    # Achaemenids' own real Immortal <-> Immortal Ranged uses, just applied to
+    # Samurai/Elite Samurai instead of inventing a new mechanic.
+    #
+    # Deliberately weak everywhere except the anti-unique-unit niche Samurai
+    # already has (real class-30 bonus, currently amount=0 on the base unit) -
+    # this is a situational tool against enemy unique units, not a second
+    # full-time attack mode.
+    base_unit.nothing = ranged_unit.id
+    base_unit.trait = base_unit.trait | 8
+
+    ranged_unit.nothing = base_unit.id
+    ranged_unit.trait = ranged_unit.trait | 8
+    ranged_unit.icon_id = base_unit.icon_id
+    ranged_unit.creatable.hero_glow_graphic = -1
+    ranged_unit.creatable.hero_mode = 0
+    ranged_unit.hit_points = base_unit.hit_points
+    ranged_unit.type_50.armours = base_unit.type_50.armours
+    ranged_unit.type_50.base_armor = base_unit.type_50.base_armor
+    ranged_unit.type_50.displayed_melee_armour = base_unit.type_50.displayed_melee_armour
+    ranged_unit.creatable.displayed_pierce_armour = base_unit.creatable.displayed_pierce_armour
+    ranged_unit.type_50.displayed_attack = 1
+    # A base Archer has range 4 - one less than that, on top of the gutted
+    # base attack below, keeps this a worse choice than actually training
+    # Archers whenever there's no enemy unique unit around to punish.
+    ranged_unit.type_50.displayed_range = 3
+    ranged_unit.type_50.max_range = 3.0
+    ranged_unit.type_50.reload_time = 5.0
+    ranged_unit.type_50.displayed_reload_time = 5.0
+    ranged_unit.type_50.attacks = [
+        AttackOrArmor(class_=3, amount=1),
+        AttackOrArmor(class_=ATTACK_CLASS_UNIQUE_UNIT, amount=30),
+    ]
+    ranged_unit.speed = 0.8
+
+
+def give_samurai_a_ranged_mode_swap(data: DatFile):
+    # Samurai's whole civ identity is already "extra damage vs enemy unique
+    # units" - letting them swap to a weak ranged stance that ONLY helps in
+    # that same niche (a poor attacker against everything else) extends that
+    # identity instead of adding an unrelated new one.
+    # Fire Archer/Elite Fire Archer are used purely as graphic donors here
+    # (their own real stats are irrelevant, this fully overwrites them) -
+    # visually distinct from standard Arbalester, unlike Archer of the
+    # Eyes/Luu Nhan Chu, which both turned out to share Arbalester's exact
+    # graphic.
+    for civ_id in civ_ids_named(data, ['Japanese']):
+        civ = data.civs[civ_id]
+        _configure_samurai_ranged_form(civ.units[SAMURAI], civ.units[FIRE_ARCHER])
+        _configure_samurai_ranged_form(civ.units[ELITE_SAMURAI], civ.units[ELITE_FIRE_ARCHER])
 
 
 def give_camel_scout_start_to_true_camel_civs(data: DatFile):
@@ -333,6 +370,25 @@ def give_harbor_to_vietnamese(data: DatFile):
             upgrade_unit_for_civ(data, civ_id, dock_tier, HARBOR, TECH_REQUIREMENT_IMPERIAL_AGE)
 
 
+def give_longboats_the_ability_to_transport_units(data: DatFile):
+    # Longboats were real Viking troop transports historically, not just
+    # warships - the game's own Transport Ship already has this exact
+    # capability (garrison_capacity, TRANSPORT_BOAT class, an unload task), so
+    # this borrows that real, working task definition rather than guessing at
+    # one. Ported from the old regionalAdditions branch's makeLongboatsTransports
+    # (patches/regional_additions.cpp) - applies to every civ's own copy since
+    # Longboat is a real trainable unit for Vikings only anyway, matching the
+    # old branch's own civ-agnostic loop rather than hardcoding a civ list.
+    unload_task = next(t for t in data.civs[0].units[TRANSPORT_SHIP].bird.tasks if t.action_type == 109)
+    for civ in data.civs:
+        for unit_id in (LONGBOAT, ELITE_LONGBOAT):
+            unit = civ.units[unit_id]
+            unit.garrison_capacity = 5
+            unit.class_ = CLASS_TRANSPORT_BOAT
+            unit.trait = 3
+            unit.bird.tasks.append(dataclasses.replace(unload_task, id=len(unit.bird.tasks)))
+
+
 def give_fortified_church_to_teutons_and_spanish(data: DatFile):
     # Fortified Church (a Church that can garrison and fight back) is already
     # shared natively by Armenians and Georgians - a genuinely regional Caucasus
@@ -382,17 +438,16 @@ def mod(data: DatFile):
     give_armored_elephants_to_other_elephant_civs(data)
     give_genitours_to_civs_with_light_cavalry_heritage(data)
     give_camel_line_to_steppe_civs_without_camels(data)
-    give_imperial_camel_riders_to_other_camel_civs(data)
     give_caravanserai_to_silk_road_civs(data)
     give_mule_carts_to_nomadic_civs(data)
     give_legionaries_to_byzantines(data)
     give_winged_hussars_to_other_eastern_european_civs(data)
-    give_imperial_skirmisher_to_civs_with_great_skirmishers(data)
     give_slingers_to_other_american_civs(data)
     give_missionaries_to_civs_with_missionary_heritage(data)
     give_warrior_priests_to_civs_with_shamanic_heritage(data)
     give_settlements_to_mesoamerican_and_andean_civs(data)
     give_fire_lancers_to_japanese(data)
+    give_samurai_a_ranged_mode_swap(data)
     give_camel_scout_start_to_true_camel_civs(data)
     give_franks_a_frankish_paladin_skin(data)
     give_crusader_knight_skin_to_crusader_states(data)
@@ -403,4 +458,5 @@ def mod(data: DatFile):
     give_donjon_to_italians(data)
     give_krepost_to_slavs(data)
     give_harbor_to_vietnamese(data)
+    give_longboats_the_ability_to_transport_units(data)
     give_fortified_church_to_teutons_and_spanish(data)

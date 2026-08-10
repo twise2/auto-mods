@@ -811,3 +811,68 @@ Skirmisher/Elephant Archer attack), the same "already core to this civ's
 identity" signal the original two picks were made on. Uses plain
 `upgrade_unit_for_civ` on the existing Skirmisher slot, same as the original
 grant - no button move needed, so no new collision risk for any of the three.
+
+## regional-heritage v13: Imperial Skirmisher/Camel Rider reverted, Samurai ranged mode, Longboat transport
+
+**Balance walkback.** Both Imperial Skirmisher (Malians/Romans/Byzantines/
+Lithuanians/Dravidians) and Imperial Camel Rider (Cumans/Huns via the camel
+line, Berbers/Saracens/Turks) are removed entirely - flagged as a real
+overpowering risk on some of these civs. `give_camel_line_to_steppe_civs_without_camels`
+now stops at Heavy Camel Rider for Cumans/Huns (matching their original,
+pre-v-whatever scope); `give_imperial_camel_riders_to_other_camel_civs` and
+the Imperial-Skirmisher grant are both deleted, along with their now-unused
+`IMPERIAL_CAMEL_RIDER`/`SKIRMISHER`/`ELITE_SKIRMISHER`/`IMPERIAL_SKIRMISHER`
+imports.
+
+**Turks/Huns losing their Knight line - investigated, not implemented.**
+Asked to check whether Steppe-Lancer civs should also lose native Knight/
+Cavalier/Paladin access for flavor (a civ shouldn't really have both a
+Western knight line and a steppe-lancer identity). Turks and Huns were
+confirmed as the strongest fits (Persians/Lithuanians/Slavs/Bulgarians all
+have their own real heavy-cavalry unique - Savar/Leitis/Boyar/Konnik - that
+already covers this niche, so they keep Knight). Implementation turned out to
+be a real dead end: unlike every grant this mod makes (which only ever ADDS
+access via a self-triggering per-civ tech, the one proven mechanism this repo
+uses), removing a civ's *native* Knight-line access has no clear write path.
+Empirically confirmed Franks (has Knight) and Indians (confirmed lacks it)
+are byte-identical in the `.dat` for `unit.enabled`, `train_locations`, and
+every tech/effect referencing Knight/Cavalier/Paladin (only two `civ=-1`
+shared techs exist for the whole line, no per-civ duplicates anywhere,
+unlike Steppe Lancer/Slinger). Also checked the `.dat`'s own DE-era
+`tech_tree`/`UnitConnection` structure and `civilizations.json` - both are
+civ-agnostic for this data too. Conclusion: this is very likely hardcoded in
+the game executable for original-game civs, not stored in any file this mod
+can edit. Left unimplemented rather than guessing at something unverifiable.
+
+**Samurai ranged-mode swap** (`give_samurai_a_ranged_mode_swap`, new
+`_configure_samurai_ranged_form` helper) - ported from the old, never-merged
+`regionalAdditions` branch's `SwapSamuraiUnitToRanged`
+(`patches/regional_additions.cpp`, commit 99abeaf on `origin/regionalAdditions`).
+Samurai/Elite Samurai can activate-swap into a ranged form via the same
+`unit.nothing`/`unit.trait` DE-native mechanic Achaemenids' real Immortal
+already uses to swap between melee/ranged - not a new mechanic, just applied
+somewhere else. Deliberately gutted everywhere except Samurai's own real
+anti-unique-unit niche (a genuine `class=30` attack slot already on the base
+unit, just at `amount=0`): base attack 1, unique-unit bonus 30, range 3 (one
+below a plain Archer's 4) - worse than an Archer in every case except against
+an enemy unique unit, so there's no reason to prefer it as a general-purpose
+attack stance. HP/armor copied straight from the melee form so defense
+doesn't change, only the weapon.
+
+Donor units went through two rounds. The old branch's own picks (Archer of
+the Eyes, Luu Nhan Chu) both turned out to render as plain Arbalester -
+confirmed by checking `standing_graphic` directly, both share graphic id 2584
+with Arbalester itself. Zhou Yu was tried as a distinct-graphic replacement,
+then swapped again per direct instruction to Wu's real Fire Archer/Elite Fire
+Archer (ids 1968/1970) specifically - a deliberate reuse of a Chronicles
+civ's real unit look, not a poaching concern given how narrow the overlap is
+in practice.
+
+**Longboat transport** (`give_longboats_the_ability_to_transport_units`) -
+ported from the same old branch's `makeLongboatsTransports`. Longboat/Elite
+Longboat get `garrison_capacity=5`, `class=CLASS_TRANSPORT_BOAT`, `trait=3`,
+and a real "unload" task (`action_type=109`) cloned directly from Transport
+Ship's own task list via `dataclasses.replace` rather than hand-building a
+`Task` object with guessed field values. Applied to every civ's own copy
+(matching the old branch's civ-agnostic loop) since Longboat is only ever a
+real trainable unit for Vikings regardless.

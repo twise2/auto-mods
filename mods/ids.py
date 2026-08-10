@@ -444,6 +444,17 @@ HOUFNICE = 1709
 CHAMPI_WARRIOR = 2552
 GHULAM = 1747
 
+# Donor units for Samurai/Elite Samurai's ranged-mode swap ability - Wu's real
+# Fire Archer/Elite Fire Archer, used purely for their graphic (not shared
+# with Arbalester, unlike Archer of the Eyes/Luu Nhan Chu).
+FIRE_ARCHER = 1968
+ELITE_FIRE_ARCHER = 1970
+
+# The real armor/attack class AoE2:DE uses for "bonus damage vs unique units
+# only" - already present (amount=0, a template slot) on Samurai's own base
+# kit, confirmed by inspecting the real unit's attacks array.
+ATTACK_CLASS_UNIQUE_UNIT = 30
+
 # Graphic donors for cosmetic reskins (reskin_unit_for_civ) - not trainable
 # units in their own right for this purpose, just a source of visuals. Never a
 # unit id also used as a hero donor in heroes_and_villains.py - the two mods
