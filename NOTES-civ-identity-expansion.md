@@ -647,13 +647,75 @@ later (a Caravanserai grant, tying into their trans-Saharan caravan trade
 identity, was the best building-flavored alternative found, though the ask
 was specifically for a unit).
 
+## regional-heritage v10: a large batch of cosmetic reskins
+
+Went back to the old C++ `regionalAdditions` branch's `giveUnitsRegionalSkins`
+function (`patches/regional_additions.cpp` on `origin/regionalAdditions`,
+never merged) - it has dozens of Knight/Cavalier/Paladin/Cavalry Archer/
+Champion/Monk/Halberdier reskins using real named campaign-hero unit clones as
+donors, grouped by cultural region. Exactly the category confirmed as good
+this pass: purely visual, no balance impact, same mechanism as the existing
+Frankish Paladin/Crusader Knight skins.
+
+The old file wasn't used as-is - it has real internal conflicts (the same civ
+appearing in two different groups targeting the same unit line, e.g. Cumans
+in both a "steppe" Knight group and an "Eastern Europe" Knight group, which
+in the original C++ just meant whichever call ran last silently won). Every
+donor unit id was re-verified to exist in the current `.dat` and to share the
+same `class` as the line it's replacing (e.g. a `class=12` donor for
+Knight/Cavalier/Paladin, `class=36` for Cavalry Archer/Heavy Cavalry Archer)
+before use - a mismatch there wouldn't crash anything, but rules out picking a
+donor that wasn't actually built to look right on that body type. Conflicts
+were resolved by keeping each civ's Knight-line skin in exactly one group,
+choosing the more historically specific fit. The Western/Eastern-European
+Knight-line groups (Bohemond, Gilbert de Clare, Kestutis, Algirdas, Jogaila)
+were left out entirely this pass - their historical fit is murkier without
+being able to see the actual rendered look, so they're deferred rather than
+guessed at.
+
+- **Refined**: Teutons' Paladin skin swaps from the generic Crusader Knight to
+  Ulrich von Jungingen (id 1727) - the Teutonic Order's own Grand Master,
+  killed leading it at Grunwald in 1410. Crusader Knight (id 1723) moves to
+  Italians and Sicilians instead, who fit the generic "Crusader" look better
+  (Genoa/Venice/Sicily's own Norman-Crusader kingdom actually shipped and
+  fought the Crusades).
+- **Royal Janissary** (id 52) for Turks' own Elite Janissary - a self-flavor
+  swap, same pattern as Franks' Paladin.
+- **Imam** (id 842) for Monk - Persians, Saracens, Hindustanis, Ethiopians,
+  Malians, Berbers. **Bui Bi** (id 1183) for Monk - Chinese, Khmer, Malay,
+  Burmese, Vietnamese, Dravidians, Bengalis, Gurjaras. Both skins already
+  exist in the game's own assets, built for exactly these regions and never
+  wired up outside scenarios - a real forum thread confirms this
+  (https://forums.ageofempires.com/t/regional-skins-are-already-in-the-game-its-just-a-matter-of-allowing-through-non-data-mod-for-asian-african-civs/85404).
+- **Pachacuti** (id 1074) for Champion - Aztecs, Mayans, Incas. **Le Loi**
+  (id 1178) for Champion - Chinese, Koreans, Vietnamese, Japanese.
+- **Sosso Guard** (id 1574) for Halberdier - Berbers, Saracens, Malians,
+  Ethiopians (West African/Islamic world).
+- **Attila the Hun** (id 777) for Knight - Huns, Mongols, Turks, Tatars,
+  Cumans (the steppe-cavalry civ group this mod already treats as one world).
+- **Qutlugh** (id 1769)/**Kotyan Khan** (id 1267) for Cavalry Archer/Heavy
+  Cavalry Archer - Mongols, Huns, Tatars, Cumans.
+- **Sumanguru** (id 1080)/**Sundjata** (id 1035) for Knight/Cavalier -
+  Malians, Berbers, Saracens, Ethiopians. The defeated ruler and the founder
+  of the Mali Empire that succeeded him, in that tier order.
+- **Rajendra** (id 1764)/**Araiyan** (id 1766) for Knight/Cavalier -
+  Hindustanis, Dravidians, Bengalis, Gurjaras, Malay, Burmese, Khmer. Chola
+  Empire figures for the Indian-subcontinent/mainland-Southeast-Asian group.
+
+Verified no new techs get added by this batch (`reskin_unit_for_civ` is a
+direct field mutation, not a tech-based grant - tech count stayed at 1844
+before and after), and confirmed the F11 tech tree regeneration correctly
+adds zero new entries for any of it, since reskins don't change what's
+trainable, only what it looks like.
+
 ## Ideas not yet pursued, worth a future pass
 
-- More cosmetic reskins in the same vein as the Frankish Paladin/Crusader
-  Knight skins - the "old C++ branch" research already identified several
-  more verified-to-exist donor units (Bohemond, Kestutis, Gilbert de Clare,
-  Ataulf) for regional Knight-line skins that haven't been applied to any
-  civ yet.
+- The Western/Eastern-European Knight-line reskins deferred in v10 above
+  (Bohemond, Kestutis, Gilbert de Clare, Algirdas, Jogaila, Ataulf) - donor
+  ids are verified to exist and share the right `class`, but the group
+  boundaries need either an in-game look or more research before committing,
+  since "Bohemond" (a Norman Crusader lord) reads oddly for an "Eastern
+  Europe" group the way the old C++ branch had it.
 - The Chronicles civs (Achaemenids/Athenians/Spartans/Macedonians/
   Thracians/Puru) still don't have anything beyond a hero - would need a
   dedicated research pass into what each one's existing kit actually looks
