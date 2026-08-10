@@ -782,3 +782,32 @@ lines now only show the 4 surviving grants.
 - More regional/line-upgrade/starting-mechanic ideas in the spirit of Camel
   Scout, Legionary, and the Savar-style reskins - the categories confirmed as
   the right kind of grant going forward. Not yet researched.
+
+## regional-heritage v12: Monk skins dropped, Slinger and more Imperial Skirmisher civs added
+
+Imam and Bui Bi (the two Monk reskins from v10) are dropped - regional Monk
+variety is already handled elsewhere in the base game, so this was redundant
+work rather than a real gap. `IMAM_SKIN`/`BUI_BI_SKIN` removed from
+`mods/ids.py`.
+
+**Slinger** is a `civ=-1` "make available" unit, same pattern as Steppe
+Lancer/Elephant Archer/Genitour - confirmed via the real `CivTechTrees`
+directory it's currently native to exactly four civs: Incas, Mapuche, Muisca,
+Tupi (the Andean/Amazonian world). Extended to **Aztecs and Mayans** - the
+other two pre-Columbian American civs, already tied to Incas via Settlement
+and Warrior Priest in this mod, and slings are a documented part of
+Mesoamerican warfare too. Verified no button collision at Archery Range
+button 4 (Slinger's native slot) for either civ before adding - it's a
+mutually-exclusive regional-alternative slot (Hand Cannoneer/Grenadier/
+Slinger/Rhodian Slinger all share it, one per civ), and neither Aztecs nor
+Mayans had anything there yet.
+
+**Imperial Skirmisher** (also `civ=-1`, confirmed natively Vietnamese-only)
+already had Malians/Romans from an earlier pass. Extended to **Byzantines,
+Lithuanians, and Dravidians** - all three have a real, dedicated vanilla civ
+bonus built specifically around Skirmishers (Byzantines: cheaper Skirmisher+
+Pikeman; Lithuanians: faster-training Skirmisher+Pikeman; Dravidians: faster
+Skirmisher/Elephant Archer attack), the same "already core to this civ's
+identity" signal the original two picks were made on. Uses plain
+`upgrade_unit_for_civ` on the existing Skirmisher slot, same as the original
+grant - no button move needed, so no new collision risk for any of the three.

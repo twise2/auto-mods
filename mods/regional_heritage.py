@@ -16,8 +16,7 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
     DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION, \
     CHURCH, CHURCH_AGE2, CHURCH_AGE3, CHURCH_AGE4, FORTIFIED_CHURCH, \
-    THIRISADAI, CONDOTTIERO, \
-    MONK, IMAM_SKIN, BUI_BI_SKIN
+    THIRISADAI, CONDOTTIERO, SLINGER
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -167,10 +166,27 @@ def give_winged_hussars_to_other_eastern_european_civs(data: DatFile):
 
 def give_imperial_skirmisher_to_civs_with_great_skirmishers(data: DatFile):
     # https://www.reddit.com/r/aoe2/comments/17h70lv/imperial_skirmisher_would_be_nice_if_it_wasnt/
-    civs = ['Malians', 'Romans']
+    # Byzantines (cheaper Skirmisher+Pikeman), Lithuanians (faster-training
+    # Skirmisher+Pikeman), and Dravidians (faster Skirmisher/Elephant Archer
+    # attack) all have a real, dedicated civ bonus built around Skirmishers
+    # specifically - the same "this civ's whole identity already points here"
+    # signal Malians/Romans were picked on originally.
+    civs = ['Malians', 'Romans', 'Byzantine', 'Lithuanians', 'Dravidians']
     for civ_id in civ_ids_named(data, civs):
         upgrade_unit_for_civ(data, civ_id, SKIRMISHER, IMPERIAL_SKIRMISHER, TECH_REQUIREMENT_IMPERIAL_AGE)
         upgrade_unit_for_civ(data, civ_id, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_slingers_to_other_american_civs(data: DatFile):
+    # Slinger is a `civ=-1` "make available" unit just like Steppe Lancer/
+    # Elephant Archer/Genitour - currently native to Incas, Mapuche, Muisca,
+    # and Tupi (confirmed via the real CivTechTrees), the four Andean/Amazonian
+    # civs. Aztecs and Mayans are the same pre-Columbian American world (already
+    # tied to Incas via Settlement/Warrior Priest in this mod) and share the
+    # same documented Mesoamerican sling-warfare tradition.
+    civs = ['Aztecs', 'Mayan']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, SLINGER, TECH_CASTLE_BUILT)
 
 
 def give_missionaries_to_civs_with_missionary_heritage(data: DatFile):
@@ -267,24 +283,6 @@ def give_crusader_knight_skin_to_crusader_states(data: DatFile):
     # grants in this file) are untouched - this is only their Paladin's look.
     for civ_id in civ_ids_named(data, ['Teutons', 'Italians', 'Sicilians']):
         reskin_unit_for_civ(data, civ_id, PALADIN, CRUSADER_KNIGHT_SKIN)
-
-
-def give_imam_skin_to_islamic_world_civs(data: DatFile):
-    # The Imam reskin for Monk already exists in the game's own assets - built
-    # by the developers for the Islamic world but never wired up to any civ's
-    # actual kit outside scenarios.
-    # https://forums.ageofempires.com/t/regional-skins-are-already-in-the-game-its-just-a-matter-of-allowing-through-non-data-mod-for-asian-african-civs/85404
-    civs = ['Persians', 'Saracens', 'Hindustanis', 'Ethiopians', 'Malians', 'Berbers']
-    for civ_id in civ_ids_named(data, civs):
-        reskin_unit_for_civ(data, civ_id, MONK, IMAM_SKIN)
-
-
-def give_bui_bi_skin_to_east_and_south_asian_civs(data: DatFile):
-    # Same idea, same forum thread - the "Bui Bi" Monk look was built for
-    # East/South/Southeast Asian civs and never wired up outside scenarios.
-    civs = ['Chinese', 'Khmer', 'Malay', 'Burmese', 'Vietnamese', 'Dravidians', 'Bengalis', 'Gurjaras']
-    for civ_id in civ_ids_named(data, civs):
-        reskin_unit_for_civ(data, civ_id, MONK, BUI_BI_SKIN)
 
 
 def give_feitoria_to_spanish(data: DatFile):
@@ -390,6 +388,7 @@ def mod(data: DatFile):
     give_legionaries_to_byzantines(data)
     give_winged_hussars_to_other_eastern_european_civs(data)
     give_imperial_skirmisher_to_civs_with_great_skirmishers(data)
+    give_slingers_to_other_american_civs(data)
     give_missionaries_to_civs_with_missionary_heritage(data)
     give_warrior_priests_to_civs_with_shamanic_heritage(data)
     give_settlements_to_mesoamerican_and_andean_civs(data)
@@ -397,8 +396,6 @@ def mod(data: DatFile):
     give_camel_scout_start_to_true_camel_civs(data)
     give_franks_a_frankish_paladin_skin(data)
     give_crusader_knight_skin_to_crusader_states(data)
-    give_imam_skin_to_islamic_world_civs(data)
-    give_bui_bi_skin_to_east_and_south_asian_civs(data)
     give_thirisadai_to_other_indian_ocean_civs(data)
     give_condottiero_to_other_mercenary_civs(data)
     give_feitoria_to_spanish(data)
