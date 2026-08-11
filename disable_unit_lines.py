@@ -4,10 +4,15 @@ per-civ unit-line access this repo's other tooling can't touch (see below
 for why the .dat itself doesn't encode this):
 
 1. Deliberate historical-identity removals - e.g. Knight/Cavalier/Paladin
-   for Turks/Huns. The civ -> unit-ids decisions live in
-   mods/regional_heritage.py's DISABLE_UNIT_LINES_FOR_CIV, alongside every
-   other civ-identity decision this project makes; this script just applies
-   that config to the real file.
+   for Turks/Huns. These are expressed as real calls to
+   mods.util.disable_unit_line_for_civ, inline inside named functions in
+   mods/regional_heritage.py (remove_knight_line_from_true_steppe_and_camel_civs,
+   remove_knight_line_from_true_elephant_civs) - the same way every other
+   grant in that file reads: a function with a name and a comment
+   explaining why, not a disconnected dict. disable_unit_line_for_civ is a
+   no-op against the .dat (see its docstring); this script traces calls to
+   it exactly the way it already traces enable_unit_for_civ/
+   upgrade_unit_for_civ, to find out what to actually remove here.
 
 2. Automatic button-collision fixes. When regional_heritage.mod() grants a
    civ a unit that shares its native (building, button) training slot with
@@ -52,7 +57,6 @@ from pathlib import Path
 from genieutils.datfile import DatFile
 
 from mods import heroes_and_villains, regional_heritage
-from mods.regional_heritage import DISABLE_UNIT_LINES_FOR_CIV
 
 
 def civ_name_to_futuravailableunits_key(data: DatFile, civilizations_json_path: Path) -> dict[int, str]:
@@ -75,12 +79,12 @@ def civ_name_to_futuravailableunits_key(data: DatFile, civilizations_json_path: 
 BUILD_MENU_ID = 118
 
 
-def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, set[int]]]:
-    """(newly_enabled, line_upgraded) civ_id -> {unit_id, ...} for
+def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, set[int]], dict[int, set[int]]]:
+    """(newly_enabled, line_upgraded, disabled) civ_id -> {unit_id, ...} for
     everything regional_heritage.mod() (and heroes_and_villains.mod()'s
-    plain enables) actually grants. Mirrors sync_tech_trees.py's
-    trace_grants - intercepts the granting calls instead of applying them,
-    so this can run against an unmodified .dat.
+    plain enables) actually does. Mirrors sync_tech_trees.py's
+    trace_grants - intercepts the granting/disabling calls instead of
+    applying them, so this can run against an unmodified .dat.
 
     Kept separate on purpose: a genuinely NEW unit (enable_unit_for_civ, or
     a type=2 effect command) can collide with something already at its
@@ -90,9 +94,12 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
     base tiers are its own prerequisites (e.g. Legionary needs Byzantines'
     Militia/Man-at-Arms/Long Swordsman to remain trainable, since that's
     the path to it). Only newly_enabled goes through collision detection.
+    disabled comes from disable_unit_line_for_civ calls - the deliberate
+    historical-identity removals, unrelated to collision detection.
     """
     enabled: dict[int, set[int]] = defaultdict(set)
     upgraded: dict[int, set[int]] = defaultdict(set)
+    disabled: dict[int, set[int]] = defaultdict(set)
 
     def rec_enable(data, civ_id, unit_id, required_tech):
         enabled[civ_id].add(unit_id)
@@ -114,20 +121,24 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
     def noop_reskin(data, civ_id, unit_id, donor_unit_id):
         pass
 
+    def rec_disable_line(data, civ_id, unit_ids):
+        disabled[civ_id] |= set(unit_ids)
+
     import mods.util as util
     orig = (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-            util.set_train_button_for_civ, util.reskin_unit_for_civ)
+            util.set_train_button_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ)
     regional_heritage.enable_unit_for_civ = rec_enable
     regional_heritage.upgrade_unit_for_civ = rec_upgrade
     regional_heritage.grant_effect_to_civ = rec_grant_effect
     regional_heritage.set_train_button_for_civ = noop_button
     regional_heritage.reskin_unit_for_civ = noop_reskin
+    regional_heritage.disable_unit_line_for_civ = rec_disable_line
     heroes_and_villains.enable_unit_for_civ = rec_enable
     regional_heritage.mod(data)
     (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-     util.set_train_button_for_civ, util.reskin_unit_for_civ) = orig
+     util.set_train_button_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ) = orig
 
-    return enabled, upgraded
+    return enabled, upgraded, disabled
 
 
 def build_upgrade_families(data: DatFile) -> dict[int, set[int]]:
@@ -175,8 +186,8 @@ def find_button_collisions(data: DatFile, civ_filenames: dict[int, str], granted
     unit can actually occupy a given (building, button) slot. Excludes
     anything in the granted unit's own upgrade family (see
     build_upgrade_families) - those are the same progression, not a
-    competing unit. Returns the same shape as DISABLE_UNIT_LINES_FOR_CIV so
-    the two can be merged.
+    competing unit. Returns {civ_name: {unit_id, ...}}, the same shape
+    disable_unit_line_for_civ calls trace to, so the two can be merged.
     """
     base = data.civs[0]
     families = build_upgrade_families(data)
@@ -228,7 +239,7 @@ def main():
 
     data = DatFile.parse(args.dat_filename)
     civ_filenames = civ_name_to_futuravailableunits_key(data, args.civilizations_json)
-    newly_enabled, _line_upgraded = trace_granted_units(data)
+    newly_enabled, _line_upgraded, disabled = trace_granted_units(data)
 
     with args.source.open(encoding='utf-8') as f:
         available_units = json.load(f)
@@ -238,8 +249,10 @@ def main():
         logging.info(f'{civ_key}: auto-detected button collision, disabling {sorted(unit_ids)}')
 
     disable_map: dict[str, set[int]] = defaultdict(set)
-    for civ_name, unit_ids in DISABLE_UNIT_LINES_FOR_CIV.items():
-        disable_map[civ_name] |= set(unit_ids)
+    for civ_id, unit_ids in disabled.items():
+        civ_key = civ_filenames.get(civ_id)
+        if civ_key is not None:
+            disable_map[civ_key] |= unit_ids
     for civ_key, unit_ids in collisions.items():
         disable_map[civ_key] |= unit_ids
 

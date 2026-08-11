@@ -5,7 +5,8 @@ from genieutils.datfile import DatFile
 from genieutils.effect import EffectCommand
 from genieutils.unit import AttackOrArmor
 
-from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ
+from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ, \
+    disable_unit_line_for_civ
 from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     TYPE_ENABLE_DISABLE_UNIT, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
@@ -47,44 +48,6 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
 
 NAME = 'regional-heritage'
 
-# Civs that lose a mainline unit line, under a strict two-part test:
-#   1. The civ has its own distinct gold-cost unit line that trains from the
-#      SAME building and fills the same combat role as the line being
-#      removed - not just "some regional flavor exists," a genuine
-#      mechanical substitute. Verified directly against the real .dat
-#      (train_locations building id + resource_costs), not assumed:
-#        - Steppe Lancer trains from the Stable (101), costs Food+Gold -
-#          identical building/resource profile to Knight.
-#        - Camel Rider/Heavy Camel Rider: Stable (101), Food+Gold. Same.
-#        - Battle Elephant: Stable (101), Food+Gold. Same - and it's each
-#          civ's own REAL NATIVE unit here, not something this mod granted.
-#   2. The line being removed doesn't fit the civ's real historical military
-#      identity (no genuine knight/heavy-shock-cavalry tradition).
-# Both conditions have to hold - a civ having elephants somewhere in its kit
-# isn't enough on its own if that elephant line doesn't actually share
-# Knight's building and resource profile (Elephant Archer trains from the
-# Archery Range, Armored Elephant from the Siege Workshop - neither
-# qualifies under rule 1, which is why Ethiopians - Armored Elephant only,
-# no native Battle Elephant - isn't on this list despite fitting rule 2).
-#
-# This is the single source of truth for the decision - disable_unit_lines.py
-# imports this dict and applies it against futuravailableunits.json, since
-# the .dat itself doesn't encode per-civ unit-line access for original civs
-# (see NOTES-civ-identity-expansion.md's "Knight-line removal" section for
-# how that was confirmed). Keys here are futuravailableunits.json's own civ
-# names (matches civilizations.json's internal_name, e.g. "Byzantines"
-# plural) - NOT the .dat's Civ.name convention civ_ids_named() below uses
-# for everything else in this file. Don't mix the two.
-DISABLE_UNIT_LINES_FOR_CIV = {
-    'Turks': {KNIGHT, CAVALIER, PALADIN},  # fully-upgraded Steppe Lancer; Janissary/Sipahi identity, not Western knights
-    'Huns': {KNIGHT, CAVALIER, PALADIN},  # fully-upgraded Steppe Lancer; the defining steppe-raider civ this whole mod leans on
-    'Berbers': {KNIGHT, CAVALIER, PALADIN},  # native Camel Rider/Heavy Camel Rider; Almoravid/Almohad camel cavalry, not knights
-    'Saracens': {KNIGHT, CAVALIER, PALADIN},  # native Camel Rider/Heavy Camel Rider; same camel-cavalry identity as Berbers
-    'Malay': {KNIGHT, CAVALIER, PALADIN},  # native fully-upgraded Battle Elephant; elephant/infantry warfare, not heavy cavalry
-    'Burmese': {KNIGHT, CAVALIER, PALADIN},  # native fully-upgraded Battle Elephant; same elephant identity as Malay
-    'Khmer': {KNIGHT, CAVALIER, PALADIN},  # native fully-upgraded Battle Elephant; the archetypal war-elephant empire (Angkor)
-    'Vietnamese': {KNIGHT, CAVALIER, PALADIN},  # native fully-upgraded Battle Elephant; elephant/naval identity, not cavalry
-}
 
 
 def civ_ids_named(data: DatFile, names: list[str]) -> list[int]:
@@ -504,6 +467,42 @@ def give_condottiero_to_other_mercenary_civs(data: DatFile):
         enable_unit_for_civ(data, civ_id, CONDOTTIERO, TECH_CASTLE_BUILT)
 
 
+def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
+    # Two-part test for every disable_unit_line_for_civ call in this file:
+    # (1) the civ has its own distinct gold-cost unit line training from the
+    # SAME building as the line being removed - not just "some regional
+    # flavor exists," a genuine mechanical substitute, verified against the
+    # real train_locations/resource_costs, not assumed - and (2) the line
+    # being removed doesn't fit the civ's real historical military identity.
+    # Both have to hold. Steppe Lancer and Camel Rider/Heavy Camel Rider
+    # both train from the Stable (101) for Food+Gold, identical to Knight's
+    # own building/resource profile.
+    #
+    # Turks and Huns: fully-upgraded Steppe Lancer from this mod; Janissary/
+    # Sipahi and defining-steppe-raider identities respectively, not Western
+    # knights.
+    for civ_id in civ_ids_named(data, ['Turks', 'Huns']):
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
+    # Berbers and Saracens: native Camel Rider/Heavy Camel Rider (not
+    # granted by this mod - they've always had it); Almoravid/Almohad and
+    # early-Islamic camel-cavalry identity, not knights.
+    for civ_id in civ_ids_named(data, ['Berbers', 'Saracens']):
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
+
+
+def remove_knight_line_from_true_elephant_civs(data: DatFile):
+    # Same two-part test as remove_knight_line_from_true_steppe_and_camel_civs
+    # above. Battle Elephant trains from the Stable (101) for Food+Gold,
+    # identical to Knight - and it's each of these civs' own real native
+    # unit with the Elite tier already, not something this mod granted
+    # (confirmed via CivTechTrees). Ethiopians was considered and dropped -
+    # they only have Armored Elephant (Siege Workshop, a different building
+    # entirely), so rule 1 doesn't hold for them despite rule 2 clearly
+    # fitting.
+    for civ_id in civ_ids_named(data, ['Malay', 'Burmese', 'Khmer', 'Vietnamese']):
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
+
+
 def mod(data: DatFile):
     logging.info('Applying regional heritage grants')
     give_steppe_lancers_to_civs_with_horse_archer_heritage(data)
@@ -529,6 +528,8 @@ def mod(data: DatFile):
     give_crusader_knight_skin_to_crusader_states(data)
     give_thirisadai_to_other_indian_ocean_civs(data)
     give_condottiero_to_other_mercenary_civs(data)
+    remove_knight_line_from_true_steppe_and_camel_civs(data)
+    remove_knight_line_from_true_elephant_civs(data)
     give_feitoria_to_spanish(data)
     give_folwark_to_bohemians(data)
     give_donjon_to_italians(data)

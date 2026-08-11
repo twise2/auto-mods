@@ -1132,3 +1132,34 @@ produced this output. Only added to the `regional_heritage` and
 `civ_identity_expansion` targets, not plain `heroes_and_villains` - the
 disable decisions are regional-heritage-specific and shouldn't apply to a
 build that doesn't include any of its flavor changes.
+
+## regional-heritage v16: DISABLE_UNIT_LINES_FOR_CIV replaced with a real inline call
+
+The dict lived at the top of `regional_heritage.py` but was never
+referenced by anything *in* that file - `mod()` only touches the `.dat`,
+and the dict governed a completely separate file. Read cold, it looked
+like dead code even though `disable_unit_lines.py` was genuinely importing
+and applying it (verified with a real run: every "removed N unit(s)"
+count matched the config exactly against each civ's actual holdings).
+
+Restructured to match how every other grant in this file already reads.
+Added `disable_unit_line_for_civ(data, civ_id, unit_ids)` to `mods/util.py`
+- a real function with the same shape as `enable_unit_for_civ`, genuinely
+a no-op against the `.dat` (logs what it would do and stops there, since
+there's still no `.dat` mechanism for this), with a docstring explaining
+why it's a no-op and how it's actually consumed. `DISABLE_UNIT_LINES_FOR_CIV`
+is gone; in its place, two named functions
+(`remove_knight_line_from_true_steppe_and_camel_civs`,
+`remove_knight_line_from_true_elephant_civs`) call
+`disable_unit_line_for_civ` inline, right next to the same two-part-test
+reasoning that used to live in a comment block above the dict - civ list
+and justification now sit together the same way `give_steppe_lancers_to_...`
+etc. already do, using `civ_ids_named()` like everything else in the file
+instead of a separate civ-name convention.
+
+`disable_unit_lines.py`'s `trace_granted_units` now intercepts
+`disable_unit_line_for_civ` too, the same monkeypatch-and-record technique
+already used for `enable_unit_for_civ`/`upgrade_unit_for_civ` - one more
+call type traced instead of one dict imported. Verified byte-identical
+output before/after the refactor (every "removed N unit(s)" log line
+matched exactly).

@@ -32,6 +32,28 @@ def disable_unit_for_civ(data: DatFile, civ_id: int, unit_id: int):
     civ.units[unit_id].enabled = 0
 
 
+def disable_unit_line_for_civ(data: DatFile, civ_id: int, unit_ids: set[int]):
+    """Remove a civ's native access to a unit line (e.g. Knight/Cavalier/
+    Paladin) for historical-identity reasons - Turks/Huns keeping their
+    fully-upgraded Steppe Lancer instead of also having Western knights,
+    etc. A no-op against the .dat: unlike every other grant in this file,
+    there's no .dat-level mechanism for removing a civ's *native* access -
+    confirmed by exhaustive comparison (Franks vs Aztecs byte-identical for
+    unit.enabled/train_locations/every tech referencing the unit) that this
+    is governed by a separate file, futuravailableunits.json, not the .dat
+    at all (see NOTES-civ-identity-expansion.md's "Knight-line removal"
+    section). disable_unit_lines.py intercepts calls to this function -
+    the same trace-don't-apply technique sync_tech_trees.py already uses
+    for enable_unit_for_civ/upgrade_unit_for_civ - to know what to actually
+    remove from that file. Exists as a real call here (rather than a bare
+    dict at module scope) so each removal reads like every other grant:
+    inline, next to the historical reasoning for why.
+    """
+    civ = data.civs[civ_id]
+    names = ', '.join(civ.units[uid].name for uid in sorted(unit_ids))
+    logging.info(f'Disabling unit line [{names}] for {civ.name} (via futuravailableunits.json, not the .dat)')
+
+
 def disable_tech_effect(data: DatFile, tech_id: int):
     logging.info(f'Disabling the effect of tech with id {tech_id} ({data.techs[tech_id].name})')
     data.techs[tech_id].effect_id = -1
