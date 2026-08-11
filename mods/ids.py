@@ -447,6 +447,8 @@ ROCKET_CART = 1904
 HEAVY_ROCKET_CART = 1907
 TRACTION_TREBUCHET = 1942
 LOU_CHUAN = 1948
+HEI_KUANG_CAVALRY = 1944
+ELITE_HEI_KUANG_CAVALRY = 1946
 
 # Donor units for Samurai/Elite Samurai's ranged-mode swap ability - Wu's real
 # Fire Archer/Elite Fire Archer, used purely for their graphic (not shared

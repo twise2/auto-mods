@@ -1163,3 +1163,24 @@ already used for `enable_unit_for_civ`/`upgrade_unit_for_civ` - one more
 call type traced instead of one dict imported. Verified byte-identical
 output before/after the refactor (every "removed N unit(s)" log line
 matched exactly).
+
+## regional-heritage v17: Hei-Kuang Cavalry replaces Knight for Chinese
+
+Confirmed via CivTechTrees that the auto-collision-detector's last full
+run was catching real, *pre-existing* bugs, not just today's new grants -
+the Elephant Archer/Armored Elephant/Genitour collisions for Khmer/Malay/
+Burmese/Vietnamese/Ethiopians/Persians have been latent since those grants
+were first made early in this session, just never caught until the
+detector existed.
+
+Added `give_hei_kuang_cavalry_to_chinese` (id 1944, Elite tier 1946) -
+verified it trains from the exact same Stable button 2 as Knight, for the
+same Food+Gold cost, so unlike Traction Trebuchet (an addition) this is a
+genuine drop-in replacement. Added `remove_knight_line_from_chinese_for_hei_kuang_cavalry`
+as its own dedicated function (not folded into the steppe/camel or
+elephant groups - the reasoning is its own thing, a specific regional
+cavalry unit rather than a shared identity family). Confirmed the
+auto-collision-detector independently flags the exact same Knight/
+Cavalier removal for Chinese even without the deliberate call - the two
+mechanisms overlap safely (set union, not double-removal) rather than
+conflicting.

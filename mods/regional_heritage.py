@@ -22,7 +22,8 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     THIRISADAI, CONDOTTIERO, SLINGER, \
     SAMURAI, ELITE_SAMURAI, FIRE_ARCHER, ELITE_FIRE_ARCHER, ATTACK_CLASS_UNIQUE_UNIT, \
     LONGBOAT, ELITE_LONGBOAT, CLASS_TRANSPORT_BOAT, TRANSPORT_SHIP, \
-    ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN
+    ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, \
+    HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -268,6 +269,20 @@ def give_lou_chuan_to_other_east_asian_civs(data: DatFile):
         enable_unit_for_civ(data, civ_id, LOU_CHUAN, TECH_CASTLE_BUILT)
 
 
+def give_hei_kuang_cavalry_to_chinese(data: DatFile):
+    # Hei-Kuang Cavalry (`civ=-1` regional cavalry) is currently Shu/Wei/Wu
+    # only - Chinese (the main civ) represents the same broader Chinese
+    # military tradition those three Three Kingdoms sub-civs split out of.
+    # Unlike Traction Trebuchet above, this replaces Knight/Cavalier/Paladin
+    # outright rather than sitting alongside it - it trains from the exact
+    # same Stable button 2 Knight does, for the same Food+Gold cost, so it's
+    # a genuine drop-in swap, not an addition. See
+    # remove_knight_line_from_chinese_for_hei_kuang_cavalry below.
+    for civ_id in civ_ids_named(data, ['Chinese']):
+        enable_unit_for_civ(data, civ_id, HEI_KUANG_CAVALRY, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
 def _configure_samurai_ranged_form(base_unit, ranged_unit):
     # Port of the old regionalAdditions branch's SwapSamuraiUnitToRanged
     # (patches/regional_additions.cpp, commit 99abeaf) - the `nothing`/`trait`
@@ -503,6 +518,18 @@ def remove_knight_line_from_true_elephant_civs(data: DatFile):
         disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
 
 
+def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
+    # Same two-part test again. Hei-Kuang Cavalry (see
+    # give_hei_kuang_cavalry_to_chinese above) trains from the exact same
+    # Stable button 2 as Knight, for the same Food+Gold cost, with a real
+    # Elite tier - a genuine drop-in replacement, not just "some regional
+    # flavor exists." A dedicated function rather than folding into either
+    # group above since the reasoning (a specific regional cavalry unit,
+    # not a steppe/camel or elephant identity) is its own thing.
+    for civ_id in civ_ids_named(data, ['Chinese']):
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
+
+
 def mod(data: DatFile):
     logging.info('Applying regional heritage grants')
     give_steppe_lancers_to_civs_with_horse_archer_heritage(data)
@@ -522,6 +549,7 @@ def mod(data: DatFile):
     give_rocket_cart_to_japanese(data)
     give_traction_trebuchet_to_east_asian_civs(data)
     give_lou_chuan_to_other_east_asian_civs(data)
+    give_hei_kuang_cavalry_to_chinese(data)
     give_samurai_a_ranged_mode_swap(data)
     give_camel_scout_start_to_true_camel_civs(data)
     give_franks_a_frankish_paladin_skin(data)
@@ -530,6 +558,7 @@ def mod(data: DatFile):
     give_condottiero_to_other_mercenary_civs(data)
     remove_knight_line_from_true_steppe_and_camel_civs(data)
     remove_knight_line_from_true_elephant_civs(data)
+    remove_knight_line_from_chinese_for_hei_kuang_cavalry(data)
     give_feitoria_to_spanish(data)
     give_folwark_to_bohemians(data)
     give_donjon_to_italians(data)
