@@ -876,3 +876,38 @@ Ship's own task list via `dataclasses.replace` rather than hand-building a
 `Task` object with guessed field values. Applied to every civ's own copy
 (matching the old branch's civ-agnostic loop) since Longboat is only ever a
 real trainable unit for Vikings regardless.
+
+## heroes-and-villains: second heroes for the Chronicles Greek/Persian civs
+
+Found five real, unclaimed named units clustered in the same id range as
+this mod's existing Chronicles heroes (checked against the full
+`HERO_FOR_CIV` id list to confirm none were already in use anywhere):
+
+- **Spartans**: added Brasidas (id 2317) alongside Leonidas.
+- **Achaemenids**: added Datis (id 2309) alongside Darius/Artemisia - Datis
+  co-commanded the Marathon expedition with Artaphernes.
+- **Athenians**: added Miltiades (id 2314) alongside Themistocles/
+  Themistocles Warship - the actual victor of Marathon, and a genuinely
+  distinct second person (Themistocles' land/water pair is really one
+  figure in two forms).
+- **Macedonians**: added Parmenion (id 2400, Alexander's senior general,
+  present at nearly every major battle) and Hephaistion (id 2402, his
+  closest companion) alongside Alexander the Great. Several other equally
+  good candidates exist and were left out for now - Cleitus (id 2401),
+  Perdiccas (id 2403), Nearchos (id 2404), Philip (id 2399, likely Philip
+  II) - flagged in case more Macedonian depth is wanted later.
+- Checked Thracians and Puru too - no additional civ-specific named unit
+  exists for either in this id range, so both stay single-hero.
+
+All five are land-class units (6/12/36) - none needed the Dock/Port
+mechanism, sidestepping a real complication: these four Chronicles civs
+have a second, parallel "Port 1-4" building line (ids 2141-2172) alongside
+the standard Dock, confirmed by scanning the `.dat` for every DOCK/PORT-
+named unit. Worth remembering if a *water* hero is ever added for one of
+them - the existing Dock-button-24 mechanism this mod relies on may not
+carry over cleanly to whichever of the two naval lines is actually active
+for these civs. Not investigated further since it wasn't needed here.
+
+Verified Castle button 2 (the mechanism's hero slot) is clear for all four
+civs before building - only Portable Trebuchet and Shu/Wu/Wei's own real
+heroes sit there, same as every other civ this mod gives heroes to.

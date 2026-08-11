@@ -551,8 +551,15 @@ JOGAILA = 1718
 ARTEMISIA = 2312
 THEMISTOCLES_WARSHIP = 2339
 
+# Chronicles: Battle for Greece - second heroes
+DATIS = 2309  # Achaemenids - Marathon co-commander alongside Darius
+MILTIADES = 2314  # Athenians - the actual victor of Marathon
+BRASIDAS = 2317  # Spartans - celebrated general of the Peloponnesian War
+
 # Chronicles: Alexander the Great civs
 ALEXANDER_THE_GREAT = 2398
+PARMENION = 2400  # Macedonians - Alexander's indispensable senior general
+HEPHAISTION = 2402  # Macedonians - Alexander's closest companion
 PORUS = 2436
 THRACIAN_CHIEFTAIN = 2451
 

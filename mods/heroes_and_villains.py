@@ -13,7 +13,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     CUAUHTEMOC, ATTILA_THE_HUN, PACAL_II, EL_CID_CAMPEADOR, GENGHIS_KHAN, FRANCESCO_SFORZA, \
     MIKLOS_TOLDI, ALEXANDER_NEVSKI, TARIQ_IBN_ZIYAD, DAGNAJAN, SURYAVARMAN_I, KUSHLUK, \
     GAJAH_MADA, LE_LOI, KOTYAN_KHAN, VYTAUTAS_THE_GREAT, OSMAN, THEMISTOCLES, THEMISTOCLES_WARSHIP, \
-    LEONIDAS, DARIUS, ARTEMISIA, \
+    LEONIDAS, DARIUS, ARTEMISIA, DATIS, MILTIADES, BRASIDAS, PARMENION, HEPHAISTION, \
     JOHN_THE_FEARLESS, ROGER_BOSSO, JAN_ZIZKA, JOGAILA, IBRAHIM_LODI, PRITHVIRAJ, TAMAR, \
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
     VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, FRANSICO_DE_ORELLANA, \
@@ -80,12 +80,12 @@ HERO_FOR_CIV = {
     "Romans": [POPE_LEO_I], #could be improved if custom unit is added. or lang script updated.
     "Armenians": [THOROS],
     "Georgians": [TAMAR],
-    "Spartans": [LEONIDAS],
-    "Achaemenids": [DARIUS, ARTEMISIA],  # Artemisia commanded ships for Xerxes, Darius's son, at Salamis
-    "Athenians": [THEMISTOCLES, THEMISTOCLES_WARSHIP],  # architect of the navy that won at Salamis
+    "Spartans": [LEONIDAS, BRASIDAS],
+    "Achaemenids": [DARIUS, ARTEMISIA, DATIS],  # Artemisia commanded ships for Xerxes, Darius's son, at Salamis; Datis co-commanded at Marathon with Artaphernes
+    "Athenians": [THEMISTOCLES, THEMISTOCLES_WARSHIP, MILTIADES],  # architect of the navy that won at Salamis; Miltiades was the actual victor of Marathon
     "Khitans": [KUSHLUK], #fine but not amazing
     "Jurchens": [WHITE_TIGER_YAN], #not great but they dont have great #Aguda if they add him would be a perfect campaign.
-    "Macedonians": [ALEXANDER_THE_GREAT],
+    "Macedonians": [ALEXANDER_THE_GREAT, PARMENION, HEPHAISTION],
     "Thracians": [THRACIAN_CHIEFTAIN],
     "Puru": [PORUS],
     "Mapuche": [LAUTARO],
