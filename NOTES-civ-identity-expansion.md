@@ -955,3 +955,107 @@ or Huns in an actual game and checking whether Knight is genuinely
 unbuildable, not just tooltip-absent. Flagging this clearly rather than
 declaring victory prematurely - this file is new territory for this repo,
 never used before this pass.
+
+## Knight-line removal expanded to 7 more civs, config moved into regional_heritage.py
+
+`DISABLE_UNIT_LINES_FOR_CIV` (the civ -> unit-ids-to-remove map) now lives in
+`mods/regional_heritage.py`, not `disable_unit_lines.py` - keeps every
+civ-identity decision this project makes in one place, the same file that
+already documents every grant with its own historical reasoning.
+`disable_unit_lines.py` just imports it and applies it to
+`futuravailableunits.json`. Its keys are that file's own civ names (matches
+`civilizations.json`'s `internal_name`, e.g. "Byzantines" plural) - **not**
+the `.dat`'s `Civ.name` convention `civ_ids_named()` uses for every other
+function in this file. Called out explicitly in a comment since mixing the
+two would silently no-op instead of erroring (a missing key just logs a
+warning and skips).
+
+Checked every other Steppe-Lancer-adjacent and elephant/camel-identity civ's
+real `Knight`/`Cavalier`/`Paladin` access via `CivTechTrees` before adding
+anything, same discipline as the original Turks/Huns pass:
+
+- **Berbers** (Knight+Cavalier) and **Saracens** (Knight only - they don't
+  even have Cavalier natively) - both already this mod's other major camel
+  civs (native Camel Rider/Heavy Camel Rider, plus Camel Scout starting
+  unit from this mod). Almoravid/Almohad and early-Islamic warfare was
+  camel/light-cavalry centered, not Western heavy knights.
+- **Malay, Burmese, Khmer, Vietnamese** (all Knight+Cavalier, no Paladin
+  natively) - all four already have this mod's Elephant Archer/Armored
+  Elephant grants (Khmer/Burmese/Malay natively have Battle Elephant too).
+  Khmer especially - Angkor is about as archetypal a war-elephant empire as
+  exists.
+- **Ethiopians** (Knight+Cavalier) - highland infantry/elephant tradition
+  (Armored Elephant from this mod, Shotel Warrior their own real native
+  unique), not heavy cavalry. Weaker case than the others - flagging the
+  lower confidence honestly rather than treating it as equally certain.
+
+**Confirmed and deliberately left alone**: Persians (Savar depends on the
+Paladin tier existing), Cumans (a genuine toss-up, same as Magyars earlier -
+steppe origin but deeply Hungarian-integrated, and already this mod's single
+most cavalry-diverse civ via Winged Hussar/Mule Cart/camel line/Camel Scout/
+Steppe Lancer all stacked on them), and all four Indian-subcontinent civs
+(Hindustanis/Dravidians/Bengalis/Gurjaras) - already confirmed to lack
+Knight/Cavalier/Paladin entirely in real vanilla play, nothing to do there.
+
+Also caught a real inaccuracy in this file's own earlier history while
+researching: the v1-era comment on `give_camel_line_to_steppe_civs_without_camels`
+claims "Cumans genuinely lack Paladin in the current game" - the real
+`CivTechTrees` data shows Cumans have full Knight/Cavalier/Paladin natively.
+Not fixing the grant itself (the camel line is still a reasonable flavor
+addition regardless), just noting the original justification was never
+fact-checked against real data and turned out to be wrong.
+
+Same in-game-verification caveat as the Turks/Huns pass applies to all 7 new
+civs - none of this is confirmed to actually block training yet.
+
+## regional-heritage v14: stricter disable criteria, more East Asian regional units
+
+**Disable criteria tightened, Ethiopians dropped.** The disable list now
+requires two things to both hold, not just "seems thematically fitting":
+(1) the civ has its own distinct gold-cost unit line training from the
+*same building* as the line being removed - verified directly against the
+`.dat`'s `train_locations`/`resource_costs`, not assumed - and (2) the
+removed line doesn't fit the civ's real history. Checking this rigorously
+changed the list: Elephant Archer trains from the Archery Range and Armored
+Elephant from the Siege Workshop - neither matches Knight's Stable building,
+so "has some elephant unit" alone doesn't qualify a civ. Battle Elephant
+*does* match (Stable, Food+Gold, identical to Knight) - and it's each
+civ's own real native unit, not something this mod granted. Malay, Burmese,
+Khmer, and Vietnamese all have it natively with the Elite tier, confirmed via
+`CivTechTrees`. Ethiopians has neither Battle Elephant nor any other
+Stable-trained gold-cost replacement (only Armored Elephant, Siege Workshop)
+- doesn't pass rule 1 despite clearly passing rule 2, so it's off the list
+now. `DISABLE_UNIT_LINES_FOR_CIV` down to 8 civs: Turks, Huns (Steppe
+Lancer), Berbers, Saracens (Camel Rider/Heavy Camel Rider), Malay, Burmese,
+Khmer, Vietnamese (Battle Elephant).
+
+Also moved `DISABLE_UNIT_LINES_FOR_CIV` itself from `disable_unit_lines.py`
+into `mods/regional_heritage.py` - keeps every civ-identity decision this
+project makes in one place, the same file that documents every other grant.
+`disable_unit_lines.py` now just imports it.
+
+**Three more proposals-list items shipped**, all cross-checked against real
+`CivTechTrees` ownership before adding, same discipline as every other grant
+in this file:
+
+- **Rocket Cart** (+ Elite tier) - Japanese. Chinese/Jurchens/Khitans/Koreans
+  already have it; Japan is the same East Asian gunpowder-contact group Fire
+  Lancer already extends to them.
+- **Traction Trebuchet** - Chinese, Jurchens, Khitans. Currently Shu/Wu/Wei
+  only, where it deliberately *replaces* standard Trebuchet (a real
+  historically-correct vanilla design choice - counterweight trebuchets
+  didn't reach China until Mongol-era contact). Chinese gets it as an
+  *addition* alongside their existing Trebuchet rather than a replacement,
+  since the main civ's timeline plausibly spans both eras unlike the
+  narrower Three-Kingdoms-specific sub-civs. Jurchens/Khitans (Song-era
+  rival/successor states, already tied to Chinese via Fire Lancer/Rocket
+  Cart) get the same addition. Deliberately did not extend to American
+  civs as floated - no historical basis for that specific unit, pre-
+  Columbian civs simply didn't have trebuchet-family siege technology of
+  any kind to begin with.
+- **Lou Chuan** - Khitans, Koreans, Vietnamese. Currently Chinese/Jurchens/
+  Shu/Wu/Wei only; same East Asian naval/gunpowder-contact group.
+
+All three verified for button collisions first (Siege Workshop/Dock slots
+these units use are all the standard "mutually-exclusive regional
+alternative" pattern already established throughout this mod - safe).

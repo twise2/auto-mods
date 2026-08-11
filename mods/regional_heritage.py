@@ -14,13 +14,14 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     MISSIONARY, SCOUT_CAVALRY, \
     LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, \
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
-    PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
+    KNIGHT, CAVALIER, PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
     FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
     DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION, \
     CHURCH, CHURCH_AGE2, CHURCH_AGE3, CHURCH_AGE4, FORTIFIED_CHURCH, \
     THIRISADAI, CONDOTTIERO, SLINGER, \
     SAMURAI, ELITE_SAMURAI, FIRE_ARCHER, ELITE_FIRE_ARCHER, ATTACK_CLASS_UNIQUE_UNIT, \
-    LONGBOAT, ELITE_LONGBOAT, CLASS_TRANSPORT_BOAT, TRANSPORT_SHIP
+    LONGBOAT, ELITE_LONGBOAT, CLASS_TRANSPORT_BOAT, TRANSPORT_SHIP, \
+    ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -45,6 +46,45 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
 # purely cosmetic reskins, and true uniques that don't train from the Castle.
 
 NAME = 'regional-heritage'
+
+# Civs that lose a mainline unit line, under a strict two-part test:
+#   1. The civ has its own distinct gold-cost unit line that trains from the
+#      SAME building and fills the same combat role as the line being
+#      removed - not just "some regional flavor exists," a genuine
+#      mechanical substitute. Verified directly against the real .dat
+#      (train_locations building id + resource_costs), not assumed:
+#        - Steppe Lancer trains from the Stable (101), costs Food+Gold -
+#          identical building/resource profile to Knight.
+#        - Camel Rider/Heavy Camel Rider: Stable (101), Food+Gold. Same.
+#        - Battle Elephant: Stable (101), Food+Gold. Same - and it's each
+#          civ's own REAL NATIVE unit here, not something this mod granted.
+#   2. The line being removed doesn't fit the civ's real historical military
+#      identity (no genuine knight/heavy-shock-cavalry tradition).
+# Both conditions have to hold - a civ having elephants somewhere in its kit
+# isn't enough on its own if that elephant line doesn't actually share
+# Knight's building and resource profile (Elephant Archer trains from the
+# Archery Range, Armored Elephant from the Siege Workshop - neither
+# qualifies under rule 1, which is why Ethiopians - Armored Elephant only,
+# no native Battle Elephant - isn't on this list despite fitting rule 2).
+#
+# This is the single source of truth for the decision - disable_unit_lines.py
+# imports this dict and applies it against futuravailableunits.json, since
+# the .dat itself doesn't encode per-civ unit-line access for original civs
+# (see NOTES-civ-identity-expansion.md's "Knight-line removal" section for
+# how that was confirmed). Keys here are futuravailableunits.json's own civ
+# names (matches civilizations.json's internal_name, e.g. "Byzantines"
+# plural) - NOT the .dat's Civ.name convention civ_ids_named() below uses
+# for everything else in this file. Don't mix the two.
+DISABLE_UNIT_LINES_FOR_CIV = {
+    'Turks': {KNIGHT, CAVALIER, PALADIN},  # fully-upgraded Steppe Lancer; Janissary/Sipahi identity, not Western knights
+    'Huns': {KNIGHT, CAVALIER, PALADIN},  # fully-upgraded Steppe Lancer; the defining steppe-raider civ this whole mod leans on
+    'Berbers': {KNIGHT, CAVALIER, PALADIN},  # native Camel Rider/Heavy Camel Rider; Almoravid/Almohad camel cavalry, not knights
+    'Saracens': {KNIGHT, CAVALIER, PALADIN},  # native Camel Rider/Heavy Camel Rider; same camel-cavalry identity as Berbers
+    'Malay': {KNIGHT, CAVALIER, PALADIN},  # native fully-upgraded Battle Elephant; elephant/infantry warfare, not heavy cavalry
+    'Burmese': {KNIGHT, CAVALIER, PALADIN},  # native fully-upgraded Battle Elephant; same elephant identity as Malay
+    'Khmer': {KNIGHT, CAVALIER, PALADIN},  # native fully-upgraded Battle Elephant; the archetypal war-elephant empire (Angkor)
+    'Vietnamese': {KNIGHT, CAVALIER, PALADIN},  # native fully-upgraded Battle Elephant; elephant/naval identity, not cavalry
+}
 
 
 def civ_ids_named(data: DatFile, names: list[str]) -> list[int]:
@@ -230,6 +270,39 @@ def give_fire_lancers_to_japanese(data: DatFile):
     for civ_id in civ_ids_named(data, ['Japanese']):
         enable_unit_for_civ(data, civ_id, FIRE_LANCER, TECH_CASTLE_BUILT)
         upgrade_unit_for_civ(data, civ_id, FIRE_LANCER, ELITE_FIRE_LANCER, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_rocket_cart_to_japanese(data: DatFile):
+    # Rocket Cart (`civ=-1` regional siege) is currently Chinese/Jurchen/
+    # Khitan/Korean only - the exact same East Asian gunpowder-contact group
+    # Fire Lancer above already extends to Japan.
+    for civ_id in civ_ids_named(data, ['Japanese']):
+        enable_unit_for_civ(data, civ_id, ROCKET_CART, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, ROCKET_CART, HEAVY_ROCKET_CART, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_traction_trebuchet_to_east_asian_civs(data: DatFile):
+    # Traction Trebuchet (`civ=-1` regional siege) is currently Shu/Wu/Wei
+    # only - narrow Three Kingdoms Chronicles content, where it deliberately
+    # replaces the standard Trebuchet entirely (a real, historically correct
+    # design choice - counterweight trebuchets didn't reach China until
+    # Mongol-era contact centuries later). Chinese (the main civ, spanning a
+    # much longer timeline that plausibly reaches that later contact too)
+    # gets it as an additional option alongside their standard Trebuchet,
+    # not a replacement. Jurchens and Khitans are Song-dynasty-era rival/
+    # successor states with the same plausible technology exposure, already
+    # tied to Chinese in this mod via Fire Lancer/Rocket Cart.
+    for civ_id in civ_ids_named(data, ['Chinese', 'Jurchens', 'Khitans']):
+        enable_unit_for_civ(data, civ_id, TRACTION_TREBUCHET, TECH_CASTLE_BUILT)
+
+
+def give_lou_chuan_to_other_east_asian_civs(data: DatFile):
+    # Lou Chuan (`civ=-1` regional warship) is currently Chinese/Jurchen/Shu/
+    # Wu/Wei only. Khitans, Koreans, and Vietnamese are the same East Asian
+    # naval/gunpowder-contact group this mod already ties together via Fire
+    # Lancer/Rocket Cart.
+    for civ_id in civ_ids_named(data, ['Khitans', 'Koreans', 'Vietnamese']):
+        enable_unit_for_civ(data, civ_id, LOU_CHUAN, TECH_CASTLE_BUILT)
 
 
 def _configure_samurai_ranged_form(base_unit, ranged_unit):
@@ -447,6 +520,9 @@ def mod(data: DatFile):
     give_warrior_priests_to_civs_with_shamanic_heritage(data)
     give_settlements_to_mesoamerican_and_andean_civs(data)
     give_fire_lancers_to_japanese(data)
+    give_rocket_cart_to_japanese(data)
+    give_traction_trebuchet_to_east_asian_civs(data)
+    give_lou_chuan_to_other_east_asian_civs(data)
     give_samurai_a_ranged_mode_swap(data)
     give_camel_scout_start_to_true_camel_civs(data)
     give_franks_a_frankish_paladin_skin(data)

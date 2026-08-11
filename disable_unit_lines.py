@@ -1,8 +1,11 @@
 #! /usr/bin/env python3
 """Patch futuravailableunits.json to remove native unit-line access for
 specific civs - e.g. Knight/Cavalier/Paladin for Turks/Huns, matching the
-"steppe civs shouldn't also have Western knights" flavor rule discussed in
-NOTES-civ-identity-expansion.md.
+"this civ's real military identity doesn't fit its default mainline unit
+line" flavor rule discussed in NOTES-civ-identity-expansion.md. The actual
+civ -> unit-ids decisions live in mods/regional_heritage.py's
+DISABLE_UNIT_LINES_FOR_CIV, alongside every other civ-identity decision this
+project makes - this script just applies that config to the real file.
 
 Unlike everything else in this repo (which only ever ADDS access, via a
 self-triggering tech in the .dat), this is the first REMOVAL of a civ's
@@ -29,13 +32,7 @@ import json
 import logging
 from pathlib import Path
 
-# civ name (as it appears as a top-level key in futuravailableunits.json,
-# not necessarily the same as the .dat's Civ.name) -> unit ids to strip
-# from every building entry that offers them.
-DISABLE_UNITS_FOR_CIV = {
-    'Turks': {38, 283, 569},  # Knight, Cavalier, Paladin
-    'Huns': {38, 283, 569},
-}
+from mods.regional_heritage import DISABLE_UNIT_LINES_FOR_CIV as DISABLE_UNITS_FOR_CIV
 
 
 def main():

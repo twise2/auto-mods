@@ -45,30 +45,25 @@ period, already tied into this mod's Mediterranean-multicultural grouping
 (Genitour, Crusader Knight skin, Genoese Crossbowman/Donjon reciprocity).
 **Proposal: give Dromon to Italians and Sicilians.**
 
-### Rocket Cart (id 1904) - currently Chinese/Jurchens/Khitans/Koreans
+### ~~Rocket Cart~~ - DONE (v14)
 
-East Asian gunpowder siege. This mod already gave Japanese Fire Lancer on
-"plausible gunpowder-technology contact with China/Korea" grounds - the
-exact same reasoning extends cleanly to Rocket Cart. **Proposal: give
-Rocket Cart to Japanese** (and consider Vietnamese, who share Fire Lancer
-natively but don't have Rocket Cart either).
+Shipped: Japanese now has Rocket Cart + Elite tier.
 
-### Traction Trebuchet + Hei-Kuang Cavalry (ids 1942, 1944) - currently Shu/Wei/Wu only
+### Traction Trebuchet - DONE for Chinese/Jurchens/Khitans (v14); Hei-Kuang Cavalry still pending
 
-Three Kingdoms Chronicles-exclusive. Regular Chinese (the main playable
-civ) represents the same broader Chinese military tradition those three
-sub-civs split out of - **proposal: give both to (main) Chinese** as
-"they'd have had this too if the Chronicles split hadn't happened."
-Moderate confidence - these are narrow, campaign-specific units, so worth
-a sanity check that they don't look anachronistic against Chinese's other
-existing content.
+Traction Trebuchet (id 1942) shipped to Chinese, Jurchens, and Khitans as an
+*addition* alongside their standard Trebuchet, not a replacement (see
+NOTES-civ-identity-expansion.md v14 for the reasoning on why Chinese keeps
+both while Shu/Wu/Wei only ever had Traction Trebuchet).
 
-### Lou Chuan (id 1948) - currently Chinese/Jurchens/Shu/Wei/Wu
+Hei-Kuang Cavalry (id 1944) - still Shu/Wei/Wu only, not yet extended to
+Chinese. Same "they'd have had this too" logic as Traction Trebuchet would
+apply, just not actioned yet - moderate confidence, narrow campaign-specific
+unit, worth a sanity check on visual fit first.
 
-A Chinese/Jurchen warship. This mod's Fire Lancer group is Chinese/
-Jurchen/Khitan/Korean/Vietnamese - **proposal: extend Lou Chuan to
-Khitans, Koreans, and Vietnamese** for consistency with that already-
-established East Asian group.
+### ~~Lou Chuan~~ - DONE (v14)
+
+Shipped: Khitans, Koreans, and Vietnamese now have Lou Chuan.
 
 ### Champi Scout (id 2550) - currently Incas/Mapuche/Muisca/Tupi
 

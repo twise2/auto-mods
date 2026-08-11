@@ -443,6 +443,10 @@ CHURCH_AGE4 = 32
 HOUFNICE = 1709
 CHAMPI_WARRIOR = 2552
 GHULAM = 1747
+ROCKET_CART = 1904
+HEAVY_ROCKET_CART = 1907
+TRACTION_TREBUCHET = 1942
+LOU_CHUAN = 1948
 
 # Donor units for Samurai/Elite Samurai's ranged-mode swap ability - Wu's real
 # Fire Archer/Elite Fire Archer, used purely for their graphic (not shared
