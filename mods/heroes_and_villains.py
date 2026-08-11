@@ -80,12 +80,12 @@ HERO_FOR_CIV = {
     "Romans": [POPE_LEO_I], #could be improved if custom unit is added. or lang script updated.
     "Armenians": [THOROS],
     "Georgians": [TAMAR],
-    "Spartans": [LEONIDAS, BRASIDAS],
-    "Achaemenids": [DARIUS, ARTEMISIA, DATIS],  # Artemisia commanded ships for Xerxes, Darius's son, at Salamis; Datis co-commanded at Marathon with Artaphernes
-    "Athenians": [THEMISTOCLES, THEMISTOCLES_WARSHIP, MILTIADES],  # architect of the navy that won at Salamis; Miltiades was the actual victor of Marathon
+    "Spartans": [LEONIDAS],
+    "Achaemenids": [DARIUS ],  # Artemisia commanded ships for Xerxes, Darius's son, at Salamis; Datis co-commanded at Marathon with Artaphernes
+    "Athenians": [THEMISTOCLES_WARSHIP, MILTIADES],  # architect of the navy that won at Salamis; Miltiades was the actual victor of Marathon
     "Khitans": [KUSHLUK], #fine but not amazing
     "Jurchens": [WHITE_TIGER_YAN], #not great but they dont have great #Aguda if they add him would be a perfect campaign.
-    "Macedonians": [ALEXANDER_THE_GREAT, PARMENION, HEPHAISTION],
+    "Macedonians": [ALEXANDER_THE_GREAT],
     "Thracians": [THRACIAN_CHIEFTAIN],
     "Puru": [PORUS],
     "Mapuche": [LAUTARO],
