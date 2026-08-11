@@ -13,7 +13,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     CUAUHTEMOC, ATTILA_THE_HUN, PACAL_II, EL_CID_CAMPEADOR, GENGHIS_KHAN, FRANCESCO_SFORZA, \
     MIKLOS_TOLDI, ALEXANDER_NEVSKI, TARIQ_IBN_ZIYAD, DAGNAJAN, SURYAVARMAN_I, KUSHLUK, \
     GAJAH_MADA, LE_LOI, KOTYAN_KHAN, VYTAUTAS_THE_GREAT, OSMAN, THEMISTOCLES_WARSHIP, \
-    LEONIDAS, DARIUS, MILTIADES, \
+    LEONIDAS, DARIUS, ARTEMISIA, MILTIADES, \
     JOHN_THE_FEARLESS, ROGER_BOSSO, JAN_ZIZKA, JOGAILA, IBRAHIM_LODI, PRITHVIRAJ, TAMAR, \
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
     VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, FRANSICO_DE_ORELLANA, \
@@ -34,67 +34,90 @@ NAME = 'heroes-and-villains'
 
 CIVS_WITH_HEROES_ALREADY = ['Shu', 'Wu', 'Wei']
 
+# At most one land hero and one water hero per civ - the dict schema below
+# enforces this structurally (a civ can only have one "land" key and one
+# "water" key), and validate_hero_for_civ() double-checks each unit's real
+# class_ actually matches the slot it's declared under. Use None for a slot
+# that's genuinely empty rather than omitting the key, so it's obvious at a
+# glance which civs are still missing a water (or land) hero.
 HERO_FOR_CIV = {
-    "British": [EDWARD_LONGSHANKS],
-    "Byzantine": [BELISARIUS],
-    "Celts": [WILLIAM_WALLACE],
-    "Chinese": [WANG_TONG],
-    "French": [JOAN_OF_ARC],
-    "Goths": [ALARIC_THE_GOTH],
-    "Japanese": [NOBUNAGA],
-    "Mongols": [GENGHIS_KHAN],
-    "Persians": [SHAH_ISHMAIL],
-    "Saracens": [SALADIN],
-    "Teutons": [ULRICH_VON_JUNGINGEN],
-    "Turks": [OSMAN],
-    "Vikings": [HARALD_HARDRADA, LEIF_ERIKSON],
-    "Aztecs": [CUAUHTEMOC],
-    "Huns": [ATTILA_THE_HUN],
-    "Koreans": [ADMIRAL_YI_SHUN_SHIN], #no lnad unit, could add one later i lang file setup.
-    "Mayan": [PACAL_II],
-    "Spanish": [EL_CID_CAMPEADOR],
-    "Incas": [PACHACUTI],
-    "Italians": [FRANCESCO_SFORZA],
-    "Magyars": [MIKLOS_TOLDI],
-    "Slavs": [ALEXANDER_NEVSKI],
-    "Berbers": [TARIQ_IBN_ZIYAD],
-    "Ethiopians": [DAGNAJAN],
-    "Malians": [SUNDJATA],
-    "Portuguese": [FRANSICO_DE_ORELLANA, VASCO_DA_GAMA],  # Orellana served the Spanish crown, but kept as a stand-in rather than leaving Portuguese with just one hero
-    "Burmese": [TABINSHWEHTI],
-    "Khmer": [SURYAVARMAN_I],
-    "Malay": [GAJAH_MADA],
-    "Vietnamese": [LE_LOI],
-    "Bulgarians": [TSAR_KONSTANTIN],
-    "Cumans": [KOTYAN_KHAN],
-    "Lithuanians": [VYTAUTAS_THE_GREAT],
-    "Tatars": [QUTLUGH],
-    "Burgundians": [JOHN_THE_FEARLESS],
-    "Sicilians": [ROGER_BOSSO],
-    "Bohemians": [JAN_ZIZKA],
-    "Poles": [JOGAILA],
-    "Hindustanis": [IBRAHIM_LODI],
-    "Bengalis": [PRITHVIRAJ],
-    "Gurjaras": [MIHIRA_BHOJA],  # Mihira Bhoja ruled the Gurjara-Pratihara dynasty - namesake fit
-    "Dravidians": [RAJENDRA_CHOLA],
-    "Romans": [POPE_LEO_I], #could be improved if custom unit is added. or lang script updated.
-    "Armenians": [THOROS],
-    "Georgians": [TAMAR],
-    "Spartans": [LEONIDAS],
-    "Achaemenids": [DARIUS ],  # Artemisia commanded ships for Xerxes, Darius's son, at Salamis; Datis co-commanded at Marathon with Artaphernes
-    "Athenians": [THEMISTOCLES_WARSHIP, MILTIADES],  # architect of the navy that won at Salamis; Miltiades was the actual victor of Marathon
-    "Khitans": [KUSHLUK], #fine but not amazing
-    "Jurchens": [WHITE_TIGER_YAN], #not great but they dont have great #Aguda if they add him would be a perfect campaign.
-    "Macedonians": [ALEXANDER_THE_GREAT],
-    "Thracians": [THRACIAN_CHIEFTAIN],
-    "Puru": [PORUS],
-    "Mapuche": [LAUTARO],
-    "Muisca": [PACANCHIQUE],
-    "Tupi": [ARARIBOIA],
-    #"Shu": [LIU_BEI],
-    #"Wu": [SUN_JIAN],
-    #"Wei": [CAO_CAO],  
+    "British": {"land": EDWARD_LONGSHANKS, "water": None},
+    "Byzantine": {"land": BELISARIUS, "water": None},
+    "Celts": {"land": WILLIAM_WALLACE, "water": None},
+    "Chinese": {"land": WANG_TONG, "water": None},
+    "French": {"land": JOAN_OF_ARC, "water": None},
+    "Goths": {"land": ALARIC_THE_GOTH, "water": None},
+    "Japanese": {"land": NOBUNAGA, "water": None},
+    "Mongols": {"land": GENGHIS_KHAN, "water": None},
+    "Persians": {"land": SHAH_ISHMAIL, "water": None},
+    "Saracens": {"land": SALADIN, "water": None},
+    "Teutons": {"land": ULRICH_VON_JUNGINGEN, "water": None},
+    "Turks": {"land": OSMAN, "water": None},
+    "Vikings": {"land": HARALD_HARDRADA, "water": LEIF_ERIKSON},
+    "Aztecs": {"land": CUAUHTEMOC, "water": None},
+    "Huns": {"land": ATTILA_THE_HUN, "water": None},
+    "Koreans": {"land": None, "water": ADMIRAL_YI_SHUN_SHIN},  # no land unit found yet, could add one later w/ lang file setup
+    "Mayan": {"land": PACAL_II, "water": None},
+    "Spanish": {"land": EL_CID_CAMPEADOR, "water": None},
+    "Incas": {"land": PACHACUTI, "water": None},
+    "Italians": {"land": FRANCESCO_SFORZA, "water": None},
+    "Magyars": {"land": MIKLOS_TOLDI, "water": None},
+    "Slavs": {"land": ALEXANDER_NEVSKI, "water": None},
+    "Berbers": {"land": TARIQ_IBN_ZIYAD, "water": None},
+    "Ethiopians": {"land": DAGNAJAN, "water": None},
+    "Malians": {"land": SUNDJATA, "water": None},
+    "Portuguese": {"land": FRANSICO_DE_ORELLANA, "water": VASCO_DA_GAMA},  # Orellana served the Spanish crown, but kept as a stand-in rather than leaving Portuguese with just one hero
+    "Burmese": {"land": TABINSHWEHTI, "water": None},
+    "Khmer": {"land": SURYAVARMAN_I, "water": None},
+    "Malay": {"land": GAJAH_MADA, "water": None},
+    "Vietnamese": {"land": LE_LOI, "water": None},
+    "Bulgarians": {"land": TSAR_KONSTANTIN, "water": None},
+    "Cumans": {"land": KOTYAN_KHAN, "water": None},
+    "Lithuanians": {"land": VYTAUTAS_THE_GREAT, "water": None},
+    "Tatars": {"land": QUTLUGH, "water": None},
+    "Burgundians": {"land": JOHN_THE_FEARLESS, "water": None},
+    "Sicilians": {"land": ROGER_BOSSO, "water": None},
+    "Bohemians": {"land": JAN_ZIZKA, "water": None},
+    "Poles": {"land": JOGAILA, "water": None},
+    "Hindustanis": {"land": IBRAHIM_LODI, "water": None},
+    "Bengalis": {"land": PRITHVIRAJ, "water": None},
+    "Gurjaras": {"land": MIHIRA_BHOJA, "water": None},  # Mihira Bhoja ruled the Gurjara-Pratihara dynasty - namesake fit
+    "Dravidians": {"land": RAJENDRA_CHOLA, "water": None},
+    "Romans": {"land": POPE_LEO_I, "water": None},  # could be improved if custom unit is added, or lang script updated
+    "Armenians": {"land": THOROS, "water": None},
+    "Georgians": {"land": TAMAR, "water": None},
+    "Spartans": {"land": LEONIDAS, "water": None},
+    "Achaemenids": {"land": DARIUS, "water": ARTEMISIA},  # Artemisia commanded ships for Xerxes, Darius's son, at Salamis
+    "Athenians": {"land": MILTIADES, "water": THEMISTOCLES_WARSHIP},  # Miltiades was the actual victor of Marathon; Themistocles built the navy that won at Salamis
+    "Khitans": {"land": KUSHLUK, "water": None},  # fine but not amazing
+    "Jurchens": {"land": WHITE_TIGER_YAN, "water": None},  # not great but they dont have great #Aguda if they add him would be a perfect campaign
+    "Macedonians": {"land": ALEXANDER_THE_GREAT, "water": None},
+    "Thracians": {"land": THRACIAN_CHIEFTAIN, "water": None},
+    "Puru": {"land": PORUS, "water": None},
+    "Mapuche": {"land": LAUTARO, "water": None},
+    "Muisca": {"land": PACANCHIQUE, "water": None},
+    "Tupi": {"land": ARARIBOIA, "water": None},
+    # Shu/Wu/Wei already have real native land heroes (Cao Cao/Liu Bei/Sun
+    # Jian - see CIVS_WITH_HEROES_ALREADY, which skips them entirely below).
+    # If a good water-only hero is ever found for one of them, add just the
+    # "water" half here rather than uncommenting "land" too.
+    #"Shu": {"land": None, "water": LIU_BEI},
+    #"Wu": {"land": None, "water": SUN_JIAN},
+    #"Wei": {"land": None, "water": CAO_CAO},
 }
+
+
+def validate_hero_for_civ(data: DatFile):
+    base = data.civs[0]
+    for civ_name, slots in HERO_FOR_CIV.items():
+        for slot, unit_id in slots.items():
+            if unit_id is None:
+                continue
+            is_water = base.units[unit_id].class_ == WARSHIP_CLASS
+            if slot == 'water' and not is_water:
+                raise ValueError(f'{civ_name}: unit {unit_id} is under "water" but is not WARSHIP_CLASS')
+            if slot == 'land' and is_water:
+                raise ValueError(f'{civ_name}: unit {unit_id} is under "land" but is WARSHIP_CLASS')
 
 class auraClass:
       def __init__(self, data: DatFile):
@@ -276,21 +299,24 @@ def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, w
     return new_unit_id
 
 def mod(data: DatFile):
+    validate_hero_for_civ(data)
     civs_missing_hero = []
     water_basilius_unit_id = limitHeroesForCiv(data, WATER_BASILIUS_RESOURCE_VALUE)
     land_basilius_unit_id = limitHeroesForCiv(data, LAND_BASILIUS_RESOURCE_VALUE)
     for civ_id, civ in enumerate(data.civs):
         if civ.name in HERO_FOR_CIV:
-            for unit_id in HERO_FOR_CIV[civ.name]:
-                logging.info(f'Creating hero for civ {civ.name} - hero: {unit_id}')
+            for slot, unit_id in HERO_FOR_CIV[civ.name].items():
+                if unit_id is None:
+                    continue
+                logging.info(f'Creating {slot} hero for civ {civ.name} - hero: {unit_id}')
                 hero_unit_id = makeHero(unit_id, civ, data, land_basilius_unit_id, water_basilius_unit_id)
                 logging.info(f'Enabling unit for civ {civ.name} - hero: {unit_id}')
                 enableUnitForCiv(civ_id, hero_unit_id, data)
-    
+
         else:
             if(civ.name not in CIVS_WITH_HEROES_ALREADY):
                 # If the civ is not in the list, log an error message
                 civs_missing_hero.append(civ.name)
-    
+
     for civ in civs_missing_hero:
         logging.error(f'No hero for civ {civ}')
