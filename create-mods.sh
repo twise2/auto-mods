@@ -65,6 +65,15 @@ mkdir -p build/civ_identity_expansion/resources/_common/dat
 ./sync_tech_trees.py ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ~/aoe/Aoe2DE\ proton/resources/_common/dat/CivTechTrees ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/regional_heritage/resources/_common/dat/CivTechTrees
 ./sync_tech_trees.py ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ~/aoe/Aoe2DE\ proton/resources/_common/dat/CivTechTrees ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/civ_identity_expansion/resources/_common/dat/CivTechTrees
 
+# regional-heritage also removes native Knight/Cavalier/Paladin access for a
+# handful of civs (mods/regional_heritage.py::DISABLE_UNIT_LINES_FOR_CIV) -
+# that's not encoded in the .dat at all, it's a separate file. Only the two
+# targets that actually include regional-heritage need this; plain
+# heroes_and_villains shouldn't lose Knight access it never granted a
+# replacement for.
+./disable_unit_lines.py ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ~/aoe/Aoe2DE\ proton/resources/_common/dat/futuravailableunits.json ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/regional_heritage/resources/_common/dat/futuravailableunits.json
+./disable_unit_lines.py ~/aoe/Aoe2DE\ proton/resources/_common/dat/empires2_x2_p1.dat ~/aoe/Aoe2DE\ proton/resources/_common/dat/futuravailableunits.json ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/civ_identity_expansion/resources/_common/dat/futuravailableunits.json
+
 
 cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/community_games/resources/_common/dat/civilizations.json
 cp ~/aoe/Aoe2DE\ proton/resources/_common/dat/civilizations.json ./build/flying_dutchman/resources/_common/dat/civilizations.json

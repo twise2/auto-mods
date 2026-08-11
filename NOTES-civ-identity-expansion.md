@@ -1059,3 +1059,76 @@ in this file:
 All three verified for button collisions first (Siege Workshop/Dock slots
 these units use are all the standard "mutually-exclusive regional
 alternative" pattern already established throughout this mod - safe).
+
+## regional-heritage v15: automatic button-collision detection, and the v14 checks weren't actually enough
+
+Asked whether Traction Trebuchet/Rocket Cart should disable the units they
+compete with (Trebuchet, Mangonel/Onager). Checking properly turned up two
+separate findings:
+
+- **Traction Trebuchet vs Trebuchet: not actually a collision.** The real,
+  standard Trebuchet (unit id 42) trains from the **Castle**, button 0 -
+  Traction Trebuchet trains from the Siege Workshop, button 4. Different
+  buildings entirely, so Chinese/Jurchens/Khitans keep both with no
+  conflict. (id 331, "Trebuchet (Packed)"/PTREB, is a separate mobility-
+  ability unit that happens to share the Castle hero button - unrelated.)
+- **Rocket Cart vs Mangonel/Onager: a real bug.** Both share Siege Workshop
+  button 2, and confirmed via `futuravailableunits.json` that Mangonel/
+  Onager are genuinely active for Japanese - meaning v14 shipped with two
+  units silently fighting over one training-menu button.
+
+Asked to make the fix "logical... not just manual runs off an arbitrary
+base" - rebuilt `disable_unit_lines.py` to detect this class of bug
+automatically instead of requiring a hand-maintained collision list, using
+the same trace-the-real-grants technique `sync_tech_trees.py` already uses:
+
+1. Trace every unit `regional_heritage.mod()` actually grants (civ id ->
+   unit ids), same monkeypatch technique as `sync_tech_trees.py`.
+2. For each granted unit, look up its real `(building, button)` in the
+   `.dat`.
+3. For every OTHER unit that civ already has listed under that same
+   building in `futuravailableunits.json`, check if it trains from the
+   identical button. If so, it's a real collision - remove it.
+
+First pass had two categories of false positive, both fixed:
+
+- **The "Builder" build-menu** (id 118, listing constructable *buildings*,
+  not trained units) uses a completely different button scheme where many
+  options are simultaneously valid - matching `(building, button)` there
+  flagged Castle itself as "colliding" with a newly-granted building.
+  Skipped entirely; building grants in this repo are already verified safe
+  by hand (no real collision ever found for Caravanserai/Donjon/Krepost/
+  Feitoria/etc across the whole session).
+- **Line-upgrade grants** (`upgrade_unit_for_civ`, e.g. Legionary for
+  Byzantines) are *supposed* to share their base unit's button - that's
+  the same continuous progression, not a competing unit. Fixed two ways:
+  (a) `trace_granted_units` now returns newly-enabled and line-upgraded
+  units separately, and only the former goes through collision detection;
+  (b) added `build_upgrade_families()`, which scans every real vanilla
+  `TYPE_UPGRADE_UNIT` tech in the `.dat` (Knight->Cavalier->Paladin, Camel
+  Rider->Heavy Camel Rider, etc) to build the *real* tier-family for any
+  unit, and excludes a granted unit's entire family from being flagged -
+  catches native vanilla upgrade chains this mod never touched (e.g.
+  Turks' own native Heavy Camel Rider, one tier past what Camel Scout
+  upgrades into), not just this mod's own upgrades.
+
+After both fixes, every remaining flagged collision was checked against
+real `CivTechTrees` status and confirmed genuine - not just Rocket Cart/
+Mangonel/Onager for Japanese, but two more real bugs the original v14
+manual button checks missed entirely: Traction Trebuchet collides with
+Bombard Cannon for Jurchens (both Siege Workshop button 4), and Lou Chuan
+collides with Cannon Galleon/Elite Cannon Galleon for Koreans/Khitans/
+Vietnamese (both Dock button 9). All now auto-detected and fixed on every
+run, merged with the deliberate `DISABLE_UNIT_LINES_FOR_CIV` removals into
+one `futuravailableunits.json` patch. `disable_unit_lines.py`'s CLI now
+takes the `.dat` and `civilizations.json` too (needed to trace grants and
+map civ ids to `futuravailableunits.json`'s civ-name keys) - updated in
+`create-mods.sh` to match.
+
+Also wired `disable_unit_lines.py` (and `futuravailableunits.json` itself)
+into `create-mods.sh` for the first time - it was only ever being run
+manually before, meaning the "official" reproducible build never actually
+produced this output. Only added to the `regional_heritage` and
+`civ_identity_expansion` targets, not plain `heroes_and_villains` - the
+disable decisions are regional-heritage-specific and shouldn't apply to a
+build that doesn't include any of its flavor changes.
