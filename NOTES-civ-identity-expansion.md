@@ -911,3 +911,47 @@ for these civs. Not investigated further since it wasn't needed here.
 Verified Castle button 2 (the mechanism's hero slot) is clear for all four
 civs before building - only Portable Trebuchet and Shu/Wu/Wei's own real
 heroes sit there, same as every other civ this mod gives heroes to.
+
+## Knight-line removal for Turks/Huns - the earlier "hits a wall" conclusion was wrong
+
+The v13 notes above concluded native Knight/Cavalier/Paladin access for
+original-game civs was likely hardcoded in the executable, since the `.dat`
+shows zero difference between Franks (has it) and Indians (confirmed lacks
+it) for `unit.enabled`, `train_locations`, or any tech/effect referencing
+those three unit ids.
+
+That conclusion was wrong - just incomplete. Prompted by the user pointing
+out that Dravidians/Aztecs/Mayans/Incas/Muisca/Mapuche/Tupi already lack a
+Knight line natively in real vanilla play, which means the exclusion has to
+be real, moddable data *somewhere*. Checked two more `.dat`-internal angles
+first (`Civ.resources` array diffed between Franks/Aztecs - only 3 unrelated
+differences; `Civ.tech_tree_id` - turned out not to index into `data.techs`
+the way it looked like it might) before finding the real answer entirely
+outside the `.dat`: **`resources/_common/dat/futuravailableunits.json`** -
+a separate file, in the same folder as `civilizations.json`, keyed by civ
+name, listing exactly which units each civ's buildings can train and at
+what age.
+
+Confirmed by inspection: Aztecs' entry has **zero** Knight/Cavalier/Paladin
+entries anywhere. Franks/Huns have all three. Turks has Knight and Cavalier
+but not Paladin - matching exactly what the real `CivTechTrees` UI already
+showed for Turks, which is a strong internal-consistency signal this file
+is genuinely authoritative, not just decorative.
+
+Built `disable_unit_lines.py` (mirrors `sync_tech_trees.py`'s CLI shape) -
+takes a `DISABLE_UNITS_FOR_CIV` map (currently `Turks`/`Huns` -> Knight/
+Cavalier/Paladin ids) and strips those unit ids out of every building entry
+for that civ, for every civ in the map. Ran it, deployed the patched file
+to `localDataMod/resources/_common/dat/futuravailableunits.json` (dropped
+in next to the existing `.dat` and `CivTechTrees` overrides).
+
+**Still genuinely unverified**, same category of uncertainty that applied
+to `CivTechTrees` before real in-game testing confirmed the `.dat`-level
+mechanism actually works: it's not proven whether this file is load-bearing
+for the real training gate, or whether it only powers a UI feature (the
+"next age" unlock-preview tooltip) while something else entirely still
+governs actual training. The only real test is building a Stable as Turks
+or Huns in an actual game and checking whether Knight is genuinely
+unbuildable, not just tooltip-absent. Flagging this clearly rather than
+declaring victory prematurely - this file is new territory for this repo,
+never used before this pass.
