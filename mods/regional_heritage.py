@@ -217,16 +217,21 @@ def give_settlements_to_mesoamerican_and_andean_civs(data: DatFile):
     # Settlement occupies the same build-menu slot as the Mill (Poland's Folwark,
     # the other Mill-replacement building in the game, uses the same slot for the
     # same reason) - it's a replacement, not an addition, same as Mule Cart above.
-    # Bundled into one tech so Mill disappears at the exact moment Settlement
+    # Confirmed via Muisca's own real futuravailableunits.json entry that their
+    # Builder menu lists neither Mill, Lumber Camp, nor Mining Camp - Settlement
+    # is a full economic-building replacement for all three, not just Mill.
+    # Bundled into one tech so all three disappear at the exact moment Settlement
     # becomes available, not before.
     civs = ['Aztecs', 'Mayan', 'Incas']
     for civ_id in civ_ids_named(data, civs):
         commands = [
             EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=SETTLEMENT, b=1, c=-1, d=0.0),
             EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=MILL, b=0, c=-1, d=0.0),
+            EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=LUMBER_CAMP, b=0, c=-1, d=0.0),
+            EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=MINING_CAMP, b=0, c=-1, d=0.0),
         ]
         grant_effect_to_civ(data, civ_id, commands, TECH_CASTLE_BUILT,
-                             f'Swap Mill for Settlement for {data.civs[civ_id].name}')
+                             f'Swap Mill/Lumber Camp/Mining Camp for Settlement for {data.civs[civ_id].name}')
         # Skip the intermediate Age 2 tier - jump straight to the final tier once
         # Imperial is reached, same simplification used for every other elite/upgrade
         # grant in this file.
