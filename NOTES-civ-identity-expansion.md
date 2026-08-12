@@ -1420,3 +1420,62 @@ universal content, not real for Steppe-Lancer-style restricted regional
 content) - so its non-self-collision output should be read as "worth a
 second look," not "confirmed real," until this mechanism is actually
 identified.
+
+## regional-heritage v21: Cavalier/Paladin research buttons cracked - a real per-civ tech-disable mechanism found
+
+In-game testing found Chinese could still research "Cavalier" even
+though the Knight/Cavalier/Paladin *units* were genuinely disabled -
+researching it just upgraded nothing, since no Knight was left to
+upgrade, but the button stayed visible and clickable. Unlike units,
+techs in this `.dat` are not per-civ objects - `data.techs` is one flat,
+shared array, so there's no per-civ copy of "Cavalier" (id 209) to
+mutate the way `civ.units[38]` gave a per-civ Knight to disable.
+
+Found the real mechanism by looking for how Persians already solve the
+exact same problem: Savar replaces only their *final* tier (Paladin),
+so Persians keep a real, working Cavalier tech but need the generic
+Paladin tech (265) hidden, since Savar occupies that slot instead.
+Direct `.dat` inspection found tech 527, **"[FTT] Disable Paladin"**,
+`civ=8` (Persians specifically) - a real vanilla tech whose one effect
+command is `type=102` (a previously unidentified type, now named
+`TYPE_DISABLE_REGIONAL_TECH` in `mods/ids.py`) with `d=265.0`, the
+target tech id (a/b/c unused, -1). "[FTT]" stands for Future Tech Tree -
+the same naming as `futuravailableunits.json`, though this is the real,
+`.dat`-level mechanism that file is presumably exported *from*, not the
+file itself (which we've already proven isn't load-bearing). Also found
+a global "Disable Regionals" tech (79, civ=-1, fires immediately for
+every civ with zero prereqs) that disables ~30 regional "make avail"
+techs by default via the same `type=102` command shape - strong
+independent confirmation this is the real, general per-civ tech-tree
+gating mechanism, not a one-off Persians quirk.
+
+Added `disable_tech_for_civ(data, civ_id, tech_ids, required_tech)` to
+`mods/util.py`, mirroring `disable_unit_line_for_civ`'s shape exactly
+but targeting tech ids via `TYPE_DISABLE_REGIONAL_TECH` instead of unit
+ids via `TYPE_ENABLE_DISABLE_UNIT`. Added `TECH_CAVALIER = 209` and
+`TECH_PALADIN = 265` to `mods/ids.py` (deliberately distinct names from
+the existing `CAVALIER`/`PALADIN` *unit* id constants - different id
+spaces that happen to overlap numerically with other things, a recurring
+source of confusion this session). Confirmed `KNIGHT`'s own "make avail"
+tech (166) has zero cost and `icon_id=-1` - a hidden background tech,
+never shown to the player - so only Cavalier/Paladin needed this
+treatment, not a third "disable Knight-the-tech" call. All 4
+`remove_knight_line_from_*` call sites in `regional_heritage.py` now
+call `disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN},
+TECH_CASTLE_BUILT)` right after `disable_unit_line_for_civ`. Rebuilt,
+verified directly in the `.dat` (Chinese's new tech correctly lists
+`type=102` commands disabling both 209 and 265), regenerated
+`CivTechTrees`/`futuravailableunits.json`, deployed, byte-hash confirmed
+matching.
+
+This also meaningfully narrows the still-open `tech_tree` mystery from
+v20: real per-civ tech restriction clearly *is* achievable and *is* a
+known, used-by-the-real-dev-team mechanism (`type=102`/"[FTT]"), just
+narrower in scope than initially feared - it targets specific techs by
+id via an explicit disable list, not some civ-wide table this mod would
+need to fully reverse-engineer. Worth checking whether the same
+mechanism can solve other still-open problems (e.g. whether Hand
+Cannoneer has an analogous tech to hide for Grenadier's target civs -
+not investigated yet, though Hand Cannoneer likely doesn't have a
+further upgrade tier the way Knight has Cavalier/Paladin, so may not
+need it).

@@ -6,7 +6,7 @@ from genieutils.effect import EffectCommand
 from genieutils.unit import AttackOrArmor
 
 from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ, \
-    disable_unit_line_for_civ, set_train_locations_for_civ
+    disable_unit_line_for_civ, set_train_locations_for_civ, disable_tech_for_civ
 from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     TYPE_ENABLE_DISABLE_UNIT, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
@@ -15,7 +15,7 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     MISSIONARY, SCOUT_CAVALRY, \
     LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, \
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
-    KNIGHT, CAVALIER, PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
+    KNIGHT, CAVALIER, PALADIN, TECH_CAVALIER, TECH_PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
     FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
     DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION, \
     CHURCH, CHURCH_AGE2, CHURCH_AGE3, CHURCH_AGE4, FORTIFIED_CHURCH, \
@@ -589,11 +589,23 @@ def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
     # knights.
     for civ_id in civ_ids_named(data, ['Turks', 'Huns']):
         disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
+        # Cavalier/Paladin are real, player-researched techs (not just the
+        # units) - without this, the now-pointless upgrade research still
+        # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
+        # Disable Paladin", civ=8/Persians, hides Paladin for them since
+        # Savar replaces it - confirmed via direct .dat inspection).
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_CASTLE_BUILT)
     # Berbers and Saracens: native Camel Rider/Heavy Camel Rider (not
     # granted by this mod - they've always had it); Almoravid/Almohad and
     # early-Islamic camel-cavalry identity, not knights.
     for civ_id in civ_ids_named(data, ['Berbers', 'Saracens']):
         disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
+        # Cavalier/Paladin are real, player-researched techs (not just the
+        # units) - without this, the now-pointless upgrade research still
+        # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
+        # Disable Paladin", civ=8/Persians, hides Paladin for them since
+        # Savar replaces it - confirmed via direct .dat inspection).
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_CASTLE_BUILT)
 
 
 def remove_knight_line_from_true_elephant_civs(data: DatFile):
@@ -607,6 +619,12 @@ def remove_knight_line_from_true_elephant_civs(data: DatFile):
     # fitting.
     for civ_id in civ_ids_named(data, ['Malay', 'Burmese', 'Khmer', 'Vietnamese']):
         disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
+        # Cavalier/Paladin are real, player-researched techs (not just the
+        # units) - without this, the now-pointless upgrade research still
+        # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
+        # Disable Paladin", civ=8/Persians, hides Paladin for them since
+        # Savar replaces it - confirmed via direct .dat inspection).
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_CASTLE_BUILT)
 
 
 def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
@@ -619,6 +637,12 @@ def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
     # not a steppe/camel or elephant identity) is its own thing.
     for civ_id in civ_ids_named(data, ['Chinese']):
         disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
+        # Cavalier/Paladin are real, player-researched techs (not just the
+        # units) - without this, the now-pointless upgrade research still
+        # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
+        # Disable Paladin", civ=8/Persians, hides Paladin for them since
+        # Savar replaces it - confirmed via direct .dat inspection).
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_CASTLE_BUILT)
 
 
 def mod(data: DatFile):

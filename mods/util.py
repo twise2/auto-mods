@@ -10,7 +10,7 @@ from genieutils.unit import Unit, TrainLocation
 from genieutils.versions import Version
 
 from mods.ids import CLASS_PETARD, MONUMENT, CLASS_HERO, TYPE_UPGRADE_UNIT, TYPE_COMBATANT, \
-    TYPE_ENABLE_DISABLE_UNIT
+    TYPE_ENABLE_DISABLE_UNIT, TYPE_DISABLE_REGIONAL_TECH
 
 GC = TypeVar('GC', bound=GenieClass)
 
@@ -54,6 +54,27 @@ def disable_unit_line_for_civ(data: DatFile, civ_id: int, unit_ids: set[int], re
     disable_commands = [EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=uid, b=0, c=-1, d=0.0)
                          for uid in sorted(unit_ids)]
     grant_effect_to_civ(data, civ_id, disable_commands, required_tech, f'Disable [{names}] for {civ.name}')
+
+
+def disable_tech_for_civ(data: DatFile, civ_id: int, tech_ids: set[int], required_tech: int):
+    """Remove a civ's real access to an upgrade *tech* (as opposed to the
+    unit it produces) - e.g. hiding the Cavalier/Paladin research buttons
+    for a civ whose Knight/Cavalier/Paladin units are already disabled via
+    disable_unit_line_for_civ, so the now-pointless upgrade research
+    doesn't still show up. Uses TYPE_DISABLE_REGIONAL_TECH, DE's own real
+    "[FTT]" (Future Tech Tree) mechanism - confirmed via direct .dat
+    inspection that Persians has exactly this: tech 527, "[FTT] Disable
+    Paladin", civ=8, disables the generic Paladin tech (265) for them
+    specifically since Savar replaces it (Persians keep the real, working
+    Cavalier tech though - Savar only replaces the final tier, unlike a
+    full-line removal like Chinese/Hei-Kuang Cavalry).
+    """
+    civ = data.civs[civ_id]
+    names = ', '.join(data.techs[tid].name for tid in sorted(tech_ids))
+    logging.info(f'Disabling tech(s) [{names}] for {civ.name}')
+    disable_commands = [EffectCommand(type=TYPE_DISABLE_REGIONAL_TECH, a=-1, b=-1, c=-1, d=float(tid))
+                         for tid in sorted(tech_ids)]
+    grant_effect_to_civ(data, civ_id, disable_commands, required_tech, f'Disable tech [{names}] for {civ.name}')
 
 
 def disable_tech_effect(data: DatFile, tech_id: int):

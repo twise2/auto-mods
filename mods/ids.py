@@ -264,6 +264,12 @@ MANGONEL = 280
 THROWING_AXEMAN = 281
 MAMELUKE = 282
 CAVALIER = 283
+# Techs (not units) that upgrade Knight->Cavalier->Paladin - distinct id
+# space from the unit constants above, needed by disable_tech_for_civ to
+# hide the now-pointless research buttons for civs whose Knight/Cavalier/
+# Paladin units are disabled entirely (e.g. Chinese/Hei-Kuang Cavalry).
+TECH_CAVALIER = 209
+TECH_PALADIN = 265
 SAMURAI = 291
 CAMEL_RIDER = 329
 HEAVY_CAMEL_RIDER = 330
@@ -490,6 +496,13 @@ TYPE_UPGRADE_UNIT = 3
 TYPE_COMBATANT = 70
 TYPE_ENABLE_DISABLE_UNIT = 2
 TYPE_GARRISON = 3
+# Removes a tech from a civ's real tech tree - the mechanism DE's own "[FTT]"
+# (Future Tech Tree) system uses, e.g. tech 527 "[FTT] Disable Paladin"
+# (civ=8/Persians) hides the generic Paladin tech for them since Savar
+# replaces it. EffectCommand's `d` field holds the target tech id (a/b/c
+# unused, -1). Confirmed real via direct .dat inspection - Persians'
+# own tech is structured exactly this way.
+TYPE_DISABLE_REGIONAL_TECH = 102
 ATTR_MODIFIER_MULTIPLY = 5
 ATTR_WORK_RATE = 13
 
