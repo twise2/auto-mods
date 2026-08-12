@@ -176,19 +176,27 @@ def reskin_unit_for_civ(data: DatFile, civ_id: int, unit_id: int, donor_unit_id:
     unit.type_50.attack_graphic = donor.type_50.attack_graphic
 
 
-def set_train_button_for_civ(data: DatFile, civ_id: int, unit_id: int, building_id: int, button_id: int):
+def set_train_locations_for_civ(data: DatFile, civ_id: int, unit_id: int, locations: list[tuple[int, int]]):
     """Move where one civ's copy of a unit trains from, without affecting any
-    other civ's copy of the same unit.
+    other civ's copy of the same unit. Takes one or more (building_id,
+    button_id) pairs, since some units (e.g. Temple Guard, trainable from
+    both Barracks and Monastery) train from more than one building.
 
     Needed when a granted unit's vanilla training button collides with
     something the target civ already has at that same building (its own
     native unique unit, or another grant) - each civ owns its own unit
-    objects, so this only touches the one civ's copy.
+    objects, so this only touches the one civ's copy. disable_unit_lines.py
+    traces calls to this (see its trace_granted_units) so
+    futuravailableunits.json reflects the overridden location(s) rather than
+    the unit's generic default.
     """
     unit = data.civs[civ_id].units[unit_id]
-    logging.info(f'Moving {unit.name} to building {building_id} button {button_id} for {data.civs[civ_id].name}')
-    unit.creatable.train_locations = [TrainLocation(train_time=unit.creatable.train_locations[0].train_time,
-                                                      unit_id=building_id, button_id=button_id, hot_key_id=-1)]
+    train_time = unit.creatable.train_locations[0].train_time
+    logging.info(f'Moving {unit.name} to {locations} for {data.civs[civ_id].name}')
+    unit.creatable.train_locations = [
+        TrainLocation(train_time=train_time, unit_id=building_id, button_id=button_id, hot_key_id=-1)
+        for building_id, button_id in locations
+    ]
 
 
 def affects_units(data: DatFile, effect_command: EffectCommand) -> bool:

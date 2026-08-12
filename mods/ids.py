@@ -449,6 +449,13 @@ TRACTION_TREBUCHET = 1942
 LOU_CHUAN = 1948
 HEI_KUANG_CAVALRY = 1944
 ELITE_HEI_KUANG_CAVALRY = 1946
+GRENADIER = 1911
+JIAN_SWORDSMAN = 1974
+ELITE_JIAN_SWORDSMAN = 1976
+TEMPLE_GUARD = 2586
+ELITE_TEMPLE_GUARD = 2587
+WAR_CHARIOT = 2150
+ELITE_WAR_CHARIOT = 2151
 
 # Donor units for Samurai/Elite Samurai's ranged-mode swap ability - Wu's real
 # Fire Archer/Elite Fire Archer, used purely for their graphic (not shared

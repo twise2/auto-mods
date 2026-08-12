@@ -79,8 +79,9 @@ def civ_name_to_futuravailableunits_key(data: DatFile, civilizations_json_path: 
 BUILD_MENU_ID = 118
 
 
-def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, set[int]], dict[int, set[int]]]:
-    """(newly_enabled, line_upgraded, disabled) civ_id -> {unit_id, ...} for
+def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, set[int]], dict[int, set[int]],
+                                                  dict[tuple[int, int], list[tuple[int, int]]]]:
+    """(newly_enabled, line_upgraded, disabled, location_overrides) for
     everything regional_heritage.mod() (and heroes_and_villains.mod()'s
     plain enables) actually does. Mirrors sync_tech_trees.py's
     trace_grants - intercepts the granting/disabling calls instead of
@@ -96,10 +97,15 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
     the path to it). Only newly_enabled goes through collision detection.
     disabled comes from disable_unit_line_for_civ calls - the deliberate
     historical-identity removals, unrelated to collision detection.
+    location_overrides comes from set_train_locations_for_civ calls - a
+    per-(civ, unit) replacement for the unit's generic default
+    train_locations, needed when the default would itself collide (e.g.
+    Temple Guard moved off Aztecs' native Eagle Warrior button).
     """
     enabled: dict[int, set[int]] = defaultdict(set)
     upgraded: dict[int, set[int]] = defaultdict(set)
     disabled: dict[int, set[int]] = defaultdict(set)
+    location_overrides: dict[tuple[int, int], list[tuple[int, int]]] = {}
 
     def rec_enable(data, civ_id, unit_id, required_tech):
         enabled[civ_id].add(unit_id)
@@ -115,8 +121,8 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
                 upgraded[civ_id].add(cmd.b)
         return -1
 
-    def noop_button(data, civ_id, unit_id, building_id, button_id):
-        pass
+    def rec_set_locations(data, civ_id, unit_id, locations):
+        location_overrides[(civ_id, unit_id)] = list(locations)
 
     def noop_reskin(data, civ_id, unit_id, donor_unit_id):
         pass
@@ -126,19 +132,19 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
 
     import mods.util as util
     orig = (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-            util.set_train_button_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ)
+            util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ)
     regional_heritage.enable_unit_for_civ = rec_enable
     regional_heritage.upgrade_unit_for_civ = rec_upgrade
     regional_heritage.grant_effect_to_civ = rec_grant_effect
-    regional_heritage.set_train_button_for_civ = noop_button
+    regional_heritage.set_train_locations_for_civ = rec_set_locations
     regional_heritage.reskin_unit_for_civ = noop_reskin
     regional_heritage.disable_unit_line_for_civ = rec_disable_line
     heroes_and_villains.enable_unit_for_civ = rec_enable
     regional_heritage.mod(data)
     (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-     util.set_train_button_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ) = orig
+     util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ) = orig
 
-    return enabled, upgraded, disabled
+    return enabled, upgraded, disabled, location_overrides
 
 
 def build_upgrade_families(data: DatFile) -> dict[int, set[int]]:
@@ -178,22 +184,44 @@ def build_upgrade_families(data: DatFile) -> dict[int, set[int]]:
     return {unit_id: families[find(unit_id)] for unit_id in parent}
 
 
+def unit_locations(data: DatFile, civ_id: int, unit_id: int,
+                    overrides: dict[tuple[int, int], list[tuple[int, int]]]) -> list[tuple[int, int]]:
+    """Where this civ's copy of unit_id actually trains from: the
+    set_train_locations_for_civ override if one was traced for this exact
+    (civ, unit) pair, otherwise the unit's real default train_locations
+    straight from the .dat (a unit can train from more than one building,
+    e.g. Temple Guard from both Barracks and Monastery)."""
+    if (civ_id, unit_id) in overrides:
+        return overrides[(civ_id, unit_id)]
+    base = data.civs[0]
+    u = base.units[unit_id] if unit_id < len(base.units) else None
+    if u is None or not u.creatable:
+        return []
+    return [(tl.unit_id, tl.button_id) for tl in u.creatable.train_locations if tl.unit_id != -1]
+
+
 def find_button_collisions(data: DatFile, civ_filenames: dict[int, str], granted: dict[int, set[int]],
+                            overrides: dict[tuple[int, int], list[tuple[int, int]]],
                             available_units: dict) -> dict[str, set[int]]:
     """For every granted unit, find any OTHER unit that civ already has
     listed under the same building in futuravailableunits.json and that
     trains from the exact same button - a real collision, since only one
-    unit can actually occupy a given (building, button) slot. Excludes
-    anything in the granted unit's own upgrade family (see
-    build_upgrade_families) - those are the same progression, not a
-    competing unit. Returns {civ_name: {unit_id, ...}}, the same shape
-    disable_unit_line_for_civ calls trace to, so the two can be merged.
+    unit can actually occupy a given (building, button) slot. Uses the
+    granted unit's actual (possibly overridden) location(s), not just its
+    generic default - a set_train_locations_for_civ override exists
+    specifically to dodge a collision the default would cause, so checking
+    the default here would just rediscover the problem the override
+    already solved. Excludes anything in the granted unit's own upgrade
+    family (see build_upgrade_families) - those are the same progression,
+    not a competing unit. Returns {civ_name: {unit_id, ...}}, the same
+    shape disable_unit_line_for_civ calls trace to, so the two can be
+    merged.
     """
     base = data.civs[0]
     families = build_upgrade_families(data)
     collisions: dict[str, set[int]] = defaultdict(set)
 
-    def train_location(unit_id: int):
+    def default_location(unit_id: int):
         u = base.units[unit_id] if unit_id < len(base.units) else None
         if u is None or not u.creatable or not u.creatable.train_locations:
             return None
@@ -207,24 +235,96 @@ def find_button_collisions(data: DatFile, civ_filenames: dict[int, str], granted
             continue
         buildings_by_id = {b.get('ID'): b for b in civ_entry.get('Buildings', [])}
         for unit_id in unit_ids:
-            loc = train_location(unit_id)
-            if loc is None:
-                continue
-            building_id, button_id = loc
-            if building_id == BUILD_MENU_ID:
-                continue
+            same_family = families.get(unit_id, {unit_id})
+            for building_id, button_id in unit_locations(data, civ_id, unit_id, overrides):
+                if building_id == BUILD_MENU_ID:
+                    continue
+                building = buildings_by_id.get(building_id)
+                if building is None:
+                    continue
+                for other in building.get('Units', []):
+                    other_id = other.get('ID')
+                    if other_id is None or other_id == unit_id or other_id in unit_ids or other_id in same_family:
+                        continue
+                    if default_location(other_id) == (building_id, button_id):
+                        collisions[civ_key].add(other_id)
+    return collisions
+
+
+def build_donor_templates(available_units: dict) -> dict[int, dict]:
+    """unit_id -> a representative {ID, Name, RequiredAge, ...} dict, copied
+    from wherever it already appears (any civ) in the source json. Reused
+    when adding that same unit to a newly-granted civ, so the added entry's
+    Name/RequiredAge match the game's own data instead of being guessed.
+    """
+    templates: dict[int, dict] = {}
+    for civ_entry in available_units.values():
+        for building in civ_entry.get('Buildings', []):
+            for unit in building.get('Units', []):
+                uid = unit.get('ID')
+                if uid is not None and uid not in templates:
+                    templates[uid] = dict(unit)
+    return templates
+
+
+def building_names(available_units: dict) -> dict[int, str]:
+    """building_id -> its display Name, scanned from the source json
+    (consistent across every civ that already lists that building)."""
+    names: dict[int, str] = {}
+    for civ_entry in available_units.values():
+        for building in civ_entry.get('Buildings', []):
+            bid = building.get('ID')
+            if bid is not None and bid not in names:
+                names[bid] = building.get('Name')
+    return names
+
+
+def add_granted_units(data: DatFile, civ_filenames: dict[int, str], available_units: dict,
+                       newly_enabled: dict[int, set[int]], upgraded: dict[int, set[int]],
+                       overrides: dict[tuple[int, int], list[tuple[int, int]]]):
+    """The other half of what this script needs to do: every unit
+    enable_unit_for_civ/upgrade_unit_for_civ grants also needs a real entry
+    added to futuravailableunits.json, or the civ never actually gains
+    visible/tracked access to it - collision removals alone can leave a civ
+    strictly worse off than vanilla (native unit removed, its replacement
+    never added). Sources each entry from wherever the unit already exists
+    for its real donor civ when possible (matches the game's own
+    Name/RequiredAge); falls back to a reasonable guess (the .dat's own
+    unit name, Castle/Imperial Age matching this mod's own TECH_CASTLE_BUILT
+    /TECH_REQUIREMENT_IMPERIAL_AGE gates) only for genuinely unclaimed units
+    with no existing donor entry anywhere (e.g. War Chariot 2150/2151).
+    """
+    templates = build_donor_templates(available_units)
+    b_names = building_names(available_units)
+    base = data.civs[0]
+
+    def add_one(civ_id: int, unit_id: int, default_age: int):
+        civ_key = civ_filenames.get(civ_id)
+        civ_entry = available_units.get(civ_key)
+        if civ_entry is None:
+            return
+        u = base.units[unit_id] if unit_id < len(base.units) else None
+        unit_name = u.name if u is not None else str(unit_id)
+        template = templates.get(unit_id) or {'ID': unit_id, 'Name': unit_name, 'RequiredAge': default_age}
+        buildings = civ_entry.setdefault('Buildings', [])
+        buildings_by_id = {b.get('ID'): b for b in buildings}
+        for building_id, button_id in unit_locations(data, civ_id, unit_id, overrides):
             building = buildings_by_id.get(building_id)
             if building is None:
-                continue
-            same_family = families.get(unit_id, {unit_id})
-            for other in building.get('Units', []):
-                other_id = other.get('ID')
-                if other_id is None or other_id == unit_id or other_id in unit_ids or other_id in same_family:
-                    continue
-                other_loc = train_location(other_id)
-                if other_loc == (building_id, button_id):
-                    collisions[civ_key].add(other_id)
-    return collisions
+                building = {'ID': building_id, 'Name': b_names.get(building_id, ''), 'Techs': [], 'Units': []}
+                buildings.append(building)
+                buildings_by_id[building_id] = building
+            existing_ids = {u.get('ID') for u in building.get('Units', [])}
+            if unit_id not in existing_ids:
+                building.setdefault('Units', []).append(dict(template))
+                logging.info(f'{civ_key}: added {template.get("Name")} to {building.get("Name")}')
+
+    for civ_id, unit_ids in newly_enabled.items():
+        for unit_id in unit_ids:
+            add_one(civ_id, unit_id, default_age=3)
+    for civ_id, unit_ids in upgraded.items():
+        for unit_id in unit_ids:
+            add_one(civ_id, unit_id, default_age=4)
 
 
 def main():
@@ -239,14 +339,16 @@ def main():
 
     data = DatFile.parse(args.dat_filename)
     civ_filenames = civ_name_to_futuravailableunits_key(data, args.civilizations_json)
-    newly_enabled, _line_upgraded, disabled = trace_granted_units(data)
+    newly_enabled, upgraded, disabled, overrides = trace_granted_units(data)
 
     with args.source.open(encoding='utf-8') as f:
         available_units = json.load(f)
 
-    collisions = find_button_collisions(data, civ_filenames, newly_enabled, available_units)
+    collisions = find_button_collisions(data, civ_filenames, newly_enabled, overrides, available_units)
     for civ_key, unit_ids in collisions.items():
         logging.info(f'{civ_key}: auto-detected button collision, disabling {sorted(unit_ids)}')
+
+    add_granted_units(data, civ_filenames, available_units, newly_enabled, upgraded, overrides)
 
     disable_map: dict[str, set[int]] = defaultdict(set)
     for civ_id, unit_ids in disabled.items():

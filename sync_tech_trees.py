@@ -85,7 +85,7 @@ def trace_grants(data: DatFile) -> dict[int, set[int]]:
                 record(civ_id, cmd.b)
         return -1
 
-    def noop_button(data, civ_id, unit_id, building_id, button_id):
+    def noop_button(data, civ_id, unit_id, locations):
         pass
 
     def noop_reskin(data, civ_id, unit_id, donor_unit_id):
@@ -93,16 +93,16 @@ def trace_grants(data: DatFile) -> dict[int, set[int]]:
 
     import mods.util as util
     orig = (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-            util.set_train_button_for_civ, util.reskin_unit_for_civ)
+            util.set_train_locations_for_civ, util.reskin_unit_for_civ)
     regional_heritage.enable_unit_for_civ = rec_enable
     regional_heritage.upgrade_unit_for_civ = rec_upgrade
     regional_heritage.grant_effect_to_civ = rec_grant_effect
-    regional_heritage.set_train_button_for_civ = noop_button
+    regional_heritage.set_train_locations_for_civ = noop_button
     regional_heritage.reskin_unit_for_civ = noop_reskin
     heroes_and_villains.enable_unit_for_civ = rec_enable
     regional_heritage.mod(data)
     (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-     util.set_train_button_for_civ, util.reskin_unit_for_civ) = orig
+     util.set_train_locations_for_civ, util.reskin_unit_for_civ) = orig
 
     return grants
 

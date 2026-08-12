@@ -1184,3 +1184,130 @@ auto-collision-detector independently flags the exact same Knight/
 Cavalier removal for Chinese even without the deliberate call - the two
 mechanisms overlap safely (set union, not double-removal) rather than
 conflicting.
+
+## regional-heritage v18: Grenadier replaces Hand Cannoneer for 6 gunpowder civs
+
+Same two-part test as every other line-replacement this branch has made.
+Grenadier (`civ=-1` regional gunpowder infantry, id 1911) was Jurchens-only,
+training from the exact same Archery Range button 4 as Hand Cannoneer for a
+near-identical cost - a genuine drop-in swap for any civ that genuinely
+lacks native Hand Cannoneer. Confirmed via CivTechTrees: Chinese, Khitans,
+Vietnamese, and Mongols are in the same position as Jurchens (no native
+Hand Cannoneer) and share the plausible historical link to Chinese
+gunpowder/grenade origins. Koreans and Turks *do* have real native Hand
+Cannoneer, but both have their own well-documented, distinct grenade
+tradition (Korea's exploding "Bigyeokjincheolloe" shells; the Ottoman
+Humbaraci corps, a real branch separate from the Janissaries) - verified
+Elite Janissary trains from Castle button 1, the universal true-unique
+slot, completely unrelated to Archery Range button 4, so swapping Hand
+Cannoneer here doesn't touch or dilute that identity at all.
+
+Added `give_grenadier_to_gunpowder_civs_without_hand_cannoneer` -
+`enable_unit_for_civ(GRENADIER)` + `disable_unit_line_for_civ({HAND_CANNONEER})`
+for Chinese/Khitans/Vietnamese/Mongols/Koreans/Turks.
+
+## regional-heritage v19: three more clean additions, plus a critical futuravailableunits.json bug fix
+
+Researched a further batch of candidate units the same way (Bolas Rider,
+Flemish Militia, Jian Swordsman, Ibirapema Warrior, Temple Guard, Savar,
+War Chariot, Mounted Trebuchet, Houfnice, Caravel, Turtle Ship, Dragon
+Ship, Shrivamsha Rider). Most are the same pattern as Savar/Grenadier/
+Hei-Kuang: a `civ=-1` unit that replaces its owner's Cavalry-Archer,
+Knight, or Fire-Ship/Demolition-Ship line outright, with no better-fitting
+gap found elsewhere (Bolas Rider, Ibirapema Warrior, Savar, Shrivamsha
+Rider - native-only, no change). Caravel/Turtle Ship/Dragon Ship all
+replace a whole existing ship line (Demolition Ship or Fire Ship) rather
+than adding on top - flagged as real tradeoffs, not implemented without a
+decision. Houfnice was previously shared with Poland and explicitly
+reverted earlier in this branch - left alone rather than re-litigating
+unilaterally. Three genuinely clean, collision-free additions found and
+implemented:
+
+- **`give_jian_swordsman_to_other_three_kingdoms_civs`**: Jian Swordsman
+  (Wu's native Barracks-button-4 unit, id 1974/1976) added to Shu and Wei -
+  same building/button, free for both, and they're literally the other two
+  Three Kingdoms civs.
+- **`give_temple_guard_to_andean_and_mesoamerican_civs`**: Temple Guard
+  (Muisca's native unit, id 2586/2587, trains from both Barracks button 4
+  *and* Monastery button 14) added to Incas and Aztecs, Barracks-only.
+  Monastery button 14 was deliberately skipped for both - it's already
+  occupied by their own granted Warrior Priest
+  (`give_warrior_priests_to_civs_with_shamanic_heritage` already covers
+  both) - a real collision, not a free second slot. Aztecs also needed
+  their Barracks copy moved off button 4 (their own native Eagle Warrior's
+  slot) to button 3 (otherwise unused for Aztecs). Considered Aztecs first
+  on user request; the Eagle Warrior collision is why it isn't a plain
+  `enable_unit_for_civ` call like Incas got.
+- **`give_war_chariot_to_persians`**: found a second, completely unclaimed
+  War Chariot/Elite War Chariot pair (ids 2150/2151, Stable button 4,
+  distinct from Shu's own separate Siege-Workshop-trained War Chariot,
+  id 1962) - no civ owned it at all. Persians' Stable button 4 is free.
+  Achaemenids would be the stronger thematic fit (actual Persian Empire
+  chariot warfare) but has no entry in `futuravailableunits.json` at all -
+  unclear this mechanism even reaches Chronicles civs (same open question
+  as Shu/Wu/Wei only inheriting grants because they mirror Chinese's civ
+  record) - Persians is the confirmed-safe target.
+
+Also confirmed (per user tip) that Mounted Trebuchet (id 1923, internal
+name `SIEGECAMEL`) is Khitans' real second native unique unit, training
+from Siege Workshop button 4 - the *exact* button `give_traction_trebuchet_to_east_asian_civs`
+already grants Traction Trebuchet to for Khitans. Not a bug: verified this
+is a genuine, correctly-resolved collision (see below), and updated that
+function's comment, which previously claimed the grant was a pure addition
+for Khitans - true for Chinese/Jurchens, false for Khitans specifically.
+
+**Critical bug found and fixed**: `disable_unit_lines.py` only ever
+*removed* units from `futuravailableunits.json` (deliberate disables +
+auto-detected collisions) - it never added a newly `enable_unit_for_civ`/
+`upgrade_unit_for_civ`-granted unit's own entry. Confirmed this was live
+in the already-deployed build: Chinese had lost Knight/Cavalier/Paladin
+but never gained Hei-Kuang Cavalry; Japanese had lost Mangonel/Onager but
+never gained Rocket Cart - both civs were strictly *worse off* than
+vanilla in this file, not better. Every regional-heritage grant this
+entire branch was affected. Fixed by:
+
+- Renaming `set_train_button_for_civ` to `set_train_locations_for_civ`
+  (`mods/util.py`) - now takes a list of `(building_id, button_id)` pairs
+  instead of one, since some units train from more than one building
+  (Temple Guard). First real caller is `give_temple_guard_to_andean_and_
+  mesoamerican_civs` above; `disable_unit_lines.py` and `sync_tech_trees.py`
+  both updated to trace the new signature.
+- `disable_unit_lines.py`'s `trace_granted_units` now also records
+  `set_train_locations_for_civ` overrides (`location_overrides`), and
+  `find_button_collisions` uses a granted unit's *actual* location(s) -
+  override if one was traced, the `.dat` default otherwise - instead of
+  always assuming the default. Without this, checking Aztecs' Temple Guard
+  against its default button 4 would have "found" and removed Eagle
+  Warrior, when the whole point of the override was to avoid that
+  collision by moving to button 3 instead.
+- New `add_granted_units` step: for every newly-enabled or upgraded
+  (civ, unit) pair, source a template `{ID, Name, RequiredAge, ...}` entry
+  from wherever that unit already exists for its real donor civ in the
+  source json (falls back to the `.dat`'s own unit name + Castle/Imperial
+  Age only for genuinely unclaimed units with no existing donor entry
+  anywhere, e.g. War Chariot 2150/2151), and inserts it into the target
+  civ's matching building(s) - creating the building entry if missing.
+  Runs before the removal step in `main()`; order doesn't matter for
+  correctness since removals never target a unit's own newly-added entry.
+
+Verified end to end after the fix: Chinese Stable now shows Hei-Kuang
+Cavalry/Elite Hei-Kuang Cavalry where Knight/Cavalier/Paladin used to be;
+Japanese Siege Workshop now shows Rocket Cart/Heavy Rocket Cart where
+Mangonel/Onager used to be; Khitans Siege Workshop shows Traction
+Trebuchet where Mounted Trebuchet used to be; Incas/Aztecs Barracks show
+Temple Guard/Elite Temple Guard at the correct per-civ button, and neither
+civ's Monastery gained a colliding second entry; Persians Stable shows War
+Chariot/Elite War Chariot alongside their existing Savar/Camel/Steppe
+Lancer options untouched. `sync_tech_trees.py` warns "No existing
+tech-tree template found" for Elite Jian Swordsman's node id (1976) - this
+is a pre-existing gap in the vanilla data itself (Wu's own
+`futuravailableunits.json` entry never listed its own Elite Jian
+Swordsman either, only the base tier), the same class of cosmetic gap
+already accepted for Folwark3/Settlement3 - the unit itself still works,
+only this one file's display name falls back to the `.dat`'s internal
+code (`JIANSWDUS`) instead of a nice name.
+
+Still unverified in-game (unchanged from before): whether
+`futuravailableunits.json` actually gates real training or only powers
+the tech-tree preview tooltip. This session's fix makes the file
+internally consistent either way, but doesn't resolve that open question.

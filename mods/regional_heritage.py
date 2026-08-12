@@ -6,7 +6,7 @@ from genieutils.effect import EffectCommand
 from genieutils.unit import AttackOrArmor
 
 from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ, \
-    disable_unit_line_for_civ
+    disable_unit_line_for_civ, set_train_locations_for_civ
 from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     TYPE_ENABLE_DISABLE_UNIT, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
@@ -23,7 +23,9 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     SAMURAI, ELITE_SAMURAI, FIRE_ARCHER, ELITE_FIRE_ARCHER, ATTACK_CLASS_UNIQUE_UNIT, \
     LONGBOAT, ELITE_LONGBOAT, CLASS_TRANSPORT_BOAT, TRANSPORT_SHIP, \
     ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, \
-    HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY
+    HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, GRENADIER, HAND_CANNONEER, \
+    JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
+    WAR_CHARIOT, ELITE_WAR_CHARIOT
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -255,7 +257,13 @@ def give_traction_trebuchet_to_east_asian_civs(data: DatFile):
     # gets it as an additional option alongside their standard Trebuchet,
     # not a replacement. Jurchens and Khitans are Song-dynasty-era rival/
     # successor states with the same plausible technology exposure, already
-    # tied to Chinese in this mod via Fire Lancer/Rocket Cart.
+    # tied to Chinese in this mod via Fire Lancer/Rocket Cart. For Khitans
+    # specifically this is actually a real replacement, not a pure addition:
+    # Khitans' own native second unique unit, Mounted Trebuchet (id 1923),
+    # trains from the exact same Siege Workshop button 4 as Traction
+    # Trebuchet - confirmed via disable_unit_lines.py's auto-collision
+    # detector, which correctly removes Mounted Trebuchet in favor of this
+    # grant rather than leaving both fighting over one button.
     for civ_id in civ_ids_named(data, ['Chinese', 'Jurchens', 'Khitans']):
         enable_unit_for_civ(data, civ_id, TRACTION_TREBUCHET, TECH_CASTLE_BUILT)
 
@@ -281,6 +289,82 @@ def give_hei_kuang_cavalry_to_chinese(data: DatFile):
     for civ_id in civ_ids_named(data, ['Chinese']):
         enable_unit_for_civ(data, civ_id, HEI_KUANG_CAVALRY, TECH_CASTLE_BUILT)
         upgrade_unit_for_civ(data, civ_id, HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_grenadier_to_gunpowder_civs_without_hand_cannoneer(data: DatFile):
+    # Grenadier (`civ=-1` regional gunpowder infantry) is currently Jurchens
+    # only - and Jurchens genuinely lack Hand Cannoneer natively (confirmed
+    # via CivTechTrees), so it's already a real replacement for them, not an
+    # addition. Grenadier trains from the exact same Archery Range button 4
+    # as Hand Cannoneer, for a near-identical cost - a genuine drop-in swap.
+    # Chinese, Khitans, Vietnamese, and Mongols are in the exact same
+    # position (confirmed lacking Hand Cannoneer natively) and China is the
+    # actual historical origin of gunpowder/grenade weapons in the first
+    # place. Koreans and Turks DO have real native Hand Cannoneer access,
+    # but both have a genuine, well-documented grenade tradition of their
+    # own distinct from generic hand cannon infantry - Korea's
+    # "Bigyeokjincheolloe" exploding-shell device, and the Ottoman
+    # "Humbaraci" grenadier corps (a real branch distinct from the
+    # Janissaries - Janissary trains from the Castle at button 1, the
+    # universal true-unique slot, completely unrelated to this building/
+    # button, so this doesn't touch or dilute that identity at all).
+    civs = ['Chinese', 'Khitans', 'Vietnamese', 'Mongols', 'Koreans', 'Turks']
+    for civ_id in civ_ids_named(data, civs):
+        enable_unit_for_civ(data, civ_id, GRENADIER, TECH_CASTLE_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {HAND_CANNONEER})
+
+
+def give_jian_swordsman_to_other_three_kingdoms_civs(data: DatFile):
+    # Jian Swordsman (`civ=-1` regional infantry) is currently Wu only -
+    # Shu and Wei are the other two Three Kingdoms Chronicles civs, the same
+    # broader Han-Chinese swordsman tradition Wu's own unit represents.
+    # Trains from the exact same Barracks button 4 Wu already uses, free for
+    # both - a pure addition, not a replacement of anything.
+    for civ_id in civ_ids_named(data, ['Shu', 'Wei']):
+        enable_unit_for_civ(data, civ_id, JIAN_SWORDSMAN, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_temple_guard_to_andean_and_mesoamerican_civs(data: DatFile):
+    # Temple Guard (`civ=-1` regional infantry) is currently Muisca only,
+    # training from both Barracks button 4 and Monastery button 14 - Sun-
+    # temple warrior-priests fit Inca religious identity at least as well as
+    # Muisca's. Restricted to Barracks-only for both civs below (dropping
+    # the Monastery location) since Monastery button 14 is already occupied
+    # by their own granted Warrior Priest (give_warrior_priests_to_civs_with_
+    # shamanic_heritage already covers both Incas and Aztecs) - a real
+    # collision, not a free second slot.
+    #
+    # Incas: Barracks button 4 is free - a plain addition.
+    incas_id, = civ_ids_named(data, ['Incas'])
+    enable_unit_for_civ(data, incas_id, TEMPLE_GUARD, TECH_CASTLE_BUILT)
+    upgrade_unit_for_civ(data, incas_id, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, TECH_REQUIREMENT_IMPERIAL_AGE)
+    set_train_locations_for_civ(data, incas_id, TEMPLE_GUARD, [(12, 4)])
+    set_train_locations_for_civ(data, incas_id, ELITE_TEMPLE_GUARD, [(12, 4)])
+    #
+    # Aztecs: button 4 is already their own native Eagle Warrior's slot -
+    # Temple Guard moves to button 3 (unused for Aztecs; the only other
+    # Barracks-button-3 content anywhere is Condottiero, granted only to
+    # mercenary-tradition civs, not Aztecs).
+    aztecs_id, = civ_ids_named(data, ['Aztecs'])
+    enable_unit_for_civ(data, aztecs_id, TEMPLE_GUARD, TECH_CASTLE_BUILT)
+    upgrade_unit_for_civ(data, aztecs_id, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, TECH_REQUIREMENT_IMPERIAL_AGE)
+    set_train_locations_for_civ(data, aztecs_id, TEMPLE_GUARD, [(12, 3)])
+    set_train_locations_for_civ(data, aztecs_id, ELITE_TEMPLE_GUARD, [(12, 3)])
+
+
+def give_war_chariot_to_persians(data: DatFile):
+    # War Chariot/Elite War Chariot (ids 2150/2151, Stable button 4) are a
+    # completely unclaimed `civ=-1` pair - no civ currently has access to
+    # them (distinct from Shu's own separate Siege-Workshop-trained War
+    # Chariot at id 1962). Persians' Stable button 4 is free. Ancient
+    # Persian/Achaemenid chariot warfare is a well-documented historical
+    # fit; Achaemenids themselves (the Chronicles civ) have no entry in
+    # futuravailableunits.json at all, so it's unclear this mechanism even
+    # reaches them - Persians is the confirmed-safe target.
+    for civ_id in civ_ids_named(data, ['Persians']):
+        enable_unit_for_civ(data, civ_id, WAR_CHARIOT, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, WAR_CHARIOT, ELITE_WAR_CHARIOT, TECH_REQUIREMENT_IMPERIAL_AGE)
 
 
 def _configure_samurai_ranged_form(base_unit, ranged_unit):
@@ -550,6 +634,10 @@ def mod(data: DatFile):
     give_traction_trebuchet_to_east_asian_civs(data)
     give_lou_chuan_to_other_east_asian_civs(data)
     give_hei_kuang_cavalry_to_chinese(data)
+    give_grenadier_to_gunpowder_civs_without_hand_cannoneer(data)
+    give_jian_swordsman_to_other_three_kingdoms_civs(data)
+    give_temple_guard_to_andean_and_mesoamerican_civs(data)
+    give_war_chariot_to_persians(data)
     give_samurai_a_ranged_mode_swap(data)
     give_camel_scout_start_to_true_camel_civs(data)
     give_franks_a_frankish_paladin_skin(data)
