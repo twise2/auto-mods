@@ -1,52 +1,34 @@
 #! /usr/bin/env python3
-"""Patch futuravailableunits.json for two related reasons, both about
-per-civ unit-line access this repo's other tooling can't touch (see below
-for why the .dat itself doesn't encode this):
+"""Patch futuravailableunits.json to mirror what regional_heritage.py's
+grants and removals actually do, for whatever UI feature this file powers
+(the F11 tech-tree preview, most likely - see below).
 
-1. Deliberate historical-identity removals - e.g. Knight/Cavalier/Paladin
-   for Turks/Huns. These are expressed as real calls to
-   mods.util.disable_unit_line_for_civ, inline inside named functions in
-   mods/regional_heritage.py (remove_knight_line_from_true_steppe_and_camel_civs,
-   remove_knight_line_from_true_elephant_civs) - the same way every other
-   grant in that file reads: a function with a name and a comment
-   explaining why, not a disconnected dict. disable_unit_line_for_civ is a
-   no-op against the .dat (see its docstring); this script traces calls to
-   it exactly the way it already traces enable_unit_for_civ/
-   upgrade_unit_for_civ, to find out what to actually remove here.
+CONFIRMED (via real in-game testing this session, not assumed) that this
+file is NOT load-bearing for actual training access: Chinese kept training
+Knight instead of the granted Hei-Kuang Cavalry even after this script
+"removed" Knight from their entry here, because the real .dat still had
+Knight fully enabled. Both problems this file used to be the ONLY fix for
+now have real .dat-level fixes instead:
 
-2. Automatic button-collision fixes. When regional_heritage.mod() grants a
-   civ a unit that shares its native (building, button) training slot with
-   something that civ already has natively, the two units silently fight
-   over the same menu button unless one is removed. This is figured out
-   from the real data every run, not hand-maintained: trace every unit
-   regional_heritage.mod() actually grants (mirrors sync_tech_trees.py's
-   trace_grants), look up each granted unit's real (building, button) in
-   the .dat, then for every OTHER unit that civ already has listed under
-   that same building in futuravailableunits.json, check whether it trains
-   from the exact same button - if so, it's a real collision and gets
-   removed. (Confirmed this class of bug for real: Rocket Cart -> Japanese
-   shares Siege Workshop button 2 with Japanese's own real, natively-active
-   Mangonel/Onager - both showed up in futuravailableunits.json before this
-   fix, meaning both would have been simultaneously offered at one button.)
+- Removing a civ's native access (e.g. Knight/Cavalier/Paladin for Turks/
+  Huns): mods.util.disable_unit_line_for_civ is a real .dat mutation now -
+  it researches a self-triggering tech with TYPE_ENABLE_DISABLE_UNIT(b=0)
+  commands, the same mechanism vanilla's own Mule Cart tech uses to
+  disable Lumber Camp/Mining Camp for Georgians/Armenians (confirmed via
+  direct .dat inspection). This script still traces those calls (see
+  trace_granted_units) purely to keep this JSON file in sync for its UI
+  purpose, not because it's needed for the removal to work anymore.
+- Real button collisions: see audit_collisions.py instead, which scans
+  the .dat's actual tech/effect data directly rather than relying on this
+  file's per-civ listings (which are curated/incomplete - confirmed they
+  missed a real collision: Packed Trebuchet, enabled at Castle button 2
+  for every civ that researches the common "Trebuchet" tech, was never
+  listed here for any civ, yet silently defeated every hero unit this
+  mod placed at that button in real games).
 
-Why this file, and not the .dat: unlike every unit-granting mechanism this
-repo already had (which only ever ADDS access via a self-triggering tech),
-neither removing a civ's native access nor un-granting a colliding native
-default is something the .dat's own effect/tech system reliably controls.
-Confirmed empirically for Knight/Cavalier/Paladin: Franks (has Knight) and
-Aztecs (confirmed lacks it) are byte-identical in the .dat for
-unit.enabled, train_locations, and every tech/effect referencing those
-three unit ids. The real per-civ gate lives here instead - a separate file,
-in the same resources/_common/dat folder as civilizations.json, listing
-exactly which units each civ's buildings can train and at what age.
-Confirmed Mangonel/Onager are ALSO tracked here for Japanese (not just
-Knight-style exclusions), so the same file has to be the fix for both
-categories of removal.
-
-UNVERIFIED whether this file is load-bearing for the actual training gate
-or only powers a UI feature (the "next age" unlock preview tooltip) - the
-same category of uncertainty that applied to CivTechTrees before it was
-confirmed in a real game. Needs an in-game test before trusting it fully.
+This script still runs and still does something real for the UI, but
+should not be trusted as a source of truth for what's actually trainable -
+use audit_collisions.py and direct .dat tech inspection for that instead.
 """
 import argparse
 import json
@@ -127,7 +109,7 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
     def noop_reskin(data, civ_id, unit_id, donor_unit_id):
         pass
 
-    def rec_disable_line(data, civ_id, unit_ids):
+    def rec_disable_line(data, civ_id, unit_ids, required_tech):
         disabled[civ_id] |= set(unit_ids)
 
     import mods.util as util

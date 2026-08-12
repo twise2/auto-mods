@@ -32,26 +32,28 @@ def disable_unit_for_civ(data: DatFile, civ_id: int, unit_id: int):
     civ.units[unit_id].enabled = 0
 
 
-def disable_unit_line_for_civ(data: DatFile, civ_id: int, unit_ids: set[int]):
+def disable_unit_line_for_civ(data: DatFile, civ_id: int, unit_ids: set[int], required_tech: int):
     """Remove a civ's native access to a unit line (e.g. Knight/Cavalier/
     Paladin) for historical-identity reasons - Turks/Huns keeping their
     fully-upgraded Steppe Lancer instead of also having Western knights,
-    etc. A no-op against the .dat: unlike every other grant in this file,
-    there's no .dat-level mechanism for removing a civ's *native* access -
-    confirmed by exhaustive comparison (Franks vs Aztecs byte-identical for
-    unit.enabled/train_locations/every tech referencing the unit) that this
-    is governed by a separate file, futuravailableunits.json, not the .dat
-    at all (see NOTES-civ-identity-expansion.md's "Knight-line removal"
-    section). disable_unit_lines.py intercepts calls to this function -
-    the same trace-don't-apply technique sync_tech_trees.py already uses
-    for enable_unit_for_civ/upgrade_unit_for_civ - to know what to actually
-    remove from that file. Exists as a real call here (rather than a bare
-    dict at module scope) so each removal reads like every other grant:
-    inline, next to the historical reasoning for why.
+    etc. A REAL .dat mutation: researches a self-triggering tech (same
+    grant_effect_to_civ mechanism enable_unit_for_civ uses) whose effect
+    commands are TYPE_ENABLE_DISABLE_UNIT with b=0 for each unit - matches
+    vanilla's own proven pattern exactly (Mule Cart's real tech, id 932/940
+    for Georgians/Armenians, disables Lumber Camp/Mining Camp this same
+    way). Confirmed via real in-game testing this session that the earlier
+    version of this function - a no-op that only patched
+    futuravailableunits.json - did NOT work: Chinese kept training Knight
+    instead of the granted Hei-Kuang Cavalry, because Knight was never
+    actually disabled in the .dat and the game doesn't consult that JSON
+    file for real training access (see NOTES-civ-identity-expansion.md).
     """
     civ = data.civs[civ_id]
     names = ', '.join(civ.units[uid].name for uid in sorted(unit_ids))
-    logging.info(f'Disabling unit line [{names}] for {civ.name} (via futuravailableunits.json, not the .dat)')
+    logging.info(f'Disabling unit line [{names}] for {civ.name}')
+    disable_commands = [EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=uid, b=0, c=-1, d=0.0)
+                         for uid in sorted(unit_ids)]
+    grant_effect_to_civ(data, civ_id, disable_commands, required_tech, f'Disable [{names}] for {civ.name}')
 
 
 def disable_tech_effect(data: DatFile, tech_id: int):

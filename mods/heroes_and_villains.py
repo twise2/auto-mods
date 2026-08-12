@@ -276,11 +276,16 @@ def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, w
     #make unit trainable in the castle if other unit type and limit is with land basilius
     else:
         logging.info(f'chose castle for hero unit {unit.name} for civ {civ.name}')
-        #button 2 at the Castle is already the game's own "hero" slot - this mod's
-        #whole hero model is built on how Shu/Wu/Wei's own native heroes (Cao Cao,
-        #Liu Bei, Sun Jian) already work in real multiplayer, so match their exact
-        #train_time/hot_key, not just the button.
-        unit.creatable.train_locations = [TrainLocation(train_time=60, unit_id=TYPE_CASTLE_TRAIN_LOCATION, button_id=2, hot_key_id=16381)]
+        #button 2 at the Castle (Shu/Wu/Wei's own native hero slot) turned out NOT
+        #to be safe for every other civ: confirmed via the .dat that tech 256
+        #("Trebuchet", civ=-1 - the real, commonly-researched player tech) also
+        #enables Packed Trebuchet (id 331) at that exact button for every civ that
+        #researches it, so a hero placed there silently lost that collision in real
+        #games (in-game testing showed no hero ever appeared anywhere). Button 4 is
+        #genuinely unclaimed instead - confirmed via the .dat that its only two
+        #occupants (MKIPCHAK, CRUSADERKNIGHT) are dead scenario-only units with no
+        #tech anywhere that ever enables them for a real civ.
+        unit.creatable.train_locations = [TrainLocation(train_time=60, unit_id=TYPE_CASTLE_TRAIN_LOCATION, button_id=4, hot_key_id=-1)]
         #this gives back a resource when the unit dies that the unit costs to spawn. This limits us to one.
         unit.dead_unit_id = land_basilius_unit_id
         #make unit cost resources 

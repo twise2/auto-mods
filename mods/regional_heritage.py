@@ -24,8 +24,7 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     LONGBOAT, ELITE_LONGBOAT, CLASS_TRANSPORT_BOAT, TRANSPORT_SHIP, \
     ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, \
     HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, GRENADIER, HAND_CANNONEER, \
-    JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
-    WAR_CHARIOT, ELITE_WAR_CHARIOT
+    JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -195,8 +194,14 @@ def give_warrior_priests_to_civs_with_shamanic_heritage(data: DatFile):
     # tradition Aztecs already have this from; Goths fit the same Germanic
     # pagan-warband religion already represented by Vikings/Celts here. Koreans
     # fit the same "shamanic tradition alongside an organized religion" pattern
-    # Japanese/Chinese already represent, via Korean mudang shamanism.
-    civs = ['Vikings', 'Celts', 'Aztecs', 'Dravidians', 'Malians', 'Teutons', 'Japanese', 'Chinese',
+    # Japanese/Chinese already represent, via Korean mudang shamanism. Teutons
+    # dropped from this list - confirmed via audit_collisions.py that they
+    # also receive Missionary (give_missionaries_to_civs_with_missionary_heritage
+    # above), and both units train from the exact same Monastery button 14, a
+    # genuine self-inflicted collision. Missionary's reasoning for Teutons (a
+    # crusading Catholic military order) is the more specific, better-reasoned
+    # fit of the two, so it wins.
+    civs = ['Vikings', 'Celts', 'Aztecs', 'Dravidians', 'Malians', 'Japanese', 'Chinese',
             'Mayan', 'Incas', 'Goths', 'Koreans']
     for civ_id in civ_ids_named(data, civs):
         enable_unit_for_civ(data, civ_id, WARRIOR_PRIEST, TECH_CASTLE_BUILT)
@@ -311,7 +316,7 @@ def give_grenadier_to_gunpowder_civs_without_hand_cannoneer(data: DatFile):
     civs = ['Chinese', 'Khitans', 'Vietnamese', 'Mongols', 'Koreans', 'Turks']
     for civ_id in civ_ids_named(data, civs):
         enable_unit_for_civ(data, civ_id, GRENADIER, TECH_CASTLE_BUILT)
-        disable_unit_line_for_civ(data, civ_id, {HAND_CANNONEER})
+        disable_unit_line_for_civ(data, civ_id, {HAND_CANNONEER}, TECH_CASTLE_BUILT)
 
 
 def give_jian_swordsman_to_other_three_kingdoms_civs(data: DatFile):
@@ -353,18 +358,15 @@ def give_temple_guard_to_andean_and_mesoamerican_civs(data: DatFile):
     set_train_locations_for_civ(data, aztecs_id, ELITE_TEMPLE_GUARD, [(12, 3)])
 
 
-def give_war_chariot_to_persians(data: DatFile):
-    # War Chariot/Elite War Chariot (ids 2150/2151, Stable button 4) are a
-    # completely unclaimed `civ=-1` pair - no civ currently has access to
-    # them (distinct from Shu's own separate Siege-Workshop-trained War
-    # Chariot at id 1962). Persians' Stable button 4 is free. Ancient
-    # Persian/Achaemenid chariot warfare is a well-documented historical
-    # fit; Achaemenids themselves (the Chronicles civ) have no entry in
-    # futuravailableunits.json at all, so it's unclear this mechanism even
-    # reaches them - Persians is the confirmed-safe target.
-    for civ_id in civ_ids_named(data, ['Persians']):
-        enable_unit_for_civ(data, civ_id, WAR_CHARIOT, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, WAR_CHARIOT, ELITE_WAR_CHARIOT, TECH_REQUIREMENT_IMPERIAL_AGE)
+# give_war_chariot_to_persians was reverted: War Chariot/Elite War Chariot
+# (ids 2150/2151, Stable button 4) were assumed completely unclaimed based
+# on their absence from futuravailableunits.json, which this session later
+# proved unreliable as a source of real per-civ ownership. Direct .dat
+# inspection (tech 1169, "Enable War Chariot", civ=46) shows it's actually
+# Achaemenids' own real native unit - giving it to Persians duplicated
+# someone else's identity, and it also collided with Persians' own granted
+# Steppe Lancer at the exact same Stable button 4 (a genuine
+# self-inflicted bug, confirmed via audit_collisions.py).
 
 
 def _configure_samurai_ranged_form(base_unit, ranged_unit):
@@ -581,12 +583,12 @@ def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
     # Sipahi and defining-steppe-raider identities respectively, not Western
     # knights.
     for civ_id in civ_ids_named(data, ['Turks', 'Huns']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
     # Berbers and Saracens: native Camel Rider/Heavy Camel Rider (not
     # granted by this mod - they've always had it); Almoravid/Almohad and
     # early-Islamic camel-cavalry identity, not knights.
     for civ_id in civ_ids_named(data, ['Berbers', 'Saracens']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
 
 
 def remove_knight_line_from_true_elephant_civs(data: DatFile):
@@ -599,7 +601,7 @@ def remove_knight_line_from_true_elephant_civs(data: DatFile):
     # entirely), so rule 1 doesn't hold for them despite rule 2 clearly
     # fitting.
     for civ_id in civ_ids_named(data, ['Malay', 'Burmese', 'Khmer', 'Vietnamese']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
 
 
 def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
@@ -611,7 +613,7 @@ def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
     # group above since the reasoning (a specific regional cavalry unit,
     # not a steppe/camel or elephant identity) is its own thing.
     for civ_id in civ_ids_named(data, ['Chinese']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN})
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
 
 
 def mod(data: DatFile):
@@ -637,7 +639,6 @@ def mod(data: DatFile):
     give_grenadier_to_gunpowder_civs_without_hand_cannoneer(data)
     give_jian_swordsman_to_other_three_kingdoms_civs(data)
     give_temple_guard_to_andean_and_mesoamerican_civs(data)
-    give_war_chariot_to_persians(data)
     give_samurai_a_ranged_mode_swap(data)
     give_camel_scout_start_to_true_camel_civs(data)
     give_franks_a_frankish_paladin_skin(data)

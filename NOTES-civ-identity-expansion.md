@@ -1311,3 +1311,112 @@ Still unverified in-game (unchanged from before): whether
 `futuravailableunits.json` actually gates real training or only powers
 the tech-tree preview tooltip. This session's fix makes the file
 internally consistent either way, but doesn't resolve that open question.
+
+## regional-heritage v20: futuravailableunits.json confirmed NOT load-bearing; real .dat fixes for heroes and every unit-line removal
+
+In-game testing resolved the open question above, negatively: Chinese
+still trained Knight instead of the granted Hei-Kuang Cavalry, and no
+civ's hero unit ever appeared anywhere. Both symptoms traced back to the
+same root cause, and both are now fixed at the real `.dat` level.
+
+**Heroes were never trainable.** `makeHero()` placed every land hero at
+Castle button 2, reasoning (from an earlier session) that it was safe
+because it matched Shu/Wu/Wei's own native heroes (Cao Cao/Liu Bei/Sun
+Jian) and nothing else used it. Direct `.dat` inspection this session
+found that reasoning was wrong: tech 256 ("Trebuchet", civ=-1 - the real,
+extremely commonly researched player tech) also enables Packed Trebuchet
+(id 331) at that exact Castle button 2 for *every* civ that researches
+it. Since `futuravailableunits.json` never listed Packed Trebuchet under
+any civ's Castle building, the earlier button-collision auditing (which
+only checked that file) never caught it. Every hero this mod ever granted
+lost that collision in real games. Fixed by moving land heroes to Castle
+button 4 (`mods/heroes_and_villains.py`), confirmed via direct tech
+scanning that its only two occupants (MKIPCHAK, CRUSADERKNIGHT) are dead
+scenario-only units no tech anywhere ever enables for a real civ. Water
+heroes (Dock button 24) were separately re-verified the same way and are
+genuinely safe - no change needed there.
+
+**`disable_unit_line_for_civ` was a no-op that never worked.** It was
+built, on purpose, to only patch `futuravailableunits.json` - reasoned at
+the time to be the real per-civ gate (see the "Knight-line removal"
+section above). In-game testing proved that reasoning wrong: Chinese kept
+their native Knight/Cavalier/Paladin regardless, meaning the entire
+Knight-line-removal program AND the Grenadier/Hand-Cannoneer swap never
+actually removed anything for any civ, ever - both the removed unit and
+the replacement sat enabled at the identical button, and the game
+consistently showed the native one. Fixed by making it a real `.dat`
+mutation: it now researches a self-triggering tech whose effect commands
+are `TYPE_ENABLE_DISABLE_UNIT(b=0)` for each unit - the exact same
+mechanism `enable_unit_for_civ` already uses (confirmed working - the
+user separately verified Grenadier genuinely appearing for a newly-
+granted civ, not just Jurchens who already had it natively), and matches
+vanilla's own real Mule Cart tech byte-for-byte (id 932/940, Georgians/
+Armenians, which really does disable Lumber Camp/Mining Camp this same
+way). All 5 call sites in `regional_heritage.py` updated to pass a
+`required_tech` (all use `TECH_CASTLE_BUILT`, matching their replacement's
+own gate). `disable_unit_lines.py` still traces the call (for whatever
+value keeping `futuravailableunits.json` in sync still has for the F11
+preview UI) but is no longer relied on for real removal.
+
+**`futuravailableunits.json`-based collision detection was also
+unreliable as a signal**, not just non-load-bearing - it missed the real
+Packed Trebuchet collision entirely (never listed under any civ's Castle
+building). New `audit_collisions.py` scans the `.dat`'s real tech/effect
+data directly instead: for every `(building, button)`, it finds every
+unit any tech (civ=-1 or civ-specific) actually enables there, then
+cross-references every grant this mod makes against that ground truth.
+Re-running it after the fixes above found two more genuine, previously-
+unnoticed self-inflicted collisions between this mod's *own* grants
+(unambiguous - both sides are things this mod enables via its own
+civ-specific tech, no interpretation of vanilla `civ=-1` semantics
+needed):
+
+- **Teutons**: `give_missionaries_to_civs_with_missionary_heritage` and
+  `give_warrior_priests_to_civs_with_shamanic_heritage` both included
+  Teutons, and Missionary/Warrior Priest train from the identical
+  Monastery button 14. Dropped Teutons from the Warrior Priest list -
+  Missionary's reasoning for them (a crusading Catholic military order)
+  is the more specific fit of the two.
+- **Persians**: `give_steppe_lancers_to_civs_with_horse_archer_heritage`
+  and (this session's now-reverted) `give_war_chariot_to_persians` both
+  targeted Stable button 4. Investigating this collision found the
+  underlying research was wrong in the first place - see below.
+
+**Correction: War Chariot (2150/2151) is not unclaimed - it's
+Achaemenids' own real native unit.** Earlier research concluded nobody
+owned it, based on its absence from `futuravailableunits.json` for every
+civ - exactly the kind of conclusion this session proved unreliable.
+Direct `.dat` tech inspection found tech 1169 ("Enable War Chariot"),
+civ=46=Achaemenids, enabling it specifically for them, plus a separate
+civ=-1 tech (1170, "Enable War Chariot Full Techs") of uncertain scope.
+`give_war_chariot_to_persians` has been fully reverted (function removed,
+`WAR_CHARIOT`/`ELITE_WAR_CHARIOT` no longer imported in
+`regional_heritage.py` - the id constants stay in `mods/ids.py` since
+they're harmless and document the real unit). Achaemenids already has
+this as genuine native content; no action needed for them.
+
+**Broader open question, now sharper but still not fully closed**: the
+real per-civ mechanism controlling native training-menu visibility is
+still not identified. Confirmed it is NOT: the unit's own `enabled` flag
+or `train_locations` (byte-identical between civs that have a unit and
+civs that don't - re-confirmed this session for both Knight/Aztecs and
+Steppe Lancer/British), NOT `futuravailableunits.json` (proven non-load-
+bearing), and NOT simply "civ=-1 tech = universal" (Steppe Lancer's real
+"make avail" tech is civ=-1, gated only on Feudal Age, structurally
+identical to Knight's - yet Steppe Lancer is genuinely Cuman/Mongol-
+exclusive while Knight is genuinely near-universal). The `.dat`'s
+`tech_tree` structure (each `Civ` has a `tech_tree_id`, e.g. Teutons=262,
+Aztecs=447 - confirmed different) is the strongest remaining candidate,
+not yet fully reverse-engineered. Practically this doesn't block anything
+current: this mod's own grants use civ-*specific* techs (not civ=-1),
+which are confirmed to work reliably for adding new content to a genuinely
+empty button (Grenadier, Hei-Kuang Cavalry all confirmed real in-game),
+and `audit_collisions.py` reliably catches genuine self-collisions between
+this mod's own grants regardless of the deeper mystery. The remaining risk
+is narrower: `audit_collisions.py` currently treats any civ=-1 "make
+avail" tech as competing with our grants at that button for every civ,
+which is only sometimes true (real for Knight/Hand Cannoneer/Petard-style
+universal content, not real for Steppe-Lancer-style restricted regional
+content) - so its non-self-collision output should be read as "worth a
+second look," not "confirmed real," until this mechanism is actually
+identified.
