@@ -49,6 +49,29 @@ FILENAME_OVERRIDES = {
     'MAGYARS': 'MAGYAR',
 }
 
+# These 3 node ids are granted by this mod but have no template anywhere in
+# the real CivTechTrees data - not a bug, just no donor civ happens to own
+# this exact age tier natively (confirmed: Poles' own Folwark file only has
+# the base tier, Wu's own Jian Swordsman file only has the base tier, Incas'
+# own Settlement file only has the base tier - the middle Age 2 tiers are
+# missing too, but this mod never grants those, so they never get flagged).
+# Derived from each one's own base-tier template instead of skipping them,
+# so the output CivTechTrees data actually matches what the .dat grants
+# rather than silently omitting it.
+DERIVED_FROM_BASE_TIER = {
+    1720: 1734,  # Folwark3 <- Folwark1 (Poles)
+    2560: 2556,  # Settlement Age3 <- Settlement1 (Incas)
+    1976: 1974,  # Elite Jian Swordsman <- Jian Swordsman (Wu)
+}
+
+# Elite/final-tier display name overrides - buildings (Folwark/Settlement)
+# keep the same name across age tiers in the real data (confirmed: Folwark's
+# own Age 2/3 upgrade techs don't rename it), units get the standard "Elite"
+# prefix used everywhere else in this mod.
+DERIVED_NODE_NAMES = {
+    1976: 'Elite Jian Swordsman',
+}
+
 
 def civ_name_to_filename_map(data: DatFile, civilizations_json_path: Path) -> dict[int, str]:
     """civ_id -> CivTechTrees filename stem (e.g. 'BRITONS'), sourced from
@@ -110,7 +133,10 @@ def trace_grants(data: DatFile) -> dict[int, set[int]]:
 def build_node_templates(tech_trees_dir: Path) -> dict[int, tuple[dict, str]]:
     """node_id -> (template node dict, array key it lives in). Scans every
     civ's file and keeps the first template found for each node id - the
-    node's own fields (name, building, age, picture) are civ-independent."""
+    node's own fields (name, building, age, picture) are civ-independent.
+    Also synthesizes templates for DERIVED_FROM_BASE_TIER node ids, which
+    have no real donor anywhere in the source data.
+    """
     templates: dict[int, tuple[dict, str]] = {}
     for path in tech_trees_dir.glob('*.json'):
         with path.open(encoding='utf-8') as f:
@@ -120,6 +146,23 @@ def build_node_templates(tech_trees_dir: Path) -> dict[int, tuple[dict, str]]:
                 node_id = node.get('Node ID')
                 if node_id is not None and node_id not in templates:
                     templates[node_id] = (node, array_key)
+
+    for derived_id, base_id in DERIVED_FROM_BASE_TIER.items():
+        if derived_id in templates or base_id not in templates:
+            continue
+        base_node, array_key = templates[base_id]
+        derived_node = dict(base_node)
+        derived_node['Node ID'] = derived_id
+        derived_node['Age ID'] = 4  # Imperial - every grant using this lands on TECH_REQUIREMENT_IMPERIAL_AGE
+        if derived_node.get('Building ID') == base_id:
+            # Buildings self-reference their own Node ID as Building ID (confirmed
+            # via Folwark1/Settlement1's own real templates) - keep that pattern.
+            derived_node['Building ID'] = derived_id
+        if derived_id in DERIVED_NODE_NAMES:
+            derived_node['Name'] = DERIVED_NODE_NAMES[derived_id]
+        templates[derived_id] = (derived_node, array_key)
+        logging.info(f'Derived a tech-tree template for node {derived_id} from base tier {base_id}')
+
     return templates
 
 

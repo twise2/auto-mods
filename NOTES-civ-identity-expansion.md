@@ -1696,3 +1696,57 @@ exploding-kings community-games-custom`, verified directly in the `.dat`
 tech shows 800 food/200 gold; no "Great Hall" or "Elite Petard" tech
 exists anywhere in the file), regenerated `CivTechTrees`/
 `futuravailableunits.json`, deployed, byte-hash confirmed matching.
+
+## v28: added rewarding-snipes to the local build; ships a real civilizations.json; sync_tech_trees.py now closes its own gaps instead of skipping them
+
+Added `rewarding-snipes` to the local mod's `--mods` list - it had been
+part of the original local mod's own description ("Kings drop a relic
+cart on death worth 50 bonus population") but was never actually included
+in any rebuild this session. Confirmed the gap directly: the deployed
+`.dat`'s King had `blood_unit_id = -1` (the no-op default) before this
+fix; after, it correctly points at the 30,000 HP always-visible relic
+cart unit worth 50 population headroom + 50 bonus pop cap.
+
+**Real multiplayer-breaking bug found and fixed**: the local mod folder
+never shipped a `civilizations.json`, only `empires2_x2_p1.dat`,
+`futuravailableunits.json`, and `CivTechTrees/`. Locally, DE apparently
+falls back to the base game's own copy when a mod doesn't ship one, so
+this went unnoticed all session - but an uploaded/packaged mod is
+evaluated in isolation, with nothing to fall back to, producing exactly
+the "unexpected number of civilizations" crash the user hit. Confirmed
+it was a real gap and not an actual mismatch (both the `.dat` and the
+vanilla `civilizations.json` list exactly 60 civs) and started shipping
+the real, unmodified vanilla copy alongside the `.dat` - the same thing
+`create-mods.sh` already does correctly for every other mod target, just
+missed for the local one.
+
+Also fixed `sync_tech_trees.py` properly rather than dropping
+`CivTechTrees` from the mod to work around it (user's call: keep it, but
+make it actually correct). It was silently skipping 3 real grants -
+Folwark3 (Bohemians/Lithuanians), Settlement Age3 (Aztecs/Mayans/Incas),
+Elite Jian Swordsman (Shu/Wei) - every single build this session, logged
+as "No existing tech-tree template found." Root cause: its template
+lookup only works by finding an existing civ that already has a tech-tree
+entry for that exact node id, and no real vanilla civ happens to own
+these 3 specific elite/final-tier ids in their own `CivTechTrees` file
+(confirmed: Poles' own Folwark file only lists the base tier, Wu's own
+Jian Swordsman file only lists the base tier, Incas' own Settlement file
+only lists the base tier - not a bug in the lookup, just no donor to copy
+from). Added `DERIVED_FROM_BASE_TIER`, deriving each missing node's
+template from its own base-tier sibling (which does have a real
+template) instead of skipping it - copies the base template, sets `Node
+ID` to the real elite/final-tier id, bumps `Age ID` to Imperial (4,
+matching every grant's real `TECH_REQUIREMENT_IMPERIAL_AGE` gate), and
+for buildings (which self-reference their own `Node ID` as `Building ID`,
+confirmed via the real Folwark1/Settlement1 templates) updates that too.
+`DERIVED_NODE_NAMES` gives Elite Jian Swordsman its correct name (
+buildings keep the same display name across age tiers in the real data,
+so Folwark/Settlement need no override). Verified: the sync run that used
+to end with a "No existing tech-tree template found" warning every single
+time now produces zero warnings, and the 3 previously-missing entries
+show up in the right civs' files with structurally correct
+`Node ID`/`Building ID`/`Age ID`.
+
+Local mod now ships all 4 files (`empires2_x2_p1.dat`, `civilizations.json`,
+`futuravailableunits.json`, `CivTechTrees/`, 59 files, zero gaps),
+fully self-contained - deployed, byte-hash confirmed matching.
