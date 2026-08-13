@@ -4,6 +4,9 @@
 # whatever's currently installed, and deploys it straight into the game's
 # local mods folder. Safe to re-run any time - after a game update, after
 # Steam "verify integrity of game files", or just to pick up code changes.
+# Also refreshes info.json's Description from local-mod-description.txt,
+# so the mod's description can't drift out of sync with what it actually
+# does - update that file (not info.json directly) when behavior changes.
 #
 # Run from Git Bash (or WSL) in this repo's directory:
 #   ./build-local-mod.sh
@@ -13,7 +16,8 @@
 set -e
 
 VANILLA="D:/Program Files/Steam/steamapps/common/AoE2DE/resources/_common/dat"
-DEPLOY="C:/Users/gwise/Games/Age of Empires 2 DE/76561198037964051/mods/local/localDataMod/resources/_common/dat"
+MOD_ROOT="C:/Users/gwise/Games/Age of Empires 2 DE/76561198037964051/mods/local/localDataMod"
+DEPLOY="$MOD_ROOT/resources/_common/dat"
 BUILD="./build/local_mod/resources/_common/dat"
 
 MODS="heroes-and-villains regional-heritage exploding-kings community-games-custom rewarding-snipes"
@@ -38,6 +42,9 @@ cp "$BUILD/futuravailableunits.json" "$DEPLOY/futuravailableunits.json"
 cp "$VANILLA/civilizations.json" "$DEPLOY/civilizations.json"
 rm -rf "$DEPLOY/CivTechTrees"
 cp -r "$BUILD/CivTechTrees" "$DEPLOY/CivTechTrees"
+
+echo "=== Updating info.json Description ==="
+python update-mod-description.py ./local-mod-description.txt "$MOD_ROOT/info.json"
 
 echo "=== Done. Deployed files: ==="
 ls -la "$DEPLOY"
