@@ -10,7 +10,7 @@ from genieutils.unit import Unit, TrainLocation
 from genieutils.versions import Version
 
 from mods.ids import CLASS_PETARD, MONUMENT, CLASS_HERO, TYPE_UPGRADE_UNIT, TYPE_COMBATANT, \
-    TYPE_ENABLE_DISABLE_UNIT, TYPE_DISABLE_REGIONAL_TECH
+    TYPE_ENABLE_DISABLE_UNIT, TYPE_DISABLE_REGIONAL_TECH, RESOURCE_STARTING_SCOUT_UNIT
 
 GC = TypeVar('GC', bound=GenieClass)
 
@@ -30,6 +30,20 @@ def disable_unit_for_civ(data: DatFile, civ_id: int, unit_id: int):
     civ = data.civs[civ_id]
     logging.info(f'Disabling {civ.units[unit_id].name} for {civ.name}')
     civ.units[unit_id].enabled = 0
+
+
+def set_starting_scout_for_civ(data: DatFile, civ_id: int, unit_id: int):
+    """Change which unit this civ's player starts scouting with (e.g.
+    Camel Scout instead of the default Scout Cavalry). Not a tech/effect -
+    a plain per-civ static value: Civ.resources[RESOURCE_STARTING_SCOUT_UNIT]
+    holds the starting scout's unit id, read once at game start rather
+    than triggered by any research. Confirmed via direct .dat comparison
+    against Gurjaras' own real bonus (resources[263]=1755, Camel Scout) vs.
+    a normal civ's resources[263]=448 (Scout Cavalry).
+    """
+    civ = data.civs[civ_id]
+    logging.info(f'Starting {civ.name} scouting with unit {unit_id} ({civ.units[unit_id].name})')
+    civ.resources[RESOURCE_STARTING_SCOUT_UNIT] = float(unit_id)
 
 
 def disable_unit_line_for_civ(data: DatFile, civ_id: int, unit_ids: set[int], required_tech: int):

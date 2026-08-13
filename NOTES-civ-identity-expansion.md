@@ -1479,3 +1479,74 @@ Cannoneer has an analogous tech to hide for Grenadier's target civs -
 not investigated yet, though Hand Cannoneer likely doesn't have a
 further upgrade tier the way Knight has Cavalier/Paladin, so may not
 need it).
+
+## regional-heritage v22: real starting-scout override found - not a tech at all
+
+`give_camel_scout_start_to_true_camel_civs` never actually implemented
+what its own name/comment promised - it only made Camel Scout trainable
+early (`enable_unit_for_civ`, Town Center built), not an actual starting
+unit. First assumed this lived entirely outside the `.dat` (random-map
+scripts, `resources/_common/random-map-scripts/`, a `.rms` format this
+project's toolchain has no support for) - wrong. The user correctly
+pushed back that Gurjaras' own real "starts scouting with a Camel Scout"
+bonus must be findable, since it's a genuine per-civ ability, not a
+scenario-only thing.
+
+Found it by directly diffing Gurjaras' full `Civ.resources` array (601
+floats) against a normal civ's (Teutons): every single value matched
+except index 263 - Gurjaras has `73.0`→`9507.0` (a bonus wood/gold-signal
+value, not investigated further) and, the real find, index 263: Gurjaras
+`1755.0` (Camel Scout's own unit id) vs Teutons `448.0` (Scout Cavalry's).
+Not a tech, not an effect command, not anything triggered - a **plain
+static per-civ value**, read once at game start to decide which unit
+template to place. No candidate tech referencing either unit id turned up
+anything (checked first, came up empty) - this mechanism sits entirely
+outside the tech/effect system this whole session has otherwise relied
+on, which is exactly why it wasn't found sooner.
+
+Added `set_starting_scout_for_civ(data, civ_id, unit_id)` to
+`mods/util.py` (a direct `civ.resources[RESOURCE_STARTING_SCOUT_UNIT] =
+float(unit_id)` mutation - no tech/effect machinery needed at all) and
+`RESOURCE_STARTING_SCOUT_UNIT = 263` to `mods/ids.py`. Wired into
+`give_camel_scout_start_to_true_camel_civs` for all 5 target civs
+(Cumans/Huns/Berbers/Saracens/Turks), alongside the existing early-
+availability grant (kept, so Camel Scout stays trainable as a
+replacement once the starting one is lost, not just present as a
+one-off). Verified directly in the `.dat`: all 5 civs now show
+`resources[263]=1755.0`, matching Gurjaras exactly; every untouched civ
+still shows `448.0`. Rebuilt, regenerated `CivTechTrees`/
+`futuravailableunits.json`, deployed, byte-hash confirmed matching.
+
+Also confirmed via direct `.dat` diffing (comparing every civ's full
+`resources` array against a normal civ's) that this same real ability is
+already used by vanilla for the whole Mesoamerican/Andean family: Aztecs/
+Mayan → `751` (Eagle Scout), Incas/Muisca/Mapuche/Tupi → `2550` (Champi
+Scout) - independent confirmation this is a real, general, dev-used
+mechanism and not a Gurjaras-only quirk.
+
+## regional-heritage v23: narrowed camel-scout-start to Berbers/Saracens only
+
+User asked to double-check that only civs with genuinely deep, native
+camel identity get the v22 grant (initially Cumans/Huns/Berbers/Saracens/
+Turks). Re-examined each rather than trust the existing comment, which
+turned out to be wrong: it justified Berbers/Saracens/Turks via "the
+Imperial Camel Rider grant below" - a function that was fully reverted
+earlier this session (see task #15) and never re-verified after that.
+Direct `.dat` inspection (tech 521, "Heavy Camel") found Imperial Camel
+Rider (id 207) is natively **Hindustanis**-only, not Berber/Saracen/Turk
+at all. Turks' real identity is gunpowder/Janissary, not camels.
+Cumans/Huns were already correctly flagged by `give_camel_line_to_
+steppe_civs_without_camels`'s own comment as "historical flavor only" /
+a Paladin gap-filler, not deep native identity. Narrowed the civ list to
+just **Berbers, Saracens** - the two civs with genuine native Camel
+Rider/Heavy Camel Rider (Almoravid/Almohad camel-cavalry identity,
+already leaned on by this file's own Knight-line removal). Rebuilt,
+verified directly in the `.dat` (Berbers/Saracens still show
+`resources[263]=1755.0`; Cumans/Huns/Turks correctly reverted to
+`448.0`), deployed, byte-hash confirmed matching.
+
+Also considered and declined a Genitour starting-unit swap (Spanish/
+Italians/Portuguese/Malians/Sicilians) - user correctly flagged that a
+free ranged starting unit would be a real balance problem (safe risk-free
+harassment of enemy scouts/villagers from minute one), unlike the melee
+Eagle/Camel/Champi Scout precedent. Not implemented.

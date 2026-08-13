@@ -6,7 +6,7 @@ from genieutils.effect import EffectCommand
 from genieutils.unit import AttackOrArmor
 
 from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ, \
-    disable_unit_line_for_civ, set_train_locations_for_civ, disable_tech_for_civ
+    disable_unit_line_for_civ, set_train_locations_for_civ, disable_tech_for_civ, set_starting_scout_for_civ
 from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     TYPE_ENABLE_DISABLE_UNIT, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
@@ -431,13 +431,41 @@ def give_samurai_a_ranged_mode_swap(data: DatFile):
 
 def give_camel_scout_start_to_true_camel_civs(data: DatFile):
     # Gurjaras start scouting with a Camel Scout instead of a normal Scout
-    # Cavalry, which then grows into the same Camel Rider line. Civs whose whole
-    # identity is already built around camels in this mod (Cumans/Huns via the
-    # camel line above, Berbers/Saracens/Turks via the Imperial Camel Rider grant
-    # below) would plausibly scout the same way from the very start, not just
-    # field camels once a Castle goes up.
-    civs = ['Cumans', 'Huns', 'Berbers', 'Saracens', 'Turks']
+    # Cavalry, which then grows into the same Camel Rider line. Restricted to
+    # civs with genuinely deep, native camel identity - not just "some camel
+    # flavor exists somewhere in this mod." Narrowed from an earlier version
+    # of this list (Cumans/Huns/Berbers/Saracens/Turks) after checking each
+    # civ's real ownership directly rather than trusting an earlier comment
+    # here, which turned out to be wrong:
+    #
+    # - Berbers, Saracens: genuine native Camel Rider/Heavy Camel Rider -
+    #   Almoravid/Almohad and early-Islamic camel-cavalry identity, real
+    #   enough that this mod's own Knight-line removal already leans on it
+    #   (see remove_knight_line_from_true_steppe_and_camel_civs above).
+    # - Turks: dropped. The old comment justified them via "the Imperial
+    #   Camel Rider grant below" - that grant was fully reverted earlier
+    #   this session, and the claim was never re-verified. Direct .dat
+    #   inspection (tech 521 "Heavy Camel") shows Imperial Camel Rider is
+    #   natively Hindustanis-only, not Berber/Saracen/Turk. Turks' real
+    #   identity is gunpowder/Janissary, not camels.
+    # - Cumans, Huns: dropped. give_camel_line_to_steppe_civs_without_camels
+    #   above already grants them Camel Rider/Heavy Camel Rider, but its own
+    #   comment says this is "historical flavor only" for Huns and a gap-
+    #   filling Paladin substitute for Cumans, not deep native identity -
+    #   this mod's own addition, not something to also treat as their
+    #   starting-unit heritage.
+    #
+    # The actual starting-unit swap isn't a tech/effect at all - confirmed via
+    # direct .dat comparison that it's a plain per-civ static value,
+    # Civ.resources[RESOURCE_STARTING_SCOUT_UNIT], read once at game start.
+    # Gurjaras has it set to Camel Scout's own unit id; every other civ has it
+    # set to Scout Cavalry's. set_starting_scout_for_civ replicates that
+    # exactly. Still also enabling Camel Scout early via a real tech (Town
+    # Center built, i.e. immediately) so it stays trainable as a replacement
+    # once the starting one is lost, not just present as a one-off.
+    civs = ['Berbers', 'Saracens']
     for civ_id in civ_ids_named(data, civs):
+        set_starting_scout_for_civ(data, civ_id, CAMEL_SCOUT)
         enable_unit_for_civ(data, civ_id, CAMEL_SCOUT, TYPE_TOWN_CENTER_BUILT)
         upgrade_unit_for_civ(data, civ_id, CAMEL_SCOUT, CAMEL_RIDER, TECH_CASTLE_BUILT)
 

@@ -491,6 +491,12 @@ CROP_ROTATION = 12
 
 TYPE_RESOURCE_MODIFIER = 1
 RESOURCE_BONUS_POPULATION_CAP = 32
+# Civ.resources[263] holds the unit id used for each player's starting
+# scout - confirmed via direct .dat comparison: Gurjaras' real "start
+# scouting with a Camel Scout" bonus is resources[263]=1755 (Camel Scout),
+# vs. a normal civ's resources[263]=448 (Scout Cavalry). Not a tech/effect
+# at all - a plain per-civ static value read at game start.
+RESOURCE_STARTING_SCOUT_UNIT = 263
 MODE_ADD = 1
 TYPE_UPGRADE_UNIT = 3
 TYPE_COMBATANT = 70
