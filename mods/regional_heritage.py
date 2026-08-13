@@ -442,18 +442,44 @@ def give_camel_scout_start_to_true_camel_civs(data: DatFile):
     #   Almoravid/Almohad and early-Islamic camel-cavalry identity, real
     #   enough that this mod's own Knight-line removal already leans on it
     #   (see remove_knight_line_from_true_steppe_and_camel_civs above).
+    # - Hindustanis: added - arguably the deepest native camel identity of
+    #   any civ. Tech 521 "Heavy Camel" (civ=20/Hindustanis specifically,
+    #   not civ=-1) upgrades Camel Scout, Camel Rider, *and* Heavy Camel
+    #   Rider all directly into Imperial Camel Rider - a real, exclusive,
+    #   civ-specific tech object, the same unambiguous signal this file
+    #   already trusts for Savar (tech 526, civ=8/Persians). Nobody else in
+    #   the game has Imperial Camel Rider at all.
     # - Turks: dropped. The old comment justified them via "the Imperial
     #   Camel Rider grant below" - that grant was fully reverted earlier
     #   this session, and the claim was never re-verified. Direct .dat
-    #   inspection (tech 521 "Heavy Camel") shows Imperial Camel Rider is
-    #   natively Hindustanis-only, not Berber/Saracen/Turk. Turks' real
-    #   identity is gunpowder/Janissary, not camels.
+    #   inspection (tech 521 above) shows Imperial Camel Rider is natively
+    #   Hindustanis-only, not Berber/Saracen/Turk. Turks' real identity is
+    #   gunpowder/Janissary, not camels.
     # - Cumans, Huns: dropped. give_camel_line_to_steppe_civs_without_camels
     #   above already grants them Camel Rider/Heavy Camel Rider, but its own
     #   comment says this is "historical flavor only" for Huns and a gap-
     #   filling Paladin substitute for Cumans, not deep native identity -
     #   this mod's own addition, not something to also treat as their
     #   starting-unit heritage.
+    # - Ethiopians: added. Their real unique tech (574, "Ethiopian UT" /
+    #   "Royal Heirs") has 4 dedicated commands explicitly buffing Camel
+    #   Scout, Camel Rider, Heavy Camel Rider, *and* Imperial Camel Rider by
+    #   id, civ-scoped to Ethiopians specifically - the same unambiguous
+    #   civ-specific-tech standard as Hindustanis/Savar above.
+    # - Malians: checked and declined. A web search suggested their real
+    #   unique tech "Farimba" unlocks Heavy Camel Rider for them - checked
+    #   directly against the .dat and that's wrong: Farimba (tech 605) and
+    #   their other unique tech Tigui (606) affect Town Center regeneration/
+    #   garrison and an unrelated stat, nothing camel-related at all. Not
+    #   adding based on a claim the real data contradicts.
+    # - Persians: considered, not added. CivTechTrees shows Camel Rider/
+    #   Heavy Camel Rider as "ResearchedCompleted" for them, but that exact
+    #   same status also shows for Turks and Mongols - civs already
+    #   confirmed to NOT have real camel identity - so it's evidently a
+    #   "reachable somewhere in the full tech tree" signal, not a true-
+    #   identity one. No civ-specific tech found. Left out for lack of real
+    #   evidence, not ruled out for good - worth another look if a
+    #   better signal turns up.
     #
     # The actual starting-unit swap isn't a tech/effect at all - confirmed via
     # direct .dat comparison that it's a plain per-civ static value,
@@ -463,7 +489,7 @@ def give_camel_scout_start_to_true_camel_civs(data: DatFile):
     # exactly. Still also enabling Camel Scout early via a real tech (Town
     # Center built, i.e. immediately) so it stays trainable as a replacement
     # once the starting one is lost, not just present as a one-off.
-    civs = ['Berbers', 'Saracens']
+    civs = ['Berbers', 'Saracens', 'Hindustanis', 'Ethiopians']
     for civ_id in civ_ids_named(data, civs):
         set_starting_scout_for_civ(data, civ_id, CAMEL_SCOUT)
         enable_unit_for_civ(data, civ_id, CAMEL_SCOUT, TYPE_TOWN_CENTER_BUILT)

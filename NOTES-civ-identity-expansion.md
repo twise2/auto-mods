@@ -1550,3 +1550,44 @@ Italians/Portuguese/Malians/Sicilians) - user correctly flagged that a
 free ranged starting unit would be a real balance problem (safe risk-free
 harassment of enemy scouts/villagers from minute one), unlike the melee
 Eagle/Camel/Champi Scout precedent. Not implemented.
+
+## regional-heritage v24: added Hindustanis and Ethiopians to the camel-scout-start civs
+
+User asked whether any other civs deserve the v22/v23 grant. Settled on a
+standard for what counts as "genuinely deep, native identity" for this
+purpose: a real civ-*specific* tech object referencing the camel line
+directly (the same signal that already confirmed Berbers/Saracens/
+Hindustanis and Savar/Persians elsewhere in this file) - not the broader
+CivTechTrees "ResearchedCompleted" status or `futuravailableunits.json`
+listing, both already proven this session to produce false positives
+(most concretely: both show Camel Rider for Turks, a civ already
+confirmed to not have real camel identity).
+
+- **Hindustanis**: added. Tech 521 "Heavy Camel" (civ=20/Hindustanis
+  specifically) upgrades Camel Scout, Camel Rider, *and* Heavy Camel
+  Rider all directly into Imperial Camel Rider - a tier nobody else in
+  the game has at all. Arguably the deepest camel identity of any civ.
+- **Ethiopians**: added. Their real unique tech (574, "Ethiopian UT" /
+  "Royal Heirs" per community naming) has 4 dedicated effect commands
+  explicitly buffing Camel Scout, Camel Rider, Heavy Camel Rider, and
+  Imperial Camel Rider by id, civ-scoped to Ethiopians. Confirmed via
+  direct `.dat` inspection, not just the web search that surfaced the
+  lead.
+- **Malians**: checked and declined. A web search claimed their real
+  unique tech "Farimba" unlocks Heavy Camel Rider - checked directly
+  against the `.dat` and that's wrong. Farimba (tech 605) is about Town
+  Center regeneration/garrison; their other unique tech Tigui (606)
+  affects an unrelated stat. Neither touches camels. Good example of why
+  external claims (web search, old comments, `futuravailableunits.json`)
+  all get checked against the real tech/effect data before acting on them
+  in this file - this is at least the third claim this session that
+  didn't survive that check (Persians/Ethiopians/Malians via
+  CivTechTrees, the old Imperial-Camel-Rider comment, and now this).
+- **Persians**: still no real evidence either way - flagged in the code
+  as worth another look if a better signal turns up, not added now.
+
+Final civ list: `['Berbers', 'Saracens', 'Hindustanis', 'Ethiopians']`.
+Rebuilt, verified directly in the `.dat` (all four show
+`resources[263]=1755.0`; Persians/Malians/Turks/Cumans/Huns correctly
+show `448.0`), regenerated `CivTechTrees`/`futuravailableunits.json`,
+deployed, byte-hash confirmed matching.
