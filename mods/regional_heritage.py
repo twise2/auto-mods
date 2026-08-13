@@ -222,6 +222,16 @@ def give_settlements_to_mesoamerican_and_andean_civs(data: DatFile):
     # is a full economic-building replacement for all three, not just Mill.
     # Bundled into one tech so all three disappear at the exact moment Settlement
     # becomes available, not before.
+    #
+    # Gated on TYPE_TOWN_CENTER_BUILT (fires essentially immediately - every
+    # civ starts with a Town Center), not TECH_CASTLE_BUILT. Settlement is
+    # meant to be these civs' primary early-game economic building, the same
+    # way it genuinely is for Muisca/Mapuche/Tupi - gating it behind actually
+    # constructing a Castle (confirmed via user testing: never fires unless a
+    # real Castle is built, not just Castle Age reached) would leave Aztecs/
+    # Mayans/Incas stuck on plain Mill through most of a normal game, the
+    # opposite of the intent. Matches give_mule_carts_to_nomadic_civs above,
+    # which already correctly uses this same immediate trigger.
     civs = ['Aztecs', 'Mayan', 'Incas']
     for civ_id in civ_ids_named(data, civs):
         commands = [
@@ -230,7 +240,7 @@ def give_settlements_to_mesoamerican_and_andean_civs(data: DatFile):
             EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=LUMBER_CAMP, b=0, c=-1, d=0.0),
             EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=MINING_CAMP, b=0, c=-1, d=0.0),
         ]
-        grant_effect_to_civ(data, civ_id, commands, TECH_CASTLE_BUILT,
+        grant_effect_to_civ(data, civ_id, commands, TYPE_TOWN_CENTER_BUILT,
                              f'Swap Mill/Lumber Camp/Mining Camp for Settlement for {data.civs[civ_id].name}')
         # Skip the intermediate Age 2 tier - jump straight to the final tier once
         # Imperial is reached, same simplification used for every other elite/upgrade
@@ -533,9 +543,16 @@ def give_folwark_to_bohemians(data: DatFile):
     # pair, and they share the same Central European agrarian economy.
     # Lithuanians fit at least as well, if not better - Poland-Lithuania were
     # literally one unified Commonwealth for centuries.
+    #
+    # Gated on TYPE_TOWN_CENTER_BUILT, not TECH_CASTLE_BUILT - same fix as
+    # give_settlements_to_mesoamerican_and_andean_civs above and for the same
+    # reason: Folwark is a primary early-game economic building, and gating
+    # it behind actually constructing a Castle (confirmed via user testing
+    # that the analogous Settlement bug left Mayans on plain Mill for an
+    # entire normal game) would defeat the point.
     for civ_id in civ_ids_named(data, ['Bohemians', 'Lithuanians']):
         for mill_tier in (MILL, MILL_AGE2, MILL_AGE3, MILL_AGE4):
-            upgrade_unit_for_civ(data, civ_id, mill_tier, FOLWARK1, TECH_CASTLE_BUILT)
+            upgrade_unit_for_civ(data, civ_id, mill_tier, FOLWARK1, TYPE_TOWN_CENTER_BUILT)
         # Skip the intermediate tier, same simplification used everywhere else
         # in this file - straight to the final tier once Imperial is reached.
         upgrade_unit_for_civ(data, civ_id, FOLWARK1, FOLWARK3, TECH_REQUIREMENT_IMPERIAL_AGE)

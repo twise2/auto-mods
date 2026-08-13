@@ -1591,3 +1591,51 @@ Rebuilt, verified directly in the `.dat` (all four show
 `resources[263]=1755.0`; Persians/Malians/Turks/Cumans/Huns correctly
 show `448.0`), regenerated `CivTechTrees`/`futuravailableunits.json`,
 deployed, byte-hash confirmed matching.
+
+Also did one more thorough check on Persians specifically, since the
+user pushed back on leaving them out: went through their *entire*
+civ-specific tech list (14 techs) including both real, named unique
+techs by their actual effects - Citadels (458, Castle HP/attack) and
+Kamandaran (543, Archer/Crossbowman/Arbalester accuracy) - neither
+touches camels at all. Their real cavalry/identity content is Cavalier→
+Savar and War Elephant. This is now a confirmed exclusion, not just an
+absence of evidence.
+
+## regional-heritage v25: Settlement/Folwark were gated on the wrong trigger entirely
+
+User reported Mayans don't have Settlement in-game. Investigated
+thoroughly before concluding it was a real bug: confirmed the tech itself
+is structurally correct (enables Settlement, disables Mill/Lumber Camp/
+Mining Camp, all verified directly in the `.dat`), confirmed the build-
+menu button-sharing isn't inherently a problem (Mill/Folwark/Settlement
+all already share the exact same button 118/2 for *every* civ in the raw
+data - Poland's real, working Folwark proves this coexistence is normal,
+not a collision to fix). Went looking for how Poland/Muisca's real native
+building-swap is actually encoded, to replicate it exactly as asked -
+exhaustive search (full Unit-object field diff between Muisca and a
+normal civ for both Settlement and Mill, every tech/effect command
+touching either unit id, the `tech_tree` structure [confirmed pure UI-
+diagram data, not per-civ], the full `Civ.resources` array) found
+**nothing** - this specific mechanism (which civs get automatic native
+building menu replacement) isn't represented anywhere this toolchain can
+read, unlike everything else this session. Likely hardcoded in the engine
+per named civ.
+
+The real, actionable bug turned up during that investigation instead:
+confirmed via direct user testing that "Castle built" (tech 266) only
+fires from actually *constructing* a Castle, not from reaching Castle
+Age - and both `give_settlements_to_mesoamerican_and_andean_civs` and
+`give_folwark_to_bohemians` were gated on exactly that trigger. Settlement
+and Folwark are meant to be these civs' primary *early*-game economic
+buildings (the same way they genuinely are for Muisca/Mapuche/Tupi and
+Poland), so gating them behind a Castle left Aztecs/Mayans/Incas/
+Bohemians/Lithuanians stuck on plain Mill through most of a normal game -
+confirmed by the user's own test (never built a Castle, so it never
+fired). Fixed both to use `TYPE_TOWN_CENTER_BUILT` instead (fires
+essentially immediately - every civ starts with a Town Center), matching
+`give_mule_carts_to_nomadic_civs`, which already correctly used this
+trigger for the same class of building swap. Rebuilt, verified directly
+in the `.dat` for all 5 civs (all 3 Settlement techs and both Folwark
+upgrade chains now require tech 1230/`TYPE_TOWN_CENTER_BUILT` instead of
+266), regenerated `CivTechTrees`/`futuravailableunits.json`, deployed,
+byte-hash confirmed matching.
