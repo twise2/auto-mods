@@ -1639,3 +1639,33 @@ in the `.dat` for all 5 civs (all 3 Settlement techs and both Folwark
 upgrade chains now require tech 1230/`TYPE_TOWN_CENTER_BUILT` instead of
 266), regenerated `CivTechTrees`/`futuravailableunits.json`, deployed,
 byte-hash confirmed matching.
+
+## regional-heritage v26: removed give_camel_line_to_steppe_civs_without_camels, restored Huns' native Knight line
+
+User decided this grant made no sense and removed it, restoring
+Cumans/Huns' real cavalry access. This also resolved a real internal
+inconsistency the two functions had between them:
+`give_camel_line_to_steppe_civs_without_camels`'s own comment already
+said Huns "already have full Paladin access (one of only two 'fully
+upgraded' Paladin civs)" in vanilla, yet
+`remove_knight_line_from_true_steppe_and_camel_civs` stripped that away
+anyway, partly justified by this same camel-line grant as a substitute.
+Taking away Huns' own real, well-known complete cavalry identity for an
+invented camel one was the wrong call once you look at it that way.
+
+- Removed `give_camel_line_to_steppe_civs_without_camels` entirely
+  (function + `mod()` registration). Cumans go back to their real, native,
+  incomplete cavalry line (Knight/Cavalier, no Paladin - a well-known
+  genuine Cumans limitation in vanilla, not something this mod should
+  paper over).
+- Dropped Huns from `remove_knight_line_from_true_steppe_and_camel_civs` -
+  now just `['Turks']`, whose removal stands independently on their own
+  Janissary/Sipahi gunpowder identity, unrelated to camels or Huns.
+  Cumans was never in this list to begin with, so no change needed there.
+
+Rebuilt, verified directly in the `.dat` (Cumans/Huns show no camel-line
+grant and no Knight-line disable at all; Turks still correctly shows the
+Knight-line disable), added `community-games` to the local build
+alongside heroes-and-villains/regional-heritage/exploding-kings,
+regenerated `CivTechTrees`/`futuravailableunits.json`, deployed, byte-hash
+confirmed matching.

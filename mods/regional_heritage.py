@@ -10,7 +10,7 @@ from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to
 from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     TYPE_ENABLE_DISABLE_UNIT, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
-    SIEGE_ELEPHANT, GENITOUR, ELITE_GENITOUR, CAMEL_RIDER, HEAVY_CAMEL_RIDER, \
+    SIEGE_ELEPHANT, GENITOUR, ELITE_GENITOUR, CAMEL_RIDER, \
     CAMEL_SCOUT, CARAVANSERAI, MULE_CART, LEGIONARY, MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN, WARRIOR_PRIEST, \
     MISSIONARY, SCOUT_CAVALRY, \
     LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, \
@@ -97,19 +97,13 @@ def give_genitours_to_civs_with_light_cavalry_heritage(data: DatFile):
         upgrade_unit_for_civ(data, civ_id, GENITOUR, ELITE_GENITOUR, TECH_REQUIREMENT_IMPERIAL_AGE)
 
 
-def give_camel_line_to_steppe_civs_without_camels(data: DatFile):
-    # Cumans genuinely lack Paladin in the current game, so this is a real
-    # gap-filling alternative late-game answer for them, not just flavor. Huns
-    # already have full Paladin access (one of only two "fully upgraded" Paladin
-    # civs), so for them this is historical flavor only - steppe peoples had
-    # plausible camel contact, but it isn't fixing a mechanical gap the way it is
-    # for Cumans. Stops at Heavy Camel Rider - no Imperial tier, which stays a
-    # true Berber/Saracen/Turk-only endgame option (camels already carry a big
-    # bonus vs cavalry, and stacking that on more civs risks real balance harm).
-    # https://forums.ageofempires.com/t/give-cumans-heavy-camel-riders-and-remove-paladins-and-maybe-chevaliers/196455
-    for civ_id in civ_ids_named(data, ['Cumans', 'Huns']):
-        enable_unit_for_civ(data, civ_id, CAMEL_RIDER, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, CAMEL_RIDER, HEAVY_CAMEL_RIDER, TECH_REQUIREMENT_IMPERIAL_AGE)
+# give_camel_line_to_steppe_civs_without_camels was removed - user decided it
+# made no sense. Cumans/Huns get their real, native cavalry access back
+# unmodified (Cumans genuinely lack Paladin in vanilla, a well-known real
+# limitation, not something this mod should paper over with an invented
+# camel substitute). Huns' Knight/Cavalier/Paladin also restored - see
+# remove_knight_line_from_true_steppe_and_camel_civs below, which used to
+# remove it partly on the strength of this same camel-line addition.
 
 
 def give_caravanserai_to_silk_road_civs(data: DatFile):
@@ -655,10 +649,16 @@ def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
     # both train from the Stable (101) for Food+Gold, identical to Knight's
     # own building/resource profile.
     #
-    # Turks and Huns: fully-upgraded Steppe Lancer from this mod; Janissary/
-    # Sipahi and defining-steppe-raider identities respectively, not Western
-    # knights.
-    for civ_id in civ_ids_named(data, ['Turks', 'Huns']):
+    # Turks: fully-upgraded Steppe Lancer from this mod; Janissary/Sipahi and
+    # gunpowder identity, not Western knights.
+    #
+    # Huns dropped from this removal - restored to their real, native, fully-
+    # upgraded Knight/Cavalier/Paladin (one of only two civs with genuinely
+    # complete Paladin access in vanilla). The original removal leaned partly
+    # on give_camel_line_to_steppe_civs_without_camels as a substitute, which
+    # the user removed as not making sense - taking away Huns' own real,
+    # well-known cavalry identity for an invented one was the wrong call.
+    for civ_id in civ_ids_named(data, ['Turks']):
         disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
@@ -722,7 +722,6 @@ def mod(data: DatFile):
     give_elephant_archers_to_civs_with_elephant_heritage(data)
     give_armored_elephants_to_other_elephant_civs(data)
     give_genitours_to_civs_with_light_cavalry_heritage(data)
-    give_camel_line_to_steppe_civs_without_camels(data)
     give_caravanserai_to_silk_road_civs(data)
     give_mule_carts_to_nomadic_civs(data)
     give_legionaries_to_byzantines(data)
