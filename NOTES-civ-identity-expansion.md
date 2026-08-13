@@ -1669,3 +1669,30 @@ Knight-line disable), added `community-games` to the local build
 alongside heroes-and-villains/regional-heritage/exploding-kings,
 regenerated `CivTechTrees`/`futuravailableunits.json`, deployed, byte-hash
 confirmed matching.
+
+## v27: new community-games-custom mod, replacing community-games in the local build
+
+User asked for a customized copy of `community_games.py`, not an edit to
+the original (which other, separately-built mods still use unmodified).
+Added `mods/community_games_custom.py` (`NAME = 'community-games-custom'`,
+registered in `auto-mod.py`'s `AVAILABLE_MODS`) with:
+
+- `add_population_cost_to_all_towers` - generalized from the original's
+  Bombard-Tower-only version to all four tower tiers (Watch Tower id 79,
+  Guard Tower 234, Keep 235, Bombard Tower 236 - added the first three as
+  new constants in `mods/ids.py`), same +1 population-headroom-cost
+  mechanism, applied per-civ to all four.
+- `modify_caravan_cost(data, 800, 200)` - kept unchanged from the
+  original (this is the real "market cost increase" the user meant -
+  Trade Caravan is the actual mechanism, not the Market building's own
+  construction cost, which was briefly considered and explicitly
+  declined).
+- Dropped entirely: `add_great_hall_tech`, `add_elite_petard`,
+  `make_trees_contain_200_wood`.
+
+Rebuilt the local mod with `heroes-and-villains regional-heritage
+exploding-kings community-games-custom`, verified directly in the `.dat`
+(all 4 tower tiers show a 1-population cost for a normal civ; Caravan
+tech shows 800 food/200 gold; no "Great Hall" or "Elite Petard" tech
+exists anywhere in the file), regenerated `CivTechTrees`/
+`futuravailableunits.json`, deployed, byte-hash confirmed matching.
