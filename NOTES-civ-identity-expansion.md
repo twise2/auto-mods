@@ -1750,3 +1750,47 @@ show up in the right civs' files with structurally correct
 Local mod now ships all 4 files (`empires2_x2_p1.dat`, `civilizations.json`,
 `futuravailableunits.json`, `CivTechTrees/`, 59 files, zero gaps),
 fully self-contained - deployed, byte-hash confirmed matching.
+
+## v29: War Chariot given to Celts; Phalangite/Sannahya/Gastraphetoros researched and declined
+
+Chronicles-era research pass, using `REGIONAL-HERITAGE-PLAYBOOK.md`'s
+methodology. Checked Phalangite (Barracks button 4), Sannahya (Stable
+button 4), and War Chariot (2150/2151, Stable button 4) - all three
+train from real, standard buildings (not the Alexander-campaign-only
+building 2414 some other Chronicles units use), gated on ordinary Feudal
+Age techs, so all three are genuinely functional/trainable, not dead
+scenario content.
+
+Found a real, data-level distinction between them: Phalangite's and
+Sannahya's own enabling techs are explicitly named `"...Macedonian Unique
+Unit"` and `"...Puru Unique Unit"` - the developers' own designation,
+not an inference. War Chariot's tech is just named `"Enable War
+Chariot"`, no "unique" qualifier at all. Treated Phalangite/Sannahya like
+Savar/Shrivamsha Rider/Bolas Rider (declined for extension, explicitly-
+labeled civ identity) and War Chariot like Steppe Lancer/Battle Elephant
+(genuine regional flavor, narrowly scoped to one civ so far by
+coincidence rather than by design).
+
+Added `give_war_chariot_to_celts` - ancient Celtic/British war chariots
+are a well-attested historical tradition (Julius Caesar's own accounts
+of British chariot tactics). Added *alongside* Celts' full native Knight
+line, not as a replacement - explicitly framed as ancestral/deep-heritage
+flavor rather than claiming chariots were still their real medieval
+military identity by AoE2's actual timeframe for Celts. Stable button 4
+confirmed free. Rebuilt via `build-local-mod.sh`, verified directly in
+the `.dat` (Celts' real enable/upgrade techs for 2150/2151 present),
+deployed.
+
+Also checked "Gastraphetoros" - doesn't exist as a real trainable unit,
+only as `Projectile Gastraphetes` (ammunition for some other already-
+named unit), nothing to extend there.
+
+Other War Chariot candidates considered: **Puru** is the strongest
+historically (ancient Indian subcontinent chariot warfare matches their
+actual historical period), but shares the still-open uncertainty about
+whether grants reliably reach Chronicles civs at all - flagged, not
+implemented. Vikings/Byzantines/Huns have no real chariot-warfare
+tradition to speak of - declined. Persians-the-main-civ has a plausible
+"heritage lineage" argument (successor to Achaemenid Persia) but was
+judged likely to feel cluttered on top of their existing Camel Rider/
+Savar/full Knight line - not implemented without a clearer case.

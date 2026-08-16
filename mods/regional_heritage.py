@@ -24,7 +24,8 @@ from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN
     LONGBOAT, ELITE_LONGBOAT, CLASS_TRANSPORT_BOAT, TRANSPORT_SHIP, \
     ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, \
     HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, GRENADIER, HAND_CANNONEER, \
-    JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD
+    JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
+    WAR_CHARIOT, ELITE_WAR_CHARIOT
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -367,15 +368,29 @@ def give_temple_guard_to_andean_and_mesoamerican_civs(data: DatFile):
     set_train_locations_for_civ(data, aztecs_id, ELITE_TEMPLE_GUARD, [(12, 3)])
 
 
-# give_war_chariot_to_persians was reverted: War Chariot/Elite War Chariot
-# (ids 2150/2151, Stable button 4) were assumed completely unclaimed based
-# on their absence from futuravailableunits.json, which this session later
-# proved unreliable as a source of real per-civ ownership. Direct .dat
-# inspection (tech 1169, "Enable War Chariot", civ=46) shows it's actually
-# Achaemenids' own real native unit - giving it to Persians duplicated
-# someone else's identity, and it also collided with Persians' own granted
-# Steppe Lancer at the exact same Stable button 4 (a genuine
-# self-inflicted bug, confirmed via audit_collisions.py).
+def give_war_chariot_to_celts(data: DatFile):
+    # War Chariot/Elite War Chariot (ids 2150/2151, Stable button 4) really
+    # is Achaemenids' real native unit (tech 1169, civ=46) - the earlier
+    # give_war_chariot_to_persians was reverted for wrongly assuming it was
+    # unclaimed. But unlike Phalangite/Sannahya (explicitly named "Macedonian
+    # Unique Unit"/"Puru Unique Unit" in their own enabling techs), War
+    # Chariot's tech is just named "Enable War Chariot" - no "unique"
+    # designation anywhere in the real data. That's a genuine distinction,
+    # not just a rationalization: it reads as regional flavor (like Steppe
+    # Lancer/Battle Elephant) that happens to be scoped to one civ so far,
+    # not a labeled identity marker.
+    #
+    # Celts: ancient Celtic/British war chariots are about as well-attested
+    # a historical chariot tradition as exists (Julius Caesar's own accounts
+    # of British chariot tactics). Added alongside their full native Knight
+    # line, not as a replacement - that's genuinely ancient-era heritage,
+    # not still their real medieval military identity by the period AoE2's
+    # Celts represent, so framing it as a bonus option rather than claiming
+    # it defines them. Stable button 4 confirmed free (only Scout Cavalry/
+    # Light Cavalry/Hussar/Knight/Cavalier/Paladin listed).
+    for civ_id in civ_ids_named(data, ['Celts']):
+        enable_unit_for_civ(data, civ_id, WAR_CHARIOT, TECH_CASTLE_BUILT)
+        upgrade_unit_for_civ(data, civ_id, WAR_CHARIOT, ELITE_WAR_CHARIOT, TECH_REQUIREMENT_IMPERIAL_AGE)
 
 
 def _configure_samurai_ranged_form(base_unit, ranged_unit):
@@ -738,6 +753,7 @@ def mod(data: DatFile):
     give_grenadier_to_gunpowder_civs_without_hand_cannoneer(data)
     give_jian_swordsman_to_other_three_kingdoms_civs(data)
     give_temple_guard_to_andean_and_mesoamerican_civs(data)
+    give_war_chariot_to_celts(data)
     give_samurai_a_ranged_mode_swap(data)
     give_camel_scout_start_to_true_camel_civs(data)
     give_franks_a_frankish_paladin_skin(data)
