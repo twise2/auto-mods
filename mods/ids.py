@@ -253,6 +253,9 @@ CHU_KO_NU = 73
 MILITIA = 74
 MAN_AT_ARMS = 75
 LONG_SWORDSMAN = 77
+# Research techs (not units) - the real prerequisite Legionary/Winged Hussar's
+# own vanilla techs require (must have researched that tier already).
+TECH_LONG_SWORDSMAN = 207
 VILLAGER = 83
 SPEARMAN = 93
 MONK = 125
@@ -298,6 +301,7 @@ ELITE_WOAD_RAIDER = 534
 GALLEY = 539
 HEAVY_SCORPION = 542
 LIGHT_CAVALRY = 546
+TECH_LIGHT_CAVALRY = 254
 ONAGER = 550
 ELITE_CATAPHRACT = 553
 ELITE_TEUTONIC_KNIGHT = 554

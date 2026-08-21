@@ -1847,3 +1847,97 @@ conflict, especially with no free alternate slot to relocate to.
 Rebuilt via `build-local-mod.sh`, verified directly in the `.dat` (Huns
 no longer has any Steppe-Lancer-related tech), re-ran the fixed audit
 (zero confirmed collisions), deployed.
+
+## v31: elite-tier upgrades were free/instant instead of real, costed research - fixed globally; Huns' Steppe Lancer restored at Stable button 3
+
+User reported that Huns "upgraded to elite for free it seemed like, not
+bought it like normal civs." Checked `grant_effect_to_civ` directly:
+*every* tech this mod builds - including every Elite-tier upgrade - is
+free (`resource_costs=(0,0,0)`), instant (`research_time=0`), and hidden
+(`location_id=-1`, `icon_id=-1`). That's the correct pattern for a
+base-tier "make avail" grant (confirmed real vanilla base-tier "make
+avail" techs, e.g. Knight's own, are genuinely free/hidden this way) but
+wrong for an Elite tier - real vanilla civs always pay for Elite
+upgrades at a real, visible research button (Cavalier 300F+300G,
+Paladin 1300F+750G, Elite Steppe Lancer 600F+550G at Stable button 9,
+etc.). Confirmed via AskUserQuestion this should be fixed globally, not
+just for Steppe Lancer.
+
+Root-caused a second, related bug while investigating: the base-tier
+"enable" trigger (Castle built) and the elite-tier trigger (Imperial
+Age) were completely independent, so a civ that reached Imperial Age
+without ever building a Castle could complete the Elite upgrade before
+the base unit had ever actually been enabled - real vanilla Elite techs
+always explicitly require their own base "make avail" tech as an
+additional prerequisite (confirmed: real Elite Steppe Lancer tech 715
+requires *both* Imperial Age *and* "Steppe Lancer (make avail)",
+reqcount=2).
+
+Added `research_elite_upgrade_for_civ` to `mods/util.py` - builds a
+real Tech with actual `resource_costs`, a real `research_locations`
+entry (building/button/time), and `required_techs` that explicitly
+includes the enable tech's id (now returned by `enable_unit_for_civ`,
+which previously returned an unused `effect_id`) alongside the age
+gate, so the elite upgrade genuinely cannot complete first. Supports
+bundling multiple upgrade pairs under one research (needed for
+Legionary, Winged Hussar, and Harbor, none of which call
+`enable_unit_for_civ` since their base units are already normal
+content) via `extra_required_techs: list[int]` instead of a single
+tech id, and an `age_tech` override (Harbor's real tech is gated on
+Feudal Age only, not Imperial - confirmed via its real tech 624's
+`required_techs`).
+
+Researched real vanilla cost/location/prerequisite data directly
+against the `.dat` for all 12 affected grants and converted every one
+from `upgrade_unit_for_civ` to `research_elite_upgrade_for_civ`: Elite
+Steppe Lancer (600F/550G, Stable9, 55s), Elite Elephant Archer
+(900F/500G, ArcheryRange8, 80s), Elite Battle Elephant/Armored Elephant
+(1100F/700G, Stable9, 100s), Elite Genitour (500F/450W, ArcheryRange0,
+60s), Elite Fire Lancer (750F/400G, Barracks9, 50s), Heavy Rocket Cart
+(800W/600G, SiegeWorkshop7, 75s), Heavy Hei-Kuang Cavalry (350F/250G,
+Stable7, 70s), Elite Temple Guard (500F/650G, Barracks9, 60s), Elite
+War Chariot (600F/500W, Stable9, 90s, requires two Celtic-specific
+enable techs), Winged Hussar (600F/800G, Stable0, 60s, requires the
+real "Light Cavalry" research tech), Legionary (800F/400G, Barracks6,
+100s, requires the real "Long Swordsman" research tech), Harbor
+(300F/300G, Castle7, 40s, Feudal Age only). Added `TECH_LONG_SWORDSMAN`
+and `TECH_LIGHT_CAVALRY` to `mods/ids.py` for the latter two. Left
+unchanged (confirmed genuinely free in real vanilla, no fix needed):
+Settlement/Folwark Age-3 upgrades, Camel Scout->Camel Rider, Fortified
+Church, and Jian Swordsman's elite tier (no real "Elite Jian Swordsman"
+tech exists anywhere in the data - documented with a comment rather
+than silently left ambiguous).
+
+Self-caught a follow-on gap while finishing this: `research_elite_
+upgrade_for_civ` bypasses `grant_effect_to_civ` entirely (it builds its
+own `Tech`/`Effect` directly), so it was invisible to every trace-based
+tracer script that monkeypatches `grant_effect_to_civ`/`enable_unit_
+for_civ`/`upgrade_unit_for_civ` to reconstruct what this mod grants -
+`disable_unit_lines.py` and `sync_tech_trees.py` both silently stopped
+seeing every elite-tier grant. Fixed both by adding an equivalent
+interception function and including `util.research_elite_upgrade_for_civ`
+in their monkeypatch set/restore. Confirmed fixed: the rebuild log now
+shows lines like "Chinese: added Elite Steppe Lancer to Stable" that
+were silently missing before, and `sync_tech_trees.py` no longer needs
+to (and doesn't) fall back to a derived template for any of these.
+
+Also implemented the user's separate follow-up request from the same
+conversation: re-added Huns to `give_steppe_lancers_to_civs_with_horse_
+archer_heritage`'s civ list (removed in v30 due to the real Tarkan
+collision at Stable button 4), and relocated their own copy of Steppe
+Lancer/Elite Steppe Lancer to Stable button 3 via `set_train_locations_
+for_civ` - confirmed free for Huns (they were never given the camel
+line `give_camel_line_to_steppe_civs_without_camels` grants to
+Cumans, and have no real native camel-line content of their own).
+Huns keep the same real, costed Elite research as every other civ in
+the function; only their training button differs.
+
+Rebuilt via `build-local-mod.sh`, verified in the log that every
+converted grant now shows a real research line rather than firing
+silently, re-ran `audit_collisions.py` against the new build - zero new
+CONFIRMED collisions (the one pre-existing CONFIRMED entry, Khitans'
+Mounted/Traction Trebuchet, is unrelated and already resolved via
+`disable_unit_lines.py`; Huns' new button-3 placement shows up only in
+the same civ=-1-sourced POSSIBLE noise bucket every other civ's Steppe
+Lancer placement already does, confirming button 3 really is free for
+them) - deployed.

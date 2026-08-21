@@ -101,10 +101,39 @@ unit trainable at its real button for a civ that didn't have it before,
 *as long as that button is otherwise empty for that civ* (see 3.5 for
 what happens when it isn't).
 
-### 3.2 Upgrading a unit for a civ - PROVEN WORKING
-`upgrade_unit_for_civ(...)`: same shape, `EffectCommand(type=
-TYPE_UPGRADE_UNIT, a=base_unit_id, b=upgraded_unit_id)`. This is how
-every elite/final-tier grant in this mod works.
+### 3.2 Upgrading a unit for a civ - PROVEN WORKING, but two different flavors matter
+`upgrade_unit_for_civ(...)`: same shape as 3.1, `EffectCommand(type=
+TYPE_UPGRADE_UNIT, a=base_unit_id, b=upgraded_unit_id)`, wrapped in the
+same free/instant/hidden tech `grant_effect_to_civ` always builds
+(`resource_costs=(0,0,0)`, `research_time=0`, `location_id=-1`,
+`icon_id=-1`). **This is only correct for things genuinely free in real
+vanilla too** - building age-tiers (confirmed: Settlement's and
+Folwark's own real age-upgrade techs both have zero cost and no research
+location) and same-line unit growth (confirmed: Camel Scout's own real
+upgrade into Camel Rider is also free).
+
+**A unit's real Elite tier is never free in vanilla** - use
+`research_elite_upgrade_for_civ(...)` instead, which builds a real,
+costed, player-researched Tech (real `resource_costs`, a real
+`research_locations` building/button/time, matching vanilla's own
+Cavalier/Paladin/Elite-Steppe-Lancer convention exactly). This was
+missed for an entire session's worth of grants - every Elite-tier
+upgrade fired free and instant, which a user caught immediately in a
+real game ("upgraded to elite for free, not bought it like normal
+civs"). Also require the base-tier enable tech explicitly (via
+`extra_required_techs`, using the tech id `enable_unit_for_civ` now
+returns) - real vanilla Elite techs always require their own base
+"make avail" tech as an extra prerequisite alongside the age gate
+(confirmed: real Elite Steppe Lancer tech 715 requires both Imperial
+Age and "Steppe Lancer (make avail)", reqcount=2), and skipping this
+lets a civ complete the elite upgrade before the base tier ever fired
+if it reaches the age gate through a different path (e.g. Imperial Age
+without ever building a Castle). Before wiring up a new Elite-tier
+grant, look up the real vanilla tech for that unit directly in the
+`.dat` (cost, building, button, research time, required_techs) rather
+than guessing round numbers - real values are inconsistent between
+units (100-2000 resources, buttons 0/6/7/8/9, 40-100s) and there's no
+shortcut for finding them besides checking.
 
 ### 3.3 Removing a civ's native unit access - PROVEN WORKING (fixed once)
 `disable_unit_line_for_civ(data, civ_id, unit_ids, required_tech)`: a
@@ -235,6 +264,21 @@ the template from the base tier instead of silently skipping it** - see
 `DERIVED_FROM_BASE_TIER` in that script for the working pattern (copy
 the base template, bump `Node ID`/`Age ID`, fix self-referencing
 `Building ID` for buildings).
+
+**Every grant-building function in `mods/util.py` needs a matching
+interception in every trace-based script** (`sync_tech_trees.py`'s
+`trace_grants`, `disable_unit_lines.py`'s `trace_granted_units`,
+`audit_collisions.py`'s equivalent) - they all work by monkeypatching
+`regional_heritage`'s (and `heroes_and_villains`'s) references to the
+`util` functions and re-running `mod()` to observe what gets called,
+rather than reading the real output `.dat`. **Adding a new grant
+function to `util.py` silently makes every one of these blind to
+whatever it grants** unless you add a matching intercept function and
+add it to each script's monkeypatch set/restore tuple. Caught this
+self-inflicted gap once already (`research_elite_upgrade_for_civ`
+bypasses `grant_effect_to_civ` entirely, so it needed its own
+`rec_research_elite`-style hook added to two scripts) - check for this
+whenever `util.py` gains a new top-level grant function.
 
 ### 3.10 Deployment completeness
 A "local" mod loaded directly from `mods/local/<name>/` can silently

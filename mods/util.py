@@ -10,7 +10,8 @@ from genieutils.unit import Unit, TrainLocation
 from genieutils.versions import Version
 
 from mods.ids import CLASS_PETARD, MONUMENT, CLASS_HERO, TYPE_UPGRADE_UNIT, TYPE_COMBATANT, \
-    TYPE_ENABLE_DISABLE_UNIT, TYPE_DISABLE_REGIONAL_TECH, RESOURCE_STARTING_SCOUT_UNIT
+    TYPE_ENABLE_DISABLE_UNIT, TYPE_DISABLE_REGIONAL_TECH, RESOURCE_STARTING_SCOUT_UNIT, \
+    TECH_REQUIREMENT_IMPERIAL_AGE
 
 GC = TypeVar('GC', bound=GenieClass)
 
@@ -143,7 +144,10 @@ def grant_effect_to_civ(data: DatFile, civ_id: int, effect_commands: list, requi
 
     This is how the game itself grants hero units, so it's a proven way to hand a
     civ something (a unit, an upgrade) without needing it to already be wired into
-    that civ's normal researchable tech tree.
+    that civ's normal researchable tech tree. Returns the new tech's own id (not
+    the effect's) - callers that need to reference this specific grant as a
+    prerequisite for something else (see research_elite_upgrade_for_civ) need the
+    tech id, not the effect id.
     """
     effect = Effect(name=name, effect_commands=effect_commands)
     effect_id = len(data.effects)
@@ -170,27 +174,117 @@ def grant_effect_to_civ(data: DatFile, civ_id: int, effect_commands: list, requi
         name=name,
         repeatable=0,
     )
+    tech_id = len(data.techs)
     data.techs.append(unlock_tech)
-    return effect_id
+    return tech_id
 
 
-def enable_unit_for_civ(data: DatFile, civ_id: int, unit_id: int, required_tech: int):
-    """Make an existing (but disabled) unit trainable for one civ."""
+def enable_unit_for_civ(data: DatFile, civ_id: int, unit_id: int, required_tech: int) -> int:
+    """Make an existing (but disabled) unit trainable for one civ. Returns the
+    new tech's id, so a following research_elite_upgrade_for_civ call can
+    require it explicitly - without that, an elite-tier tech gated only on
+    (say) Imperial Age could complete before this enable does, since the two
+    triggers are otherwise independent (confirmed real bug: Huns could reach
+    Imperial Age without ever building a Castle, completing the elite upgrade
+    while the base tier had never actually been enabled).
+    """
     civ = data.civs[civ_id]
     unit_name = civ.units[unit_id].name
     logging.info(f'Enabling {unit_name} for {civ.name}')
     enable_command = EffectCommand(type=TYPE_ENABLE_DISABLE_UNIT, a=unit_id, b=1, c=-1, d=0.0)
-    grant_effect_to_civ(data, civ_id, [enable_command], required_tech, f'Enable {unit_name} for {civ.name}')
+    return grant_effect_to_civ(data, civ_id, [enable_command], required_tech, f'Enable {unit_name} for {civ.name}')
 
 
 def upgrade_unit_for_civ(data: DatFile, civ_id: int, base_unit_id: int, upgraded_unit_id: int, required_tech: int):
     """Give one civ the free upgrade from `base_unit_id` to `upgraded_unit_id`
-    (e.g. a unit's Elite tier) once `required_tech` is satisfied."""
+    once `required_tech` is satisfied. Only correct for things that are
+    genuinely free/automatic in real vanilla too - building age-tiers
+    (confirmed: Settlement's and Folwark's own real age-upgrade techs both
+    have zero cost and no research location) and same-line unit growth
+    (confirmed: Camel Scout's own real upgrade into Camel Rider is also free).
+    A unit's real Elite tier is NOT free in vanilla - use
+    research_elite_upgrade_for_civ for that instead.
+    """
     civ = data.civs[civ_id]
     base_name = civ.units[base_unit_id].name
     logging.info(f'Upgrading {base_name} to {civ.units[upgraded_unit_id].name} for {civ.name}')
     upgrade_command = EffectCommand(type=TYPE_UPGRADE_UNIT, a=base_unit_id, b=upgraded_unit_id, c=-1, d=0.0)
     grant_effect_to_civ(data, civ_id, [upgrade_command], required_tech, f'Upgrade {base_name} for {civ.name}')
+
+
+def research_elite_upgrade_for_civ(data: DatFile, civ_id: int, upgrade_pairs: list[tuple[int, int]],
+                                    extra_required_techs: list[int], building_id: int, button_id: int,
+                                    resource_costs: list[tuple[int, int]], research_time: int, name: str,
+                                    age_tech: int = TECH_REQUIREMENT_IMPERIAL_AGE):
+    """Give one civ a REAL, player-researched Elite-tier upgrade - a visible,
+    costed button at a real building, matching vanilla's own convention for
+    every actual Elite-tier tech checked this session (Elite Steppe Lancer:
+    600 food/550 gold at the Stable; Elite War Chariot: 600 food/500 wood;
+    Legionary: 800 food/400 gold; etc - see NOTES-civ-identity-expansion.md
+    for the full list). This is NOT the same as upgrade_unit_for_civ, which
+    is a free, instant, hidden background tech - correct for adding a new
+    base-tier unit or a building's age-tier (vanilla's own "X (make avail)"
+    techs work exactly that way), but wrong for an Elite tier, which real
+    civs always pay for and actively research.
+
+    `upgrade_pairs` is a list of (base_unit_id, upgraded_unit_id), not just
+    one - several real grants (Winged Hussar, Legionary, Harbor) upgrade
+    more than one source unit/building tier into the same target, and the
+    real vanilla techs for those bundle every command into ONE researchable
+    tech rather than offering several duplicate research buttons (confirmed:
+    Malay's own real Harbor tech has 4 separate upgrade commands in a single
+    tech). A single-pair grant just passes a 1-item list.
+
+    required_techs is always TECH_REQUIREMENT_IMPERIAL_AGE plus whatever's
+    in `extra_required_techs` (1-4 more tech ids, matching how many real
+    vanilla Elite techs are gated - most need just one more, e.g. the tech
+    id enable_unit_for_civ returned for the base unit, but Legionary's real
+    tech also requires "Long Swordsman" researched and Winged Hussar's
+    requires "Light Cavalry" researched, neither of which is an enable-tech
+    case). This also fixes the real bug that motivated this function:
+    without an explicit dependency on whatever makes the base tier real,
+    the two triggers are otherwise independent, so a civ could complete the
+    Elite tier via Imperial Age alone while the base tier had never actually
+    been enabled (confirmed happening for civs that reached Imperial Age
+    without ever building a Castle).
+    """
+    civ = data.civs[civ_id]
+    for base_unit_id, upgraded_unit_id in upgrade_pairs:
+        logging.info(f'Researching {civ.units[upgraded_unit_id].name} '
+                      f'(from {civ.units[base_unit_id].name}) for {civ.name}')
+    upgrade_commands = [EffectCommand(type=TYPE_UPGRADE_UNIT, a=base_unit_id, b=upgraded_unit_id, c=-1, d=0.0)
+                         for base_unit_id, upgraded_unit_id in upgrade_pairs]
+    effect = Effect(name=name, effect_commands=upgrade_commands)
+    effect_id = len(data.effects)
+    data.effects.append(effect)
+
+    costs = [ResearchResourceCost(type=t, amount=a, flag=1) for t, a in resource_costs]
+    while len(costs) < 3:
+        costs.append(ResearchResourceCost(type=-1, amount=0, flag=0))
+
+    required = [age_tech] + list(extra_required_techs)
+    while len(required) < 6:
+        required.append(-1)
+
+    unlock_tech = Tech(
+        required_techs=tuple(required[:6]),
+        resource_costs=tuple(costs[:3]),
+        required_tech_count=1 + len(extra_required_techs),
+        civ=civ_id,
+        full_tech_mode=0,
+        language_dll_name=0,
+        language_dll_description=0,
+        effect_id=effect_id,
+        type=0,
+        icon_id=-1,
+        language_dll_help=0,
+        language_dll_tech_tree=0,
+        research_locations=[ResearchLocation(location_id=building_id, research_time=research_time,
+                                              button_id=button_id, hot_key_id=-1)],
+        name=name,
+        repeatable=0,
+    )
+    data.techs.append(unlock_tech)
 
 
 def reskin_unit_for_civ(data: DatFile, civ_id: int, unit_id: int, donor_unit_id: int):

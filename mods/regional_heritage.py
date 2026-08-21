@@ -6,14 +6,15 @@ from genieutils.effect import EffectCommand
 from genieutils.unit import AttackOrArmor
 
 from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ, \
-    disable_unit_line_for_civ, set_train_locations_for_civ, disable_tech_for_civ, set_starting_scout_for_civ
-from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
-    TYPE_ENABLE_DISABLE_UNIT, \
+    disable_unit_line_for_civ, set_train_locations_for_civ, disable_tech_for_civ, set_starting_scout_for_civ, \
+    research_elite_upgrade_for_civ
+from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUDAL_AGE, \
+    TYPE_ENABLE_DISABLE_UNIT, TYPE_FOOD, TYPE_WOOD, TYPE_GOLD, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
     SIEGE_ELEPHANT, GENITOUR, ELITE_GENITOUR, CAMEL_RIDER, \
-    CAMEL_SCOUT, CARAVANSERAI, MULE_CART, LEGIONARY, MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN, WARRIOR_PRIEST, \
-    MISSIONARY, SCOUT_CAVALRY, \
-    LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, \
+    CAMEL_SCOUT, CARAVANSERAI, MULE_CART, LEGIONARY, MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN, TECH_LONG_SWORDSMAN, \
+    WARRIOR_PRIEST, MISSIONARY, SCOUT_CAVALRY, \
+    LIGHT_CAVALRY, TECH_LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, \
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
     KNIGHT, CAVALIER, PALADIN, TECH_CAVALIER, TECH_PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
     FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
@@ -62,23 +63,33 @@ def give_steppe_lancers_to_civs_with_horse_archer_heritage(data: DatFile):
     # other horse-archer and steppe-adjacent civs would plausibly have fielded them.
     # https://www.reddit.com/r/aoe2/comments/y6b17r/disproportionate_spread_of_regional_units/
     #
-    # Huns dropped: a real, previously-hidden collision, found via a fix to
-    # audit_collisions.py (it only ever checked a unit's *first*
-    # train_location and only TYPE_ENABLE_DISABLE_UNIT targets, missing
-    # units that only ever appear as a TYPE_UPGRADE_UNIT target with a
-    # second location). Huns' own real, correctly-gated native tech
-    # ("Elite Tarkan", civ=17) upgrades unit 886 -> 887 (UTARK) alongside
-    # its main 755 -> 757 upgrade, and 887's own second train_location is
-    # the exact same Stable button 4 this grant uses - confirmed via a
-    # full Stable-button audit that all 4 real Stable buttons are already
-    # occupied, so there's no free alternate slot to move this to. Same
-    # precedent as the earlier Huns Knight-line reversal: their own real
-    # native content wins over an added grant when the two genuinely
-    # conflict, not the other way around.
-    civs = ['Chinese', 'Bulgarians', 'Lithuanians', 'Hindustanis', 'Magyars', 'Slavs', 'Persians', 'Turks']
+    # Huns: real, previously-hidden collision at the default Stable button 4,
+    # found via a fix to audit_collisions.py (it only ever checked a unit's
+    # *first* train_location and only TYPE_ENABLE_DISABLE_UNIT targets,
+    # missing units that only ever appear as a TYPE_UPGRADE_UNIT target with
+    # a second location). Huns' own real, correctly-gated native tech
+    # ("Elite Tarkan", civ=17) upgrades unit 886 -> 887 (UTARK) alongside its
+    # main 755 -> 757 upgrade, and 887's own second train_location is the
+    # exact same Stable button 4 this grant otherwise defaults to. Rather
+    # than dropping Huns entirely, keep the grant but relocate their own
+    # copy to Stable button 3 - confirmed free for Huns (their camel line,
+    # the other real occupant of button 3, was never given/native to them).
+    civs = ['Chinese', 'Bulgarians', 'Lithuanians', 'Hindustanis', 'Magyars', 'Slavs', 'Persians', 'Turks', 'Huns']
     for civ_id in civ_ids_named(data, civs):
-        enable_unit_for_civ(data, civ_id, STEPPE_LANCER, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, STEPPE_LANCER, ELITE_STEPPE_LANCER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        enable_tech = enable_unit_for_civ(data, civ_id, STEPPE_LANCER, TECH_CASTLE_BUILT)
+        # Real cost/location, matching vanilla's own "Elite Steppe Lancer"
+        # tech exactly (600 food/550 gold, Stable button 9, 55s) - a real,
+        # player-researched upgrade, not the free/instant default. Also
+        # fixes the real bug that motivated this: requiring enable_tech
+        # explicitly means the elite tier can never complete before the
+        # base tier was actually enabled (confirmed happening for civs that
+        # reached Imperial Age without ever building a Castle).
+        research_elite_upgrade_for_civ(data, civ_id, [(STEPPE_LANCER, ELITE_STEPPE_LANCER)], [enable_tech],
+                                        101, 9, [(TYPE_FOOD, 600), (TYPE_GOLD, 550)], 55,
+                                        f'Elite Steppe Lancer for {data.civs[civ_id].name}')
+    huns_id, = civ_ids_named(data, ['Huns'])
+    set_train_locations_for_civ(data, huns_id, STEPPE_LANCER, [(101, 3)])
+    set_train_locations_for_civ(data, huns_id, ELITE_STEPPE_LANCER, [(101, 3)])
 
 
 def give_elephant_archers_to_civs_with_elephant_heritage(data: DatFile):
@@ -87,16 +98,25 @@ def give_elephant_archers_to_civs_with_elephant_heritage(data: DatFile):
     # https://www.reddit.com/r/aoe2/comments/10mqm64/sotl_should_more_civs_get_elephant_archers/
     civs = ['Persians', 'Burmese', 'Malay', 'Khmer', 'Vietnamese']
     for civ_id in civ_ids_named(data, civs):
-        enable_unit_for_civ(data, civ_id, ELEPHANT_ARCHER, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        enable_tech = enable_unit_for_civ(data, civ_id, ELEPHANT_ARCHER, TECH_CASTLE_BUILT)
+        # Real cost/location, matching vanilla's own "Elite Elephant Archer"
+        # (900 food/500 gold, Archery Range button 8, 80s).
+        research_elite_upgrade_for_civ(data, civ_id, [(ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER)], [enable_tech],
+                                        87, 8, [(TYPE_FOOD, 900), (TYPE_GOLD, 500)], 80,
+                                        f'Elite Elephant Archer for {data.civs[civ_id].name}')
 
 
 def give_armored_elephants_to_other_elephant_civs(data: DatFile):
     # https://www.reddit.com/r/aoe2/comments/ubkjoa/armored_elephants_for_khmer_burmese_and_malay
     civs = ['Khmer', 'Burmese', 'Malay', 'Ethiopians', 'Vietnamese']
     for civ_id in civ_ids_named(data, civs):
-        enable_unit_for_civ(data, civ_id, ARMORED_ELEPHANT, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, ARMORED_ELEPHANT, SIEGE_ELEPHANT, TECH_REQUIREMENT_IMPERIAL_AGE)
+        enable_tech = enable_unit_for_civ(data, civ_id, ARMORED_ELEPHANT, TECH_CASTLE_BUILT)
+        # Real cost/location, matching vanilla's own "Elite Battle Elephant"
+        # tech (1100 food/700 gold, Stable button 9, 100s) - the real name
+        # of Armored Elephant's own elite upgrade in the actual data.
+        research_elite_upgrade_for_civ(data, civ_id, [(ARMORED_ELEPHANT, SIEGE_ELEPHANT)], [enable_tech],
+                                        101, 9, [(TYPE_FOOD, 1100), (TYPE_GOLD, 700)], 100,
+                                        f'Elite Battle Elephant for {data.civs[civ_id].name}')
 
 
 def give_genitours_to_civs_with_light_cavalry_heritage(data: DatFile):
@@ -108,8 +128,12 @@ def give_genitours_to_civs_with_light_cavalry_heritage(data: DatFile):
     # https://www.reddit.com/r/aoe2/comments/106i52l/genitours_for_middle_eastern_civs/
     civs = ['Spanish', 'Portuguese', 'Persians', 'Saracens', 'Malians', 'Turks', 'Italians', 'Sicilians']
     for civ_id in civ_ids_named(data, civs):
-        enable_unit_for_civ(data, civ_id, GENITOUR, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, GENITOUR, ELITE_GENITOUR, TECH_REQUIREMENT_IMPERIAL_AGE)
+        enable_tech = enable_unit_for_civ(data, civ_id, GENITOUR, TECH_CASTLE_BUILT)
+        # Real cost/location, matching vanilla's own "Elite Genitour" tech
+        # (500 food/450 wood, Archery Range button 0, 60s).
+        research_elite_upgrade_for_civ(data, civ_id, [(GENITOUR, ELITE_GENITOUR)], [enable_tech],
+                                        87, 0, [(TYPE_FOOD, 500), (TYPE_WOOD, 450)], 60,
+                                        f'Elite Genitour for {data.civs[civ_id].name}')
 
 
 # give_camel_line_to_steppe_civs_without_camels was removed - user decided it
@@ -159,18 +183,43 @@ def give_legionaries_to_byzantines(data: DatFile):
     # Swordsman line becomes Legionary the same way Persians' Paladin becomes Savar,
     # not a second, separate unique unit sitting alongside their existing one.
     # https://www.reddit.com/r/aoe2/comments/13tw143/so_i_read_some_comments_about_how_byzantine_civ/
+    # Real cost/location, matching vanilla's own "Legionary" tech (800
+    # food/400 gold, Barracks button 6, 100s). No enable_unit_for_civ here -
+    # Militia/Man-at-Arms/Long Swordsman are already real, normal trainable
+    # units for Byzantines, not something this mod separately introduces -
+    # so the real prerequisite is TECH_LONG_SWORDSMAN (has the player
+    # actually researched that tier), matching vanilla's own real Legionary
+    # tech exactly (it requires Imperial Age + "Long Swordsman" researched,
+    # not an enable tech).
     for civ_id in civ_ids_named(data, ['Byzantine']):
-        for base_unit in (MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN):
-            upgrade_unit_for_civ(data, civ_id, base_unit, LEGIONARY, TECH_REQUIREMENT_IMPERIAL_AGE)
+        research_elite_upgrade_for_civ(
+            data, civ_id,
+            [(MILITIA, LEGIONARY), (MAN_AT_ARMS, LEGIONARY), (LONG_SWORDSMAN, LEGIONARY)],
+            [TECH_LONG_SWORDSMAN], 12, 6, [(TYPE_FOOD, 800), (TYPE_GOLD, 400)], 100,
+            f'Legionary for {data.civs[civ_id].name}')
 
 
 def give_winged_hussars_to_other_eastern_european_civs(data: DatFile):
     # Winged Hussars are currently Polish/Lithuanian only, but Hungary and the Cuman
     # cavalry tradition both fed directly into the same eastern-European hussar style.
     # https://www.reddit.com/r/aoe2/comments/qu6b4a/should_magyars_get_winged_hussars_too/
+    #
+    # Real cost/location, matching vanilla's own "Winged Hussar" tech (600
+    # food/800 gold, Stable button 0, 60s). Like Legionary above, no
+    # enable_unit_for_civ - Scout Cavalry/Light Cavalry/Hussar are already
+    # real, normal trainable units for these civs. Vanilla's own real
+    # Winged Hussar tech requires Imperial Age + Light Cavalry researched +
+    # (Poles' or Lithuanians' own specific unlock tech, an OR-style
+    # threshold that doesn't generalize to a new civ) - using just
+    # TECH_LIGHT_CAVALRY here, the one part of that gating that's actually
+    # about the player's own progress rather than someone else's civ-
+    # specific content.
     for civ_id in civ_ids_named(data, ['Magyars', 'Cumans']):
-        for base_unit in (SCOUT_CAVALRY, LIGHT_CAVALRY, HUSSAR):
-            upgrade_unit_for_civ(data, civ_id, base_unit, WINGED_HUSSAR, TECH_REQUIREMENT_IMPERIAL_AGE)
+        research_elite_upgrade_for_civ(
+            data, civ_id,
+            [(SCOUT_CAVALRY, WINGED_HUSSAR), (LIGHT_CAVALRY, WINGED_HUSSAR), (HUSSAR, WINGED_HUSSAR)],
+            [TECH_LIGHT_CAVALRY], 101, 0, [(TYPE_FOOD, 600), (TYPE_GOLD, 800)], 60,
+            f'Winged Hussar for {data.civs[civ_id].name}')
 
 
 def give_slingers_to_other_american_civs(data: DatFile):
@@ -263,8 +312,12 @@ def give_fire_lancers_to_japanese(data: DatFile):
     # contact with China/Korea and hasn't been given any gunpowder-flavored unit
     # by this mod yet.
     for civ_id in civ_ids_named(data, ['Japanese']):
-        enable_unit_for_civ(data, civ_id, FIRE_LANCER, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, FIRE_LANCER, ELITE_FIRE_LANCER, TECH_REQUIREMENT_IMPERIAL_AGE)
+        enable_tech = enable_unit_for_civ(data, civ_id, FIRE_LANCER, TECH_CASTLE_BUILT)
+        # Real cost/location, matching vanilla's own "Elite Fire Lancer"
+        # tech (750 food/400 gold, Barracks button 9, 50s).
+        research_elite_upgrade_for_civ(data, civ_id, [(FIRE_LANCER, ELITE_FIRE_LANCER)], [enable_tech],
+                                        12, 9, [(TYPE_FOOD, 750), (TYPE_GOLD, 400)], 50,
+                                        f'Elite Fire Lancer for {data.civs[civ_id].name}')
 
 
 def give_rocket_cart_to_japanese(data: DatFile):
@@ -272,8 +325,12 @@ def give_rocket_cart_to_japanese(data: DatFile):
     # Khitan/Korean only - the exact same East Asian gunpowder-contact group
     # Fire Lancer above already extends to Japan.
     for civ_id in civ_ids_named(data, ['Japanese']):
-        enable_unit_for_civ(data, civ_id, ROCKET_CART, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, ROCKET_CART, HEAVY_ROCKET_CART, TECH_REQUIREMENT_IMPERIAL_AGE)
+        enable_tech = enable_unit_for_civ(data, civ_id, ROCKET_CART, TECH_CASTLE_BUILT)
+        # Real cost/location, matching vanilla's own "Heavy Rocket Cart"
+        # tech (800 wood/600 gold, Siege Workshop button 7, 75s).
+        research_elite_upgrade_for_civ(data, civ_id, [(ROCKET_CART, HEAVY_ROCKET_CART)], [enable_tech],
+                                        49, 7, [(TYPE_WOOD, 800), (TYPE_GOLD, 600)], 75,
+                                        f'Heavy Rocket Cart for {data.civs[civ_id].name}')
 
 
 def give_traction_trebuchet_to_east_asian_civs(data: DatFile):
@@ -316,8 +373,12 @@ def give_hei_kuang_cavalry_to_chinese(data: DatFile):
     # a genuine drop-in swap, not an addition. See
     # remove_knight_line_from_chinese_for_hei_kuang_cavalry below.
     for civ_id in civ_ids_named(data, ['Chinese']):
-        enable_unit_for_civ(data, civ_id, HEI_KUANG_CAVALRY, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, TECH_REQUIREMENT_IMPERIAL_AGE)
+        enable_tech = enable_unit_for_civ(data, civ_id, HEI_KUANG_CAVALRY, TECH_CASTLE_BUILT)
+        # Real cost/location, matching vanilla's own "Heavy Hei-Kuang
+        # Cavalry" tech (350 food/250 gold, Stable button 7, 70s).
+        research_elite_upgrade_for_civ(data, civ_id, [(HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY)], [enable_tech],
+                                        101, 7, [(TYPE_FOOD, 350), (TYPE_GOLD, 250)], 70,
+                                        f'Heavy Hei-Kuang Cavalry for {data.civs[civ_id].name}')
 
 
 def give_grenadier_to_gunpowder_civs_without_hand_cannoneer(data: DatFile):
@@ -349,6 +410,13 @@ def give_jian_swordsman_to_other_three_kingdoms_civs(data: DatFile):
     # broader Han-Chinese swordsman tradition Wu's own unit represents.
     # Trains from the exact same Barracks button 4 Wu already uses, free for
     # both - a pure addition, not a replacement of anything.
+    # Left as the free/instant upgrade (not research_elite_upgrade_for_civ,
+    # unlike every other unit elite-tier grant in this file) - checked and
+    # confirmed there's no real "Elite Jian Swordsman" tech anywhere in the
+    # actual data to copy a cost/location from. Wu's own real
+    # futuravailableunits.json entry never listed their own Elite Jian
+    # Swordsman either, only the base tier - this looks like a genuine gap
+    # in the vanilla data itself, not something to invent a cost for.
     for civ_id in civ_ids_named(data, ['Shu', 'Wei']):
         enable_unit_for_civ(data, civ_id, JIAN_SWORDSMAN, TECH_CASTLE_BUILT)
         upgrade_unit_for_civ(data, civ_id, JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TECH_REQUIREMENT_IMPERIAL_AGE)
@@ -364,10 +432,19 @@ def give_temple_guard_to_andean_and_mesoamerican_civs(data: DatFile):
     # shamanic_heritage already covers both Incas and Aztecs) - a real
     # collision, not a free second slot.
     #
+    # Real cost/location for the research itself, matching vanilla's own
+    # "Elite Temple Guard" tech (500 food/650 gold, Barracks button 9, 60s) -
+    # note this research button is separate from wherever the unit itself
+    # trains (button 4 for Incas, button 3 for Aztecs, set below), the same
+    # way a training slot and a research slot are always independent
+    # buttons at the same building.
+    #
     # Incas: Barracks button 4 is free - a plain addition.
     incas_id, = civ_ids_named(data, ['Incas'])
-    enable_unit_for_civ(data, incas_id, TEMPLE_GUARD, TECH_CASTLE_BUILT)
-    upgrade_unit_for_civ(data, incas_id, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, TECH_REQUIREMENT_IMPERIAL_AGE)
+    enable_tech = enable_unit_for_civ(data, incas_id, TEMPLE_GUARD, TECH_CASTLE_BUILT)
+    research_elite_upgrade_for_civ(data, incas_id, [(TEMPLE_GUARD, ELITE_TEMPLE_GUARD)], [enable_tech],
+                                    12, 9, [(TYPE_FOOD, 500), (TYPE_GOLD, 650)], 60,
+                                    f'Elite Temple Guard for {data.civs[incas_id].name}')
     set_train_locations_for_civ(data, incas_id, TEMPLE_GUARD, [(12, 4)])
     set_train_locations_for_civ(data, incas_id, ELITE_TEMPLE_GUARD, [(12, 4)])
     #
@@ -376,8 +453,10 @@ def give_temple_guard_to_andean_and_mesoamerican_civs(data: DatFile):
     # Barracks-button-3 content anywhere is Condottiero, granted only to
     # mercenary-tradition civs, not Aztecs).
     aztecs_id, = civ_ids_named(data, ['Aztecs'])
-    enable_unit_for_civ(data, aztecs_id, TEMPLE_GUARD, TECH_CASTLE_BUILT)
-    upgrade_unit_for_civ(data, aztecs_id, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, TECH_REQUIREMENT_IMPERIAL_AGE)
+    enable_tech = enable_unit_for_civ(data, aztecs_id, TEMPLE_GUARD, TECH_CASTLE_BUILT)
+    research_elite_upgrade_for_civ(data, aztecs_id, [(TEMPLE_GUARD, ELITE_TEMPLE_GUARD)], [enable_tech],
+                                    12, 9, [(TYPE_FOOD, 500), (TYPE_GOLD, 650)], 60,
+                                    f'Elite Temple Guard for {data.civs[aztecs_id].name}')
     set_train_locations_for_civ(data, aztecs_id, TEMPLE_GUARD, [(12, 3)])
     set_train_locations_for_civ(data, aztecs_id, ELITE_TEMPLE_GUARD, [(12, 3)])
 
@@ -403,8 +482,12 @@ def give_war_chariot_to_celts(data: DatFile):
     # it defines them. Stable button 4 confirmed free (only Scout Cavalry/
     # Light Cavalry/Hussar/Knight/Cavalier/Paladin listed).
     for civ_id in civ_ids_named(data, ['Celts']):
-        enable_unit_for_civ(data, civ_id, WAR_CHARIOT, TECH_CASTLE_BUILT)
-        upgrade_unit_for_civ(data, civ_id, WAR_CHARIOT, ELITE_WAR_CHARIOT, TECH_REQUIREMENT_IMPERIAL_AGE)
+        enable_tech = enable_unit_for_civ(data, civ_id, WAR_CHARIOT, TECH_CASTLE_BUILT)
+        # Real cost/location, matching vanilla's own "Elite War Chariot"
+        # tech (600 food/500 wood, Stable button 9, 90s).
+        research_elite_upgrade_for_civ(data, civ_id, [(WAR_CHARIOT, ELITE_WAR_CHARIOT)], [enable_tech],
+                                        101, 9, [(TYPE_FOOD, 600), (TYPE_WOOD, 500)], 90,
+                                        f'Elite War Chariot for {data.civs[civ_id].name}')
 
 
 def _configure_samurai_ranged_form(base_unit, ranged_unit):
@@ -601,9 +684,16 @@ def give_harbor_to_vietnamese(data: DatFile):
     # Vietnamese to Malay/Khmer/Burmese throughout this mod. Vikings fit the
     # same idea from a completely different angle - Norse maritime trade routes
     # were just as central to their identity.
+    # Real cost/location, matching vanilla's own "Malay UT" tech that grants
+    # Harbor (300 food/300 gold, Castle button 7, 40s) - unlike every other
+    # elite-tier grant in this file, the real tech only requires Feudal Age
+    # (not Imperial), so age_tech overrides the default here to match.
     for civ_id in civ_ids_named(data, ['Vietnamese', 'Vikings']):
-        for dock_tier in (TYPE_DOCK_TRAIN_LOCATION, DOCK_AGE2, DOCK_AGE3, DOCK_AGE4):
-            upgrade_unit_for_civ(data, civ_id, dock_tier, HARBOR, TECH_REQUIREMENT_IMPERIAL_AGE)
+        research_elite_upgrade_for_civ(
+            data, civ_id,
+            [(dock_tier, HARBOR) for dock_tier in (TYPE_DOCK_TRAIN_LOCATION, DOCK_AGE2, DOCK_AGE3, DOCK_AGE4)],
+            [], 82, 7, [(TYPE_FOOD, 300), (TYPE_GOLD, 300)], 40,
+            f'Harbor for {data.civs[civ_id].name}', age_tech=FEUDAL_AGE)
 
 
 def give_longboats_the_ability_to_transport_units(data: DatFile):

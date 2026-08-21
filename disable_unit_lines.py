@@ -112,19 +112,27 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
     def rec_disable_line(data, civ_id, unit_ids, required_tech):
         disabled[civ_id] |= set(unit_ids)
 
+    def rec_research_elite(data, civ_id, upgrade_pairs, extra_required_techs, building_id, button_id,
+                            resource_costs, research_time, name, age_tech=None):
+        for _base_unit_id, upgraded_unit_id in upgrade_pairs:
+            upgraded[civ_id].add(upgraded_unit_id)
+
     import mods.util as util
     orig = (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-            util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ)
+            util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ,
+            util.research_elite_upgrade_for_civ)
     regional_heritage.enable_unit_for_civ = rec_enable
     regional_heritage.upgrade_unit_for_civ = rec_upgrade
     regional_heritage.grant_effect_to_civ = rec_grant_effect
     regional_heritage.set_train_locations_for_civ = rec_set_locations
     regional_heritage.reskin_unit_for_civ = noop_reskin
     regional_heritage.disable_unit_line_for_civ = rec_disable_line
+    regional_heritage.research_elite_upgrade_for_civ = rec_research_elite
     heroes_and_villains.enable_unit_for_civ = rec_enable
     regional_heritage.mod(data)
     (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-     util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ) = orig
+     util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ,
+     util.research_elite_upgrade_for_civ) = orig
 
     return enabled, upgraded, disabled, location_overrides
 
