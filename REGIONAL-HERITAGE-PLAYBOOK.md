@@ -150,9 +150,29 @@ actual tech/effect data directly - for every `(building, button)`, it
 finds every unit any tech (civ=-1 or civ-specific) really enables there,
 then cross-references every grant this mod makes against that ground
 truth. Prefer this over anything based on `futuravailableunits.json`.
-One real limitation it still has: it currently treats *any* `civ=-1`
-"make avail" tech as competing with a grant for every civ, which is only
-sometimes true - see 3.7 for why that's not fully solved.
+
+**Check every `train_locations` entry, not just the first, and both
+`TYPE_ENABLE_DISABLE_UNIT` *and* `TYPE_UPGRADE_UNIT` targets.** A real,
+previously-hidden bug slipped through this whole session because the
+original version of `build_slot_enablers` only looked at index 0 and
+only tracked direct enables - missing that Huns' own native "Elite
+Tarkan" tech upgrades a *second* unit (887) whose *second*
+`train_locations` entry happened to be the exact Stable button 4 this
+mod's Steppe Lancer grant uses. A unit that only ever appears as an
+upgrade *target*, never separately enabled, is structurally invisible
+unless you check both command types.
+
+**Treat `civ=-1`-sourced competitors and civ-specific-sourced
+competitors as different confidence levels, don't merge them.** A
+civ-specific tech (`Tech.civ = X`) unambiguously means that exact civ
+has the competing unit - act on it. A `civ=-1` tech only means the unit
+is *reachable somewhere in the full tech tree* - per 3.7, that's not
+proof a specific civ really has it (Steppe Lancer's own tech is `civ=-1`
+and gated only on Feudal Age, identical in shape to Knight's, yet it's
+genuinely Cuman/Mongol-exclusive). `audit_collisions.py` reports these
+as two separate buckets - CONFIRMED and POSSIBLE - for exactly this
+reason. Only CONFIRMED entries are safe to act on without further
+verification.
 
 **Villager-build-menu buttons are different from training-menu buttons.**
 Multiple buildings can legitimately share the identical numbered slot
@@ -235,6 +255,12 @@ exactly this reason.
   and turned out not to gate real gameplay at all (3.5), and to be
   incomplete even as a listing (it never mentioned Packed Trebuchet's
   real Castle-button-2 collision, the thing that broke every hero).
+- **A collision checker that only looks at index 0 of `train_locations`,
+  or only tracks direct-enable commands, will miss real collisions.**
+  Huns' Steppe Lancer grant silently lost to their own native Tarkan for
+  this exact reason, undetected for the entire session until a live
+  in-game report surfaced it. See 3.5's updated guidance - check every
+  location, and check upgrade targets too, not just enables.
 - **Don't trust an existing code comment's factual claim without
   re-verifying it.** Real examples from this session: a comment claimed
   War Chariot (2150/2151) was "completely unclaimed" - direct `.dat`

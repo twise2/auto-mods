@@ -61,7 +61,21 @@ def give_steppe_lancers_to_civs_with_horse_archer_heritage(data: DatFile):
     # Steppe Lancers are currently a Cuman/Mongol-family exclusive, but plenty of
     # other horse-archer and steppe-adjacent civs would plausibly have fielded them.
     # https://www.reddit.com/r/aoe2/comments/y6b17r/disproportionate_spread_of_regional_units/
-    civs = ['Chinese', 'Bulgarians', 'Lithuanians', 'Hindustanis', 'Magyars', 'Slavs', 'Persians', 'Huns', 'Turks']
+    #
+    # Huns dropped: a real, previously-hidden collision, found via a fix to
+    # audit_collisions.py (it only ever checked a unit's *first*
+    # train_location and only TYPE_ENABLE_DISABLE_UNIT targets, missing
+    # units that only ever appear as a TYPE_UPGRADE_UNIT target with a
+    # second location). Huns' own real, correctly-gated native tech
+    # ("Elite Tarkan", civ=17) upgrades unit 886 -> 887 (UTARK) alongside
+    # its main 755 -> 757 upgrade, and 887's own second train_location is
+    # the exact same Stable button 4 this grant uses - confirmed via a
+    # full Stable-button audit that all 4 real Stable buttons are already
+    # occupied, so there's no free alternate slot to move this to. Same
+    # precedent as the earlier Huns Knight-line reversal: their own real
+    # native content wins over an added grant when the two genuinely
+    # conflict, not the other way around.
+    civs = ['Chinese', 'Bulgarians', 'Lithuanians', 'Hindustanis', 'Magyars', 'Slavs', 'Persians', 'Turks']
     for civ_id in civ_ids_named(data, civs):
         enable_unit_for_civ(data, civ_id, STEPPE_LANCER, TECH_CASTLE_BUILT)
         upgrade_unit_for_civ(data, civ_id, STEPPE_LANCER, ELITE_STEPPE_LANCER, TECH_REQUIREMENT_IMPERIAL_AGE)

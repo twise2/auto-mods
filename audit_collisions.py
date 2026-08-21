@@ -31,52 +31,75 @@ from disable_unit_lines import trace_granted_units, unit_locations, build_upgrad
 
 def build_slot_enablers(data: DatFile) -> dict[tuple[int, int], dict[int, set[int]]]:
     """(building_id, button_id) -> {civ_id: {unit_id, ...}} for every unit
-    any real tech ever enables there. civ_id -1 means "every civ" (a
-    civ=-1 tech) - callers should treat that as applying universally in
+    any real tech ever makes available there. civ_id -1 means "every civ"
+    (a civ=-1 tech) - callers should treat that as applying universally in
     addition to whatever a specific civ_id maps to.
+
+    Checks *every* train_location a unit has, not just the first - missing
+    this hid a real collision all session (Huns' native "Elite Tarkan"
+    upgrades unit 886 -> 887, and 887's second train_location is the exact
+    same Stable button 4 this mod's Steppe Lancer grant uses; 886/887 never
+    showed up in any check that only looked at index 0). Also checks
+    TYPE_UPGRADE_UNIT (type=3) targets, not just TYPE_ENABLE_DISABLE_UNIT
+    (type=2) - a unit that only ever appears as an upgrade *target* (like
+    887 above) is real and trainable once the upgrade fires, even though no
+    tech ever directly "enables" it.
     """
     base = data.civs[0]
 
-    def location(unit_id: int):
+    def locations(unit_id: int):
         u = base.units[unit_id] if unit_id < len(base.units) else None
         if u is None or not u.creatable or not u.creatable.train_locations:
-            return None
-        tl = u.creatable.train_locations[0]
-        return (tl.unit_id, tl.button_id) if tl.unit_id != -1 else None
+            return []
+        return [(tl.unit_id, tl.button_id) for tl in u.creatable.train_locations if tl.unit_id != -1]
 
     slots: dict[tuple[int, int], dict[int, set[int]]] = defaultdict(lambda: defaultdict(set))
     for t in data.techs:
         if t is None or t.effect_id < 0:
             continue
         for cmd in data.effects[t.effect_id].effect_commands:
-            if cmd.type != 2 or cmd.b != 1:
+            if cmd.type == 2 and cmd.b == 1:
+                target = cmd.a
+            elif cmd.type == 3:
+                target = cmd.b
+            else:
                 continue
-            loc = location(cmd.a)
-            if loc is None:
-                continue
-            slots[loc][t.civ].add(cmd.a)
+            for loc in locations(target):
+                slots[loc][t.civ].add(target)
     return slots
 
 
 def real_competitors(data: DatFile, slots: dict[tuple[int, int], dict[int, set[int]]],
                       civ_id: int, building_id: int, button_id: int,
-                      exclude: set[int], families: dict[int, set[int]]) -> set[int]:
-    """Every unit_id genuinely enabled (universally or for this specific
-    civ) at (building_id, button_id), other than the units in `exclude`
-    (the grant itself) or in their upgrade family."""
+                      exclude: set[int], families: dict[int, set[int]]) -> tuple[set[int], set[int]]:
+    """(civ_specific, universal) competitors at (building_id, button_id),
+    other than the units in `exclude` (the grant itself) or in their
+    upgrade family. Split rather than merged because the two have very
+    different confidence: a civ-specific tech unambiguously means that
+    exact civ really has that unit, while a civ=-1 tech only means it's
+    *reachable* somewhere in the full tech tree - confirmed unreliable as
+    "this civ really has it" on its own (Steppe Lancer's own "make avail"
+    tech is civ=-1 and gated only on Feudal Age, identical in shape to
+    Knight's, yet Steppe Lancer is genuinely Cuman/Mongol-exclusive - the
+    real per-civ restriction for civ=-1 content isn't visible in the tech
+    system at all, see REGIONAL-HERITAGE-PLAYBOOK.md section 3.7).
+    """
     if building_id == BUILD_MENU_ID:
-        return set()
+        return set(), set()
     by_civ = slots.get((building_id, button_id), {})
-    candidates = set(by_civ.get(-1, set())) | set(by_civ.get(civ_id, set()))
-    result = set()
-    for unit_id in candidates:
-        if unit_id in exclude:
-            continue
-        same_family = families.get(unit_id, {unit_id})
-        if same_family & exclude:
-            continue
-        result.add(unit_id)
-    return result
+
+    def filtered(candidates):
+        result = set()
+        for unit_id in candidates:
+            if unit_id in exclude:
+                continue
+            same_family = families.get(unit_id, {unit_id})
+            if same_family & exclude:
+                continue
+            result.add(unit_id)
+        return result
+
+    return filtered(by_civ.get(civ_id, set())), filtered(by_civ.get(-1, set()))
 
 
 def audit(data: DatFile) -> None:
@@ -93,20 +116,34 @@ def audit(data: DatFile) -> None:
         combined[civ_id] |= ids
 
     total_checked = 0
-    total_bad = 0
+    confirmed = []
+    possible = []
     for civ_id, unit_ids in sorted(combined.items()):
         for unit_id in sorted(unit_ids):
             for building_id, button_id in unit_locations(data, civ_id, unit_id, overrides):
                 total_checked += 1
-                competitors = real_competitors(data, slots, civ_id, building_id, button_id,
-                                                unit_ids | {unit_id}, families)
-                if competitors:
-                    total_bad += 1
-                    names = ', '.join(sorted(base.units[c].name for c in competitors if c < len(base.units)))
-                    granted_name = base.units[unit_id].name if unit_id < len(base.units) else unit_id
-                    print(f'COLLISION: {civ_names.get(civ_id)}: granted {granted_name} at building='
-                          f'{building_id} button={button_id} really competes with [{names}]')
-    print(f'\nChecked {total_checked} (civ, unit, location) grants, {total_bad} real collisions found.')
+                civ_specific, universal = real_competitors(data, slots, civ_id, building_id, button_id,
+                                                             unit_ids | {unit_id}, families)
+                granted_name = base.units[unit_id].name if unit_id < len(base.units) else unit_id
+                if civ_specific:
+                    names = ', '.join(sorted(base.units[c].name for c in civ_specific if c < len(base.units)))
+                    confirmed.append(f'{civ_names.get(civ_id)}: granted {granted_name} at building='
+                                      f'{building_id} button={button_id} really competes with [{names}] '
+                                      f'(civ-specific - confirmed real)')
+                if universal:
+                    names = ', '.join(sorted(base.units[c].name for c in universal if c < len(base.units)))
+                    possible.append(f'{civ_names.get(civ_id)}: granted {granted_name} at building='
+                                     f'{building_id} button={button_id} might compete with [{names}] '
+                                     f'(civ=-1 sourced - unconfirmed, see section 3.7)')
+
+    print('=== CONFIRMED (civ-specific tech - real, act on these) ===')
+    for line in confirmed:
+        print(line)
+    print('\n=== POSSIBLE (civ=-1 sourced - worth a second look, not proven) ===')
+    for line in possible:
+        print(line)
+    print(f'\nChecked {total_checked} (civ, unit, location) grants: '
+          f'{len(confirmed)} confirmed, {len(possible)} possible.')
 
 
 def main():

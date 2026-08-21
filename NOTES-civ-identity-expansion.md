@@ -1794,3 +1794,56 @@ tradition to speak of - declined. Persians-the-main-civ has a plausible
 "heritage lineage" argument (successor to Achaemenid Persia) but was
 judged likely to feel cluttered on top of their existing Camel Rider/
 Savar/full Knight line - not implemented without a clearer case.
+
+## v30: fixed a real, previously-hidden collision - Huns' Steppe Lancer vs their own native Tarkan
+
+User reported Huns seeming to only ever get Elite Steppe Lancer, and a
+conflict "at the tarkan spot" once the upgrade fires. Investigated
+directly rather than guess, and found a genuine, previously-undetected
+bug - not the async-tech-timing theory considered first.
+
+Huns' real, correctly-gated native tech ("Elite Tarkan", civ=17,
+requires Imperial Age + their own "Tarkan (make avail)" tech) has *two*
+upgrade commands: the intended 755->757 (Tarkan's real Castle-button-1
+unique), and a second, seemingly-vestigial 886->887. Unit 887's own
+train_locations include a second entry - Stable button 4 - the exact
+same slot `give_steppe_lancers_to_civs_with_horse_archer_heritage` uses.
+Confirmed via a full Stable-button audit (checking every unit's *every*
+train_location, not just the first) that all 4 real Stable buttons are
+already occupied for every civ - no free alternate slot exists to move
+this to.
+
+**This was invisible to every collision check run this whole session**
+because `audit_collisions.py`'s `build_slot_enablers` had two compounding
+gaps: it only ever looked at a candidate unit's *first* `train_locations`
+entry (887's real collision was its *second*), and it only tracked
+`TYPE_ENABLE_DISABLE_UNIT` targets, never `TYPE_UPGRADE_UNIT` targets -
+so a unit like 887, which only ever appears as an upgrade *target* and is
+never separately "enabled" by any tech, was structurally invisible to it
+regardless. Fixed both: `locations()` now returns every train_location,
+and both `type=2` (enable) and `type=3` (upgrade) commands are scanned,
+using the upgrade's target unit for the latter.
+
+Fixing that surfaced a lot more noise, though - civ=-1-sourced
+"competitors" (Battle Elephant, War Chariot, etc., matching the same
+known-unreliable category documented in
+`REGIONAL-HERITAGE-PLAYBOOK.md` section 3.7) flooded the output for
+civs that were never actually granted those units. Split
+`real_competitors`'s output into two buckets instead of merging them:
+**CONFIRMED** (civ-specific tech - unambiguous, real) and **POSSIBLE**
+(civ=-1 sourced - worth a second look, not proven). After the fix, the
+confirmed bucket contained exactly the real Huns bug plus the
+already-known-and-already-resolved Khitans Mounted-Trebuchet-vs-
+Traction-Trebuchet case (re-confirmed still correctly resolved in the
+deployed output via the separate `disable_unit_lines.py` mechanism) -
+nothing else. The possible bucket, once real collisions were filtered
+out, came back empty for the current grant set.
+
+Fixed the actual bug by dropping Huns from
+`give_steppe_lancers_to_civs_with_horse_archer_heritage`'s civ list -
+same precedent as the earlier Huns Knight-line reversal: their own real
+native content (Tarkan) wins over an added grant when the two genuinely
+conflict, especially with no free alternate slot to relocate to.
+Rebuilt via `build-local-mod.sh`, verified directly in the `.dat` (Huns
+no longer has any Steppe-Lancer-related tech), re-ran the fixed audit
+(zero confirmed collisions), deployed.
