@@ -280,6 +280,21 @@ bypasses `grant_effect_to_civ` entirely, so it needed its own
 `rec_research_elite`-style hook added to two scripts) - check for this
 whenever `util.py` gains a new top-level grant function.
 
+**Monkeypatching a module's function reference does nothing if that
+module's own `mod()` is never called.** Found a real, much bigger
+version of the same class of bug: both trace scripts patched
+`heroes_and_villains.enable_unit_for_civ`, but only ever called
+`regional_heritage.mod(data)` - `heroes_and_villains.mod(data)` was
+never invoked at all. Every hero grant, for every civ, was invisible to
+both the collision checker and CivTechTrees sync for this whole
+project's history; the patch had nothing to intercept. **When a trace
+script monkeypatches functions across more than one mod module, verify
+it actually calls `mod()` on *each* of those modules, in the same order
+`auto-mod.py`/`build-local-mod.sh` do** - not just that every function
+got a matching intercept (3.9's lesson) but that every module gets
+exercised at all. A patched-but-uncalled function is silent and easy to
+mistake for "already covered."
+
 ### 3.10 Deployment completeness
 A "local" mod loaded directly from `mods/local/<name>/` can silently
 fall back to the base game's own copy of a file it doesn't ship
@@ -374,19 +389,25 @@ Chinese; cosmetic skins (Frankish Paladin, Crusader Knight); Samurai
 ranged-mode swap; Longboat transport; regional buildings (Feitoria,
 Folwark, Donjon, Krepost, Harbor, Fortified Church).
 
-**Civs that intentionally receive nothing from this mod** (verified via
-a full trace, not just "seems fine"): the real donor civs whose own
-native content is what's being extended to others (Poles, Armenians,
-Georgians, Muisca, Mapuche, Tupi, Wu), and the Chronicles civs
-(Achaemenids, Athenians, Spartans, Macedonians, Thracians, Puru) -
-deliberately left alone because it's genuinely unclear whether the grant
-mechanism reliably reaches them (Achaemenids has no entry at all in
-`futuravailableunits.json`, unlike every base-roster civ). **This last
-group is the most likely place to find real, still-open work** - if a
-future session can establish whether `enable_unit_for_civ`-style grants
-actually function correctly for Chronicles civs, several already-
-researched ideas (Achaemenid War Chariot chief among them) could be
-revisited.
+**Civs that intentionally receive nothing from `regional_heritage.py`**
+(verified via a full trace, not just "seems fine"): the real donor civs
+whose own native content is what's being extended to others (Poles,
+Armenians, Georgians, Muisca, Mapuche, Tupi, Wu). They do each still get
+a hero from `heroes_and_villains.py`.
+
+**Resolved**: whether the grant mechanism reliably reaches the Chronicles
+civs (Achaemenids, Athenians, Spartans, Macedonians, Thracians, Puru)
+was an open question for most of this project - `Achaemenids` having no
+entry in `futuravailableunits.json` looked like a bad sign, but per 3.5
+that file was never load-bearing anyway. Confirmed directly once the
+tracer bug in 3.9 was fixed (it had never actually exercised
+`heroes_and_villains.mod()`, so this was never really tested before):
+all 6 Chronicles civs show real, correctly-traced hero grants with zero
+button collisions. `enable_unit_for_civ`-style grants do work correctly
+for these civs - **if a future session wants to revisit
+`regional_heritage.py`-style grants for them** (Achaemenid War Chariot
+chief among the already-researched ideas), the mechanism is no longer
+in question, only the historical-fit judgment call.
 
 ---
 

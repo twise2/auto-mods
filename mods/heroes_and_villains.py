@@ -202,22 +202,38 @@ def extendTasks(unit: Unit, tasks) -> Unit:
     return unit
 
 
-def giveLanguage(unit: Unit, unitGiver: Unit) -> Unit:
-    #unit.language_dll_name = unitGiver.language_dll_creation
-    unit.language_dll_creation = unitGiver.language_dll_creation
-    unit.language_dll_help = unitGiver.language_dll_help
-    unit.language_dll_hotkey_text = unitGiver.language_dll_hotkey_text
+def fixHeroCreationText(unit: Unit) -> Unit:
+    """Point the "training tooltip" text at the hero's own, already-valid
+    name string instead of leaving it wrong or inventing a new one.
+
+    Real, confirmed bug: this used to copy language_dll_creation/help/
+    hotkey_text from whichever of Cao Cao/Liu Bei/Sun Jian donated the
+    hero's aura ability - purely a code-reuse shortcut for stealing their
+    aura task data, but it also dragged along their own real, defined
+    "Create Cao Cao"/"Create Liu Bei"/"Create Sun Jian" text onto every
+    hero of that aura class, regardless of who the hero actually is
+    (confirmed directly in key-value-strings-utf8.txt).
+
+    A custom key-value-modded-strings-utf8.txt override was considered,
+    but this is a data-only mod meant for multiplayer - that file isn't
+    part of the .dat, so there's no guarantee every client in a lobby has
+    it, unlike every field on the Unit object itself, which is baked into
+    the .dat and therefore identical for everyone. So instead of inventing
+    new text, reuse text that's already guaranteed correct and present:
+    the hero's own language_dll_name (e.g. "Belisarius") is real, defined,
+    already shown as the unit's title, and ships with the base game on
+    every client. Confirmed the hero's own original language_dll_help/
+    hotkey_text ids resolve to nothing in the string table either way
+    (same as the donor's), so there's no equivalent "already correct"
+    value to redirect those to - leaving them as the hero's own (unused)
+    values is no worse than before, and no longer borrows from an
+    unrelated unit.
+    """
+    unit.language_dll_creation = unit.language_dll_name
+    return unit
 
 def giveAuraAndLangauge(unit: Unit, data: DatFile) -> Unit:
     auras = auraClass(data)
-
-    #TODO see if you can change the names somehow?
-    #this is not currently possible because genieUtils.py does not support language files.
-    #can see about adding langfile support from genieUtils to genieutils.py
-    #https://github.com/Tapsa/genieutils/blob/master/src/lang/LangFile.cpp
-    attackSpeedLanguageUnit = data.civs[0].units[CAO_CAO]
-    healingLanguageUnit = data.civs[0].units[LIU_BEI]
-    movementSpeedLanguageUnit = data.civs[0].units[SUN_JIAN]
 
     #set unit to use aura abilities
     unit.type_50.break_off_combat = TYPE_INFLUENCE_ABILITY
@@ -225,22 +241,19 @@ def giveAuraAndLangauge(unit: Unit, data: DatFile) -> Unit:
     if(unit.class_ in [CAVLARY_CLASS, WARSHIP_CLASS]):
         logging.info("giving move speed aura to unit")
         extendTasks(unit, auras.movementSpeed)
-        giveLanguage(unit, movementSpeedLanguageUnit)
     elif(unit.class_ in [CAVALRY_ARCHER_CLASS, CONQUISTADOR_CLASS]):
         logging.info("giving attack speed aura to unit")
         extendTasks(unit, auras.attackSpeed)
-        giveLanguage(unit, attackSpeedLanguageUnit)
     elif(unit.class_ in [INFANTRY_CLASS, ARCHER_CLASS, HAND_CANNONEER_CLASS]):
         logging.info("giving move and attack speed aura to unit")
         extendTasks(unit, auras.attackSpeed)
         extendTasks(unit, auras.movementSpeed)
-        giveLanguage(unit, attackSpeedLanguageUnit)
     elif(unit.class_ in [MONK_CLASS, HEALER_CLASS]):
         logging.info("giving healing aura to unit")
         extendTasks(unit, auras.healing)
-        giveLanguage(unit, healingLanguageUnit)
     else:
         logging.error(f"Unit {unit.name} not given an aura")
+    fixHeroCreationText(unit)
             
 def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, water_basilius_unit_id: int) -> int:
     logging.info(f'Patching hero unit {unitId}')

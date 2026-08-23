@@ -129,6 +129,15 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
     regional_heritage.disable_unit_line_for_civ = rec_disable_line
     regional_heritage.research_elite_upgrade_for_civ = rec_research_elite
     heroes_and_villains.enable_unit_for_civ = rec_enable
+    # Real, previously-undiscovered gap: heroes_and_villains.mod() was never
+    # actually called here - only regional_heritage.mod() was - so every
+    # hero grant (all ~60 civs) has been invisible to this collision checker
+    # since it was written. The heroes_and_villains.enable_unit_for_civ
+    # patch above was dead code with nothing to intercept. Call both, in
+    # the same order build-local-mod.sh/auto-mod.py actually apply them
+    # (heroes-and-villains before regional-heritage), so ids/ordering match
+    # a real build.
+    heroes_and_villains.mod(data)
     regional_heritage.mod(data)
     (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
      util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ,

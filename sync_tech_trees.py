@@ -129,6 +129,12 @@ def trace_grants(data: DatFile) -> dict[int, set[int]]:
     regional_heritage.reskin_unit_for_civ = noop_reskin
     regional_heritage.research_elite_upgrade_for_civ = rec_research_elite
     heroes_and_villains.enable_unit_for_civ = rec_enable
+    # Same gap fixed in disable_unit_lines.py's trace_granted_units:
+    # heroes_and_villains.mod() was never actually called here, only
+    # regional_heritage.mod() was, so every hero grant was invisible to
+    # CivTechTrees sync too. Call both, in the same order
+    # build-local-mod.sh/auto-mod.py actually apply them.
+    heroes_and_villains.mod(data)
     regional_heritage.mod(data)
     (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
      util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.research_elite_upgrade_for_civ) = orig

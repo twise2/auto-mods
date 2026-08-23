@@ -1941,3 +1941,61 @@ Mounted/Traction Trebuchet, is unrelated and already resolved via
 the same civ=-1-sourced POSSIBLE noise bucket every other civ's Steppe
 Lancer placement already does, confirming button 3 really is free for
 them) - deployed.
+
+## v32: hero build-tooltip text was borrowing an unrelated donor's real name; heroes were also invisible to every collision/tech-tree tracer
+
+User reported the hover tooltip on a hero's build icon at the Castle
+showing "incorrect information." Root cause, confirmed directly against
+`key-value-strings-utf8.txt`: `giveLanguage()` in
+`mods/heroes_and_villains.py` copied `language_dll_creation` (the
+"Create X" training-tooltip string) from whichever of Cao Cao/Liu
+Bei/Sun Jian donated the hero's aura ability - a code-reuse shortcut for
+stealing their aura task data that also dragged along their real,
+defined text ("Create Cao Cao"/"Create Liu Bei"/"Create Sun Jian") onto
+every hero in that aura class, regardless of who the hero actually is.
+Confirmed concretely: Belisarius (Byzantines, cavalry class -> borrows
+from Sun Jian) showed "Create Sun Jian."
+
+A custom `key-value-modded-strings-utf8.txt` string override was
+considered and explicitly rejected - user correctly pointed out this is
+a data-only mod meant for multiplayer, and that file lives outside the
+`.dat`, so there's no guarantee every client in a lobby has it, unlike
+every field on the `Unit` object itself. Fixed instead by reusing text
+that's already guaranteed correct and present on every client: pointed
+`language_dll_creation` at the hero's own `language_dll_name` (e.g.
+Belisarius's own 5621, which really does resolve to "Belisarius" -
+already used, untouched, as the unit's title). Confirmed the hero's own
+original `language_dll_help`/`hotkey_text` ids resolve to nothing in the
+string table either way (same as the donor's), so there's no equivalent
+"already correct" value to redirect those to - left alone rather than
+inventing something. Verified directly in the rebuilt `.dat`: the
+deployed Belisarius clone now has `creation_id == name_id` (5621),
+versus the untouched donor copy which still shows the old mismatched
+6000.
+
+While verifying this against multiple civs, found a second, much larger
+bug purely by accident: `disable_unit_lines.py`'s `trace_granted_units`
+and `sync_tech_trees.py`'s `trace_grants` both monkeypatch
+`heroes_and_villains.enable_unit_for_civ`, but neither ever actually
+called `heroes_and_villains.mod(data)` - only `regional_heritage.mod
+(data)` was called. **Every hero grant, for every civ, has been
+completely invisible to the collision checker and to CivTechTrees sync
+this whole time** - the patch was dead code with nothing to intercept.
+This also means the "does `enable_unit_for_civ` reliably reach
+Chronicles civs" question flagged as unresolved earlier this session was
+never actually tested by tooling either. Fixed both trace functions to
+call `heroes_and_villains.mod(data)` before `regional_heritage.mod
+(data)` - the same order `build-local-mod.sh`/`auto-mod.py` apply them
+in, so ids and grant ordering match a real build.
+
+Re-ran the fixed audit: checked grants jumped from 147 to 207 (the ~60
+newly-visible hero grants), CONFIRMED collisions stayed at exactly 1
+(the pre-existing, already-resolved Khitans case - zero new ones from
+heroes), POSSIBLE stayed at 71 (unchanged). Specifically verified all 6
+Chronicles civs (Achaemenids, Athenians, Spartans, Macedonians,
+Thracians, Puru) - each now shows a real traced grant (e.g. Achaemenids:
+Darius + Artemisia) and zero competitors in either bucket, confirming
+both that Castle button 4 / Dock button 24 are genuinely clean for them
+and that the grant mechanism does reach them correctly - closing out
+that open question from earlier in the session. Rebuilt via
+`build-local-mod.sh`, deployed.
