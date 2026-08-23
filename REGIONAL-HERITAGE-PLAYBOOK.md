@@ -135,6 +135,19 @@ than guessing round numbers - real values are inconsistent between
 units (100-2000 resources, buttons 0/6/7/8/9, 40-100s) and there's no
 shortcut for finding them besides checking.
 
+**Also grab that same real tech's `language_dll_name`/`description`/
+`icon_id` while you're there and pass its id as `donor_tech_id`.**
+`research_elite_upgrade_for_civ` copies these directly from the donor -
+skipping this leaves the button with no text and no icon (confirmed as
+a real, reported bug: every one of the 12 Elite-tier grants built before
+this parameter existed showed blank text/icon at a real, functional
+research button - it worked, it just looked broken). This is the same
+"reuse already-correct, already-shipped data instead of inventing new
+strings" principle as the hero tooltip fix (below) - a custom
+`key-value-modded-strings-utf8.txt` override isn't reliable for a
+multiplayer data mod, but copying numeric ids that are already baked
+into the `.dat` is.
+
 ### 3.3 Removing a civ's native unit access - PROVEN WORKING (fixed once)
 `disable_unit_line_for_civ(data, civ_id, unit_ids, required_tech)`: a
 civ-specific tech whose commands are `TYPE_ENABLE_DISABLE_UNIT(b=0)`.
@@ -244,15 +257,33 @@ non-self-collision output as "worth a second look," not proven.
 
 ### 3.8 Trigger timing matters
 `TECH_CASTLE_BUILT` (id 266, "Castle built") only fires from actually
-*constructing* a Castle - not from researching/reaching Castle Age. Real
-symptom when this is used wrong: a grant meant to be an early-game
-staple (Settlement replacing Mill for Aztecs/Mayans/Incas) simply never
-appeared in an entire normal game, because the player never built a
-Castle. For anything meant to be available from early game, use
-`TYPE_TOWN_CENTER_BUILT` (id 1230) instead - fires essentially
-immediately, since every civ starts with a Town Center. Reserve
-`TECH_CASTLE_BUILT` for things that should genuinely wait for Castle Age
-(most unit-line replacements, hero units).
+*constructing* a Castle - not from researching/reaching Castle Age.
+**These are not the same thing and mixing them up is an easy, repeated
+mistake** (caught it twice this session: once for Settlement/Folwark,
+then again mod-wide for 22 more grants - Steppe Lancer, Elephant Archer,
+Genitour, Fire Lancer, Temple Guard, War Chariot, and more - see
+`NOTES-civ-identity-expansion.md` v33). Real symptom: a grant meant to
+be available as soon as a civ reaches a given age simply doesn't appear
+for most of a normal game, because plenty of real games reach that age
+(or even Imperial) without ever building an actual Castle.
+
+**`CASTLE_AGE` (id 102, `ids.py`) is what "should unlock at Castle Age"
+actually means** - confirmed by checking real vanilla "X (make avail)"
+techs directly (e.g. real Steppe Lancer's own tech 714 requires exactly
+`(102, -1, ...)`, nothing else). The .dat's *internal* name for tech 102
+is confusingly "Feudal Age" (see 3.8's age-id note below/FEUDAL_AGE=101
+being real Feudal despite its own internal name of "Middle Age") - don't
+let that internal label steer you into picking the wrong constant.
+`TECH_CASTLE_BUILT` is for the much narrower case of something that
+should wait for a *constructed* Castle specifically - trained *at* the
+Castle (nothing exists there can before one stands), or a deliberate
+late-arriving bonus. **When in doubt, check the real vanilla "make
+avail" tech's own `required_techs` for that exact unit/building rather
+than picking whichever age-ish constant seems plausible** - this
+session's audit found grants that should have been Castle Age, Imperial
+Age, *and* effectively immediate (`TYPE_TOWN_CENTER_BUILT`, id 1230,
+essentially immediate since every civ starts with a Town Center) all
+mislabeled as `TECH_CASTLE_BUILT`, in both directions.
 
 ### 3.9 CivTechTrees sync gaps
 `sync_tech_trees.py` builds F11-tech-tree-screen entries by finding an
@@ -304,6 +335,46 @@ an uploaded/packaged copy with "unexpected number of civilizations").
 `build-local-mod.sh` deploys `empires2_x2_p1.dat`, `civilizations.json`,
 `futuravailableunits.json`, and `CivTechTrees/` together every time for
 exactly this reason.
+
+### 3.11 UI text (unit tooltips, research buttons) - reuse real ids, don't invent strings
+Every player-visible name/description on a `Unit` or `Tech` object is
+just a numeric id (`language_dll_name`, `_description`, `_help`,
+`_hotkey_text`/`_tech_tree`) pointing into a separate string table
+(`resources/en/strings/key-value/*.txt`), not text stored in the `.dat`
+itself. AoE2:DE ships a sanctioned override file for mods to add new
+strings (`key-value-modded-strings-utf8.txt`) - **don't use it for a
+data-only multiplayer mod**: it lives outside the `.dat`, so there's no
+guarantee every client in a lobby has it, unlike a `.dat` field, which
+every client loading the same mod definitely does.
+
+Instead, **point the id at text that's already real, already correct,
+and already shipped with the base game** - copy it from wherever it
+already exists rather than inventing anything new. Two real bugs fixed
+this way:
+- Hero build tooltips (`mods/heroes_and_villains.py`'s `makeHero()`)
+  were showing the wrong hero's name ("Create Sun Jian" for a civ that
+  got a totally different hero) because the code borrowed
+  `language_dll_creation` from whichever of Cao Cao/Liu Bei/Sun Jian
+  donated the hero's aura ability - a shortcut for stealing their aura
+  *task* data that also dragged along their own real, defined text.
+  Fixed by pointing `language_dll_creation` at the hero's own
+  `language_dll_name` instead (e.g. Belisarius's own id, which really
+  does resolve to "Belisarius") - already correct, already used as the
+  unit's title, zero new strings.
+- Every `research_elite_upgrade_for_civ` tech showed no icon and no text
+  at its real research button (`language_dll_name=0`, `icon_id=-1` - the
+  same placeholder `grant_effect_to_civ` correctly uses for *hidden*
+  background techs, wrong here since these are real, visible, clickable
+  buttons). Fixed by adding a `donor_tech_id` parameter that copies
+  `language_dll_name`/`description`/`help`/`tech_tree` and `icon_id`
+  straight from the real vanilla tech each grant is modeled on (already
+  being looked up anyway for cost/location/prerequisites, per 3.2).
+
+A missing string resolves to blank in-game, not an error - easy to miss
+in testing unless you're specifically looking at the tooltip/button, and
+easy to catch by checking `grep -n "^<id> " resources/en/strings/
+key-value/*.txt` for whatever id a `Tech`/`Unit` field holds before
+assuming it renders correctly.
 
 ---
 
@@ -364,7 +435,11 @@ exactly this reason.
   too, since its own justification had partly depended on the thing that
   was just undone. Don't treat earlier grants as permanently settled
   just because they were implemented - a later addition or removal can
-  change whether an earlier one still makes sense.
+  change whether an earlier one still makes sense. Proven out a second
+  time later in the same session: once Huns got a real, non-invented
+  Steppe Lancer substitute (relocated to Stable button 3), the Knight
+  line was removed from them again - current state, see 5 below, is
+  Huns *without* Knight/Cavalier/Paladin.
 
 ---
 
@@ -384,8 +459,8 @@ Grenadier (Chinese/Khitans/Vietnamese/Mongols/Koreans/Turks, real
 Hand-Cannoneer replacement); Jian Swordsman (Shu/Wei); Temple Guard
 (Incas/Aztecs, per-civ button reassignment for Aztecs to avoid a real
 Eagle Warrior collision); Knight/Cavalier/Paladin removal - units *and*
-research - for Turks/Berbers/Saracens/Malay/Burmese/Khmer/Vietnamese/
-Chinese; cosmetic skins (Frankish Paladin, Crusader Knight); Samurai
+research - for Turks/Huns/Berbers/Saracens/Malay/Burmese/Khmer/
+Vietnamese/Chinese; cosmetic skins (Frankish Paladin, Crusader Knight); Samurai
 ranged-mode swap; Longboat transport; regional buildings (Feitoria,
 Folwark, Donjon, Krepost, Harbor, Fortified Church).
 

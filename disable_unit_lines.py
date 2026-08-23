@@ -113,7 +113,7 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
         disabled[civ_id] |= set(unit_ids)
 
     def rec_research_elite(data, civ_id, upgrade_pairs, extra_required_techs, building_id, button_id,
-                            resource_costs, research_time, name, age_tech=None):
+                            resource_costs, research_time, name, donor_tech_id, age_tech=None):
         for _base_unit_id, upgraded_unit_id in upgrade_pairs:
             upgraded[civ_id].add(upgraded_unit_id)
 

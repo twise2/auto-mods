@@ -115,7 +115,7 @@ def trace_grants(data: DatFile) -> dict[int, set[int]]:
         pass
 
     def rec_research_elite(data, civ_id, upgrade_pairs, extra_required_techs, building_id, button_id,
-                            resource_costs, research_time, name, age_tech=None):
+                            resource_costs, research_time, name, donor_tech_id, age_tech=None):
         for _base_unit_id, upgraded_unit_id in upgrade_pairs:
             record(civ_id, upgraded_unit_id)
 

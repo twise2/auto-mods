@@ -215,7 +215,7 @@ def upgrade_unit_for_civ(data: DatFile, civ_id: int, base_unit_id: int, upgraded
 def research_elite_upgrade_for_civ(data: DatFile, civ_id: int, upgrade_pairs: list[tuple[int, int]],
                                     extra_required_techs: list[int], building_id: int, button_id: int,
                                     resource_costs: list[tuple[int, int]], research_time: int, name: str,
-                                    age_tech: int = TECH_REQUIREMENT_IMPERIAL_AGE):
+                                    donor_tech_id: int, age_tech: int = TECH_REQUIREMENT_IMPERIAL_AGE):
     """Give one civ a REAL, player-researched Elite-tier upgrade - a visible,
     costed button at a real building, matching vanilla's own convention for
     every actual Elite-tier tech checked this session (Elite Steppe Lancer:
@@ -247,7 +247,24 @@ def research_elite_upgrade_for_civ(data: DatFile, civ_id: int, upgrade_pairs: li
     Elite tier via Imperial Age alone while the base tier had never actually
     been enabled (confirmed happening for civs that reached Imperial Age
     without ever building a Castle).
+
+    `donor_tech_id` is the id of the real vanilla tech this grant is modeled
+    on (e.g. 715 for Elite Steppe Lancer) - its language_dll_name/
+    description/help/tech_tree and icon_id are copied directly onto the new
+    tech, so the research button shows real, correct text and a real icon
+    instead of blank ones. Confirmed as a real bug (user report: "no
+    wording or icon"): every tech this function built left these at the
+    same 0/0/-1 placeholder grant_effect_to_civ uses for hidden background
+    techs - fine there since those are never actually shown in the UI, but
+    wrong here since this is a real, visible, clickable research button. A
+    custom string-file override was considered and rejected for the same
+    reason as the hero tooltip fix - this is a data-only mod for
+    multiplayer, and a loose key-value string file isn't guaranteed to be
+    on every client the way a `.dat` field is. Reusing the real vanilla
+    tech's own already-correct, already-shipped text and icon needs no new
+    strings and is guaranteed present everywhere.
     """
+    donor = data.techs[donor_tech_id]
     civ = data.civs[civ_id]
     for base_unit_id, upgraded_unit_id in upgrade_pairs:
         logging.info(f'Researching {civ.units[upgraded_unit_id].name} '
@@ -272,13 +289,13 @@ def research_elite_upgrade_for_civ(data: DatFile, civ_id: int, upgrade_pairs: li
         required_tech_count=1 + len(extra_required_techs),
         civ=civ_id,
         full_tech_mode=0,
-        language_dll_name=0,
-        language_dll_description=0,
+        language_dll_name=donor.language_dll_name,
+        language_dll_description=donor.language_dll_description,
         effect_id=effect_id,
         type=0,
-        icon_id=-1,
-        language_dll_help=0,
-        language_dll_tech_tree=0,
+        icon_id=donor.icon_id,
+        language_dll_help=donor.language_dll_help,
+        language_dll_tech_tree=donor.language_dll_tech_tree,
         research_locations=[ResearchLocation(location_id=building_id, research_time=research_time,
                                               button_id=button_id, hot_key_id=-1)],
         name=name,

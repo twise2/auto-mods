@@ -1999,3 +1999,85 @@ both that Castle button 4 / Dock button 24 are genuinely clean for them
 and that the grant mechanism does reach them correctly - closing out
 that open question from earlier in the session. Rebuilt via
 `build-local-mod.sh`, deployed.
+
+## v33: mod-wide Castle-built-vs-Castle-Age audit, missing icon/wording on every Elite research tech, Huns' Knight line removed again
+
+User reported Steppe Lancer seemed "trapped behind a castle" rather than
+Castle Age. Checked directly: real vanilla "Steppe Lancer (make avail)"
+(tech 714) requires only tech 102 (real Castle Age - the .dat's internal
+name for it is confusingly "Feudal Age", a mismatch documented earlier
+this session; `CASTLE_AGE = 102` already existed in `ids.py` but was
+unused). The mod's own grant used `TECH_CASTLE_BUILT` (id 266, "Castle
+built" - only fires from actually *constructing* a Castle) instead -
+exactly the same class of bug already caught and fixed once for
+Settlement/Folwark earlier this session (section 3.8 of the playbook),
+just never generalized to the rest of the file.
+
+Audited every `TECH_CASTLE_BUILT` usage in `regional_heritage.py` (36
+occurrences) by checking each granted unit/building's *real* vanilla
+"make avail" tech's `required_techs` directly against the `.dat`, not
+assuming. Found 22 more wrongly gated the same way, split across what
+their real prerequisite actually is:
+- **Real Castle Age (102), fix to `CASTLE_AGE`**: Steppe Lancer, Elephant
+  Archer, Armored Elephant, Genitour, Slinger, Missionary, Warrior
+  Priest, Fire Lancer, Rocket Cart, Hei-Kuang Cavalry, Grenadier (+ its
+  Hand Cannoneer disable), Jian Swordsman, Temple Guard (both Incas and
+  Aztecs), War Chariot, Krepost, Camel Scout->Camel Rider upgrade.
+- **Real Imperial Age (103), fix to `TECH_REQUIREMENT_IMPERIAL_AGE`**:
+  Caravanserai, Traction Trebuchet, Lou Chuan, Feitoria, Thirisadai,
+  Condottiero - these were never actually Castle-Age content in vanilla
+  at all, TECH_CASTLE_BUILT was wrong in the *other* direction for them.
+- **Real Dark Age / effectively immediate, fix to
+  `TYPE_TOWN_CENTER_BUILT`**: Donjon (real Sicilian donor tech requires
+  only Dark Age itself, i.e. no real gate at all - matches the existing
+  Settlement/Folwark/Mule Cart convention for "should be available from
+  the start").
+
+Left `TECH_CASTLE_BUILT` alone on the four `remove_knight_line_from_*`
+functions' `disable_unit_line_for_civ`/`disable_tech_for_civ` calls -
+those are removals, not blocks on new content, so the same "trapped"
+complaint doesn't apply the same way; not touched.
+
+Separately, user reported Elite Steppe Lancer (and, once pointed at,
+Heavy Hei-Kuang Cavalry) showing no icon or text at their real research
+button - functionally fine, cosmetically broken. Root cause: every
+`research_elite_upgrade_for_civ` tech was built with `language_dll_name=
+0, language_dll_description=0, icon_id=-1` - the same placeholder
+`grant_effect_to_civ` uses for hidden, never-shown background techs,
+correct there but wrong here since these are real, visible, clickable
+buttons. A custom `key-value-modded-strings-utf8.txt` override was
+considered and rejected for the same reason as the hero tooltip fix
+(v32) - multiplayer data mod, no guarantee every client has a loose
+string file. Added a `donor_tech_id` parameter instead: the function now
+copies `language_dll_name`/`description`/`help`/`tech_tree` and
+`icon_id` straight from the real vanilla tech each grant is modeled on
+(e.g. 715 for Elite Steppe Lancer, 1033 for Heavy Hei-Kuang Cavalry) -
+already-correct, already-shipped text and icons, no new strings needed.
+Passed the correct real donor tech id at all 12 call sites (715, 481,
+631, 599, 885, 786, 982, 980, 1033, 1401 x2, 1171, 624 - the same ids
+researched for cost/location/prerequisite data back in v31). This
+changed the function's signature, which broke the `rec_research_elite`
+stub functions in `disable_unit_lines.py`/`sync_tech_trees.py` (missing
+the new positional param, caught immediately as a real `TypeError` on
+rebuild) - fixed both to match.
+
+Also implemented a separate request: removed Knight/Cavalier/Paladin
+from Huns again. This reverses part of an earlier decision (Huns'
+Knight line was restored earlier this session when their only
+substitute was an invented camel line that got walked back as not
+making sense) - but the situation genuinely changed since then: Huns
+now have a real, non-invented substitute of their own, their Steppe
+Lancer/Elite Steppe Lancer grant (Stable-trained, Food+Gold, same
+building/resource profile as Knight), satisfying the exact two-part
+test `remove_knight_line_from_true_steppe_and_camel_civs` already
+applies to Turks. Added Huns to that function's civ list; updated the
+stale comments in both places that referenced the old restoration.
+
+Verified all three fixes directly in the rebuilt `.dat`: Steppe Lancer's
+enable tech now requires `(102, -1, ...)` not `(266, ...)`; Elite Steppe
+Lancer's and Heavy Hei-Kuang Cavalry's research techs now show
+`icon_id`/`language_dll_name` matching their real donor tech exactly;
+Huns' Knight/Cavalier/Paladin disable commands are present and their
+Steppe Lancer is untouched at Stable button 3. Re-ran
+`audit_collisions.py` - unchanged at 1 confirmed/71 possible, no new
+collisions from any of this. Rebuilt via `build-local-mod.sh`, deployed.
