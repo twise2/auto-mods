@@ -2081,3 +2081,37 @@ Huns' Knight/Cavalier/Paladin disable commands are present and their
 Steppe Lancer is untouched at Stable button 3. Re-ran
 `audit_collisions.py` - unchanged at 1 confirmed/71 possible, no new
 collisions from any of this. Rebuilt via `build-local-mod.sh`, deployed.
+
+## v34: the four Knight-line removal functions had the exact same Castle-built-vs-Castle-Age bug, just on the removal side
+
+User reported Huns could still train Knight for a long time, only losing
+it once a Castle happened to get built - well after their Steppe
+Lancer/Elite Steppe Lancer substitute was already available (fixed to
+`CASTLE_AGE` in v33). v33 deliberately left the four
+`remove_knight_line_from_*` functions on `TECH_CASTLE_BUILT`, reasoning
+that removals don't have the same "trapped" problem enables do - that
+reasoning was wrong in practice: gating the *removal* on actually
+constructing a Castle, while the *replacement* now arrives at Castle
+Age, created a long window with both the old line and the new one
+available together, then a jarring later disappearance once a Castle
+happened to get built.
+
+First pass: changed all 8 occurrences (`disable_unit_line_for_civ` +
+`disable_tech_for_civ`, x4 functions: Turks/Huns, Berbers/Saracens,
+Malay/Burmese/Khmer/Vietnamese, Chinese) from `TECH_CASTLE_BUILT` to
+`CASTLE_AGE`, matching the substitute unit's own trigger. User then
+asked a better question: can it just be removed immediately instead, so
+there's no dependency on staying in sync with whatever trigger the
+substitute grant happens to use? Checked real vanilla Knight's own
+enable tech (166, civ=-1) - requires Castle Age (102) and nothing
+earlier, for every civ, unconditionally. So these civs could never
+actually train Knight before Castle Age regardless of when this mod's
+own disable fires - gating it on `TYPE_TOWN_CENTER_BUILT` (essentially
+immediate) produces the identical practical result with no ongoing
+dependency on any other grant's timing, ever. Switched all 8 occurrences
+to that instead. Removed `TECH_CASTLE_BUILT` from `regional_heritage.py`
+'s imports entirely since nothing in the file uses it anymore. Verified
+directly in the rebuilt `.dat`: Huns/Turks/Berbers/Chinese's Knight
+unit-disable all now require `(1230, ...)` (TYPE_TOWN_CENTER_BUILT).
+Re-ran `audit_collisions.py` - unchanged (1 confirmed/71 possible).
+Rebuilt via `build-local-mod.sh`, deployed.

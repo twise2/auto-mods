@@ -8,7 +8,7 @@ from genieutils.unit import AttackOrArmor
 from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ, \
     disable_unit_line_for_civ, set_train_locations_for_civ, disable_tech_for_civ, set_starting_scout_for_civ, \
     research_elite_upgrade_for_civ
-from mods.ids import TECH_CASTLE_BUILT, TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUDAL_AGE, \
+from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUDAL_AGE, \
     CASTLE_AGE, \
     TYPE_ENABLE_DISABLE_UNIT, TYPE_FOOD, TYPE_WOOD, TYPE_GOLD, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
@@ -777,6 +777,20 @@ def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
     # both train from the Stable (101) for Food+Gold, identical to Knight's
     # own building/resource profile.
     #
+    # Gated on TYPE_TOWN_CENTER_BUILT (essentially immediate), not
+    # TECH_CASTLE_BUILT - real user report: Huns could still train Knight
+    # for the entire early-mid game and only lost it once a Castle
+    # happened to get built, well after their Steppe Lancer substitute
+    # was already available. Tried gating on CASTLE_AGE next (matching
+    # the substitute's own trigger) - works, but depends on staying in
+    # sync with whatever the substitute grant uses, forever. Simpler and
+    # strictly safer: confirmed real vanilla Knight itself (tech 166,
+    # civ=-1) requires Castle Age and nothing earlier for every civ, so
+    # these civs could never actually train Knight before Castle Age
+    # anyway, regardless of when this disable fires - gating it immediate
+    # produces the identical practical result with no ongoing dependency
+    # on any other grant's trigger.
+    #
     # Turks: fully-upgraded Steppe Lancer from this mod; Janissary/Sipahi and
     # gunpowder identity, not Western knights.
     #
@@ -791,24 +805,24 @@ def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
     # are the textbook nomadic horse-archer civ historically, an even
     # cleaner fit for rule 2 than Turks.
     for civ_id in civ_ids_named(data, ['Turks', 'Huns']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TYPE_TOWN_CENTER_BUILT)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
         # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
         # Disable Paladin", civ=8/Persians, hides Paladin for them since
         # Savar replaces it - confirmed via direct .dat inspection).
-        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_CASTLE_BUILT)
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TYPE_TOWN_CENTER_BUILT)
     # Berbers and Saracens: native Camel Rider/Heavy Camel Rider (not
     # granted by this mod - they've always had it); Almoravid/Almohad and
     # early-Islamic camel-cavalry identity, not knights.
     for civ_id in civ_ids_named(data, ['Berbers', 'Saracens']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TYPE_TOWN_CENTER_BUILT)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
         # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
         # Disable Paladin", civ=8/Persians, hides Paladin for them since
         # Savar replaces it - confirmed via direct .dat inspection).
-        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_CASTLE_BUILT)
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TYPE_TOWN_CENTER_BUILT)
 
 
 def remove_knight_line_from_true_elephant_civs(data: DatFile):
@@ -821,13 +835,13 @@ def remove_knight_line_from_true_elephant_civs(data: DatFile):
     # entirely), so rule 1 doesn't hold for them despite rule 2 clearly
     # fitting.
     for civ_id in civ_ids_named(data, ['Malay', 'Burmese', 'Khmer', 'Vietnamese']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TYPE_TOWN_CENTER_BUILT)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
         # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
         # Disable Paladin", civ=8/Persians, hides Paladin for them since
         # Savar replaces it - confirmed via direct .dat inspection).
-        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_CASTLE_BUILT)
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TYPE_TOWN_CENTER_BUILT)
 
 
 def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
@@ -839,13 +853,13 @@ def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
     # group above since the reasoning (a specific regional cavalry unit,
     # not a steppe/camel or elephant identity) is its own thing.
     for civ_id in civ_ids_named(data, ['Chinese']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_CASTLE_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TYPE_TOWN_CENTER_BUILT)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
         # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
         # Disable Paladin", civ=8/Persians, hides Paladin for them since
         # Savar replaces it - confirmed via direct .dat inspection).
-        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_CASTLE_BUILT)
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TYPE_TOWN_CENTER_BUILT)
 
 
 def mod(data: DatFile):

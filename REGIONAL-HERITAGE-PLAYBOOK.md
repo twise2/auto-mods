@@ -285,6 +285,21 @@ Age, *and* effectively immediate (`TYPE_TOWN_CENTER_BUILT`, id 1230,
 essentially immediate since every civ starts with a Town Center) all
 mislabeled as `TECH_CASTLE_BUILT`, in both directions.
 
+**A removal doesn't need to match its replacement's trigger - fire it as
+early as the removed content's own real gate allows.** First instinct
+when a Knight-line removal felt out of sync with its Steppe Lancer
+replacement (both should swap at the same moment) was to gate the
+removal on the same trigger the replacement uses (`CASTLE_AGE`) - works,
+but creates an ongoing coupling between two independent grants that has
+to be remembered and kept in sync forever. Better: check the removed
+content's *own* real vanilla gate (Knight itself requires Castle Age for
+every civ, confirmed via its real `civ=-1` enable tech) - since it was
+never actually reachable earlier than that anyway, gating the removal on
+something that fires immediately (`TYPE_TOWN_CENTER_BUILT`) produces the
+identical practical result with zero coupling to any other grant's
+timing. Prefer "as early as safely possible, checked against the real
+gate" over "matched to a specific other grant" when removing something.
+
 ### 3.9 CivTechTrees sync gaps
 `sync_tech_trees.py` builds F11-tech-tree-screen entries by finding an
 existing civ that already owns a template for the exact node id being
