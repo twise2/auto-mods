@@ -437,11 +437,27 @@ plain unit id - the hero keeps its real name/stats/id, it just renders
 using a different same-`class_` donor's graphics via
 `reskin_unit_for_civ`, freeing the hero's own original look for reuse
 elsewhere (see Malay's Gajah Mada -> Sunda Royal Fighter in
-`NOTES-civ-identity-expansion.md` v35 for the worked example). Only worth
-doing when a good same-class alternate actually exists *and* the hero
-isn't so central to its own civ's identity that no stand-in would do -
-Le Loi (Vietnamese) and Pachacuti (Incas) were both considered and
-declined for exactly that reason.
+`NOTES-civ-identity-expansion.md` v35 for the worked example, and
+Mongols' Genghis Khan -> Girgen Khan in v36). Only worth doing when a
+good same-class alternate actually exists *and* the hero isn't so
+central to its own civ's identity that no stand-in would do - Le Loi
+(Vietnamese) and Pachacuti (Incas) were both considered and declined for
+exactly that reason. Also not required just because a hero's look gets
+reused elsewhere - Wang Tong, Vytautas, Kotyan Khan, Prithviraj, Osman,
+and Francesco Sforza all got reused directly with no swap, since none of
+them are globally recognizable enough that seeing the same look twice
+(their own hero, plus regular troops elsewhere) reads as odd the way it
+would for Genghis Khan.
+
+**`unit_skin_override` only covers civs actually routed through
+`makeHero()`.** Shu/Wu/Wei are deliberately excluded from `HERO_FOR_CIV`
+(`CIVS_WITH_HEROES_ALREADY`) since they already have real native heroes
+built into the base game (Liu Bei/Sun Jian/Cao Cao) - there's no
+`HERO_FOR_CIV` entry to attach an override to. Reskinning one of these
+needs a direct `reskin_unit_for_civ(data, shu_id, LIU_BEI, donor)` call
+in `regional_heritage.py` instead (see Zhang Fei taking over Shu's own
+Liu Bei slot in v36) - same mechanism, just called from a different
+place since the unit isn't created fresh by `makeHero()`.
 
 ---
 

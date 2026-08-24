@@ -24,7 +24,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     TYPE_SPAWN_UNIT, TOWN_CENTER, TYPE_TOWN_CENTER_BUILT, SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD, CONQUISTADOR_CLASS, \
     WARSHIP_CLASS, CAVLARY_CLASS, INFANTRY_CLASS, ARCHER_CLASS, CAVALRY_ARCHER_CLASS, HAND_CANNONEER_CLASS, \
     HEALER_CLASS, MONK_CLASS, \
-    CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH, SUNDA_ROYAL_FIGHTER #auras
+    CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH, SUNDA_ROYAL_FIGHTER, GIRGEN_KHAN, SUMANGURU #auras
 
 #reserve spaces for hidden resouces. Dont use 501 as its used for sparta already.
 LAND_BASILIUS_RESOURCE_VALUE = 201  
@@ -72,7 +72,14 @@ HERO_FOR_CIV = {
     "French": {"land": JOAN_OF_ARC, "water": None},
     "Goths": {"land": ALARIC_THE_GOTH, "water": None},
     "Japanese": {"land": NOBUNAGA, "water": None},
-    "Mongols": {"land": GENGHIS_KHAN, "water": None},
+    # Genghis Khan keeps the name/stats, but renders as Girgen Khan instead
+    # of his own real look - Girgen Khan's model reads as more "hero-y."
+    # Frees Genghis Khan's own iconic look from ever being used as a
+    # regional skin, since seeing THE Genghis Khan standing next to a pile
+    # of visually-identical mass-trained troops elsewhere would be jarring
+    # in a way a more obscure look wouldn't be (same reasoning as Malay's
+    # Gajah Mada -> Sunda Royal Fighter override above).
+    "Mongols": {"land": unit_skin_override(GENGHIS_KHAN, GIRGEN_KHAN), "water": None},
     "Persians": {"land": SHAH_ISHMAIL, "water": None},
     "Saracens": {"land": SALADIN, "water": None},
     "Teutons": {"land": ULRICH_VON_JUNGINGEN, "water": None},
@@ -89,7 +96,12 @@ HERO_FOR_CIV = {
     "Slavs": {"land": ALEXANDER_NEVSKI, "water": None},
     "Berbers": {"land": TARIQ_IBN_ZIYAD, "water": None},
     "Ethiopians": {"land": DAGNAJAN, "water": None},
-    "Malians": {"land": SUNDJATA, "water": None},
+    # Sundjata keeps the name/stats, but renders as Sumanguru - his real
+    # historical rival, the sorcerer-king of Sosso, confirmed via the wiki
+    # to have gotten his own genuinely unique DE model too (same African
+    # Kingdoms art pass as Gidajan/Yodit/Sosso Guard). Frees Sundjata's own
+    # look for reuse as a Paladin skin (regional_heritage.py).
+    "Malians": {"land": unit_skin_override(SUNDJATA, SUMANGURU), "water": None},
     "Portuguese": {"land": FRANSICO_DE_ORELLANA, "water": VASCO_DA_GAMA},  # Orellana served the Spanish crown, but kept as a stand-in rather than leaving Portuguese with just one hero
     "Burmese": {"land": TABINSHWEHTI, "water": None},
     "Khmer": {"land": SURYAVARMAN_I, "water": None},

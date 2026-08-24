@@ -601,6 +601,12 @@ SOSSO_GUARD = 1574
 SUBOTAI = 698
 GIRGEN_KHAN = 1269
 SUNDA_ROYAL_FIGHTER = 1160  # skin-override donor for Malay's Gajah Mada hero
+GIDAJAN = 1109  # unique DE model (sword + shield), Ethiopian - Champion skin for Berbers
+CUSI_YUPANQUI = 749  # unique Andean model (young Pachacuti) - Champion skin for American civs
+ZHANG_FEI = 2038  # unique DE model, confirmed distinct from Liu Bei's own look
+SUMANGURU = 1080  # unique DE model, Sundjata's real historical rival - Malay hero skin_override donor
+CUMAN_CHIEF = 1268  # unique DE model - "a Steppe Lancer mixed with its Elite version" per the wiki
+ENVOY = 1186  # unique DE model since DE (was plain Light Cavalry in HD) - Hussar skin candidate
 
 # Water heroes (WARSHIP_CLASS) - paired with an existing land hero of the same person
 ARTEMISIA = 2312

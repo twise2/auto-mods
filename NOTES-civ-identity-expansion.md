@@ -2207,3 +2207,102 @@ hero clone shows Sunda Royal Fighter while the reusable Gajah Mada
 template stays pristine. Re-ran `audit_collisions.py` - unchanged, since
 `reskin_unit_for_civ` never touches `train_locations`. Rebuilt via
 `build-local-mod.sh`, deployed.
+
+## v36: four more regional skins - Gidajan, the Girgen Khan/Kotyan Khan consolidation, Cusi Yupanqui, and Zhang Fei/Liu Bei
+
+Follow-up round, all confirmed via the wiki or a user screenshot before
+implementing, same standard as v35.
+
+- **Gidajan -> Berbers** (Champion). Confirmed unique DE model (sword and
+  shield) earlier in v35 but not yet assigned anywhere - Berbers was the
+  one African-heritage civ that never got a Champion skin (Eastern
+  Swordsman's steppe/Persian look was checked and ruled out for them
+  specifically in v35).
+- **Girgen Khan/Kotyan Khan consolidated.** v35 had Girgen Khan on
+  Tatars/Cumans and Kotyan Khan on Turks as two separate Heavy Cavalry
+  Archer donors. User wanted Girgen Khan's look ("a little more hero-y")
+  used for Mongols' own hero instead - added `unit_skin_override
+  (GENGHIS_KHAN, GIRGEN_KHAN)` to Mongols' `HERO_FOR_CIV` entry (keeps the
+  name/stats, renders as Girgen Khan), which finally solves the "no clean
+  alternate found" problem v35 left open for freeing Genghis Khan's own
+  iconic look from ever being used as a mass-produced skin. Since Girgen
+  Khan is now spoken for, Kotyan Khan's own look absorbed the whole
+  bucket instead: Tatars/Cumans/Turks all now use Kotyan Khan for Heavy
+  Cavalry Archer.
+- **Cusi Yupanqui -> Aztecs/Mayans/Muisca/Mapuche/Tupi** (Champion).
+  Confirmed via a direct user screenshot (feathered headdress, blue/gold
+  regalia, spear and shield) - genuinely distinct Andean look, represents
+  a young Pachacuti before the "Earth Shaker" title. Incas excluded since
+  it's narratively already their own hero's earlier identity.
+- **Zhang Fei takes over Shu's native Liu Bei slot; Liu Bei's own look
+  freed for Chinese** (Champion). Liu Bei is Shu's real, native hero -
+  not part of `HERO_FOR_CIV` at all (`CIVS_WITH_HEROES_ALREADY` skips
+  Shu/Wu/Wei since they already have real native heroes built into the
+  base game), so this needed a direct `reskin_unit_for_civ(data, shu_id,
+  LIU_BEI, ZHANG_FEI)` call in `regional_heritage.py` rather than the
+  `unit_skin_override` mechanism (which only applies to civs actually
+  routed through `makeHero()`). Confirmed via the wiki that Zhang Fei
+  (Liu Bei's real sworn-brother general) has his own genuinely unique DE
+  model, distinct from Liu Bei's - previously listed as "unresolved" in
+  v35, now confirmed. Chinese (the main civ) had no Champion skin
+  assigned yet, so it got Liu Bei's newly-freed original look.
+
+Verified all four directly in the rebuilt `.dat`: Berbers/Tatars/Cumans/
+Turks/Aztecs/Mapuche/Chinese's graphics all match their intended donor
+exactly; Shu's own Liu Bei unit (1966) now shows Zhang Fei's graphic;
+Mongols' actual cloned-and-enabled hero unit shows Girgen Khan's graphic
+(had to filter out several unrelated raw units that happen to share the
+same internal "HKHAN" code name - the same false-positive pattern
+documented earlier this session, not a new issue). Re-ran
+`audit_collisions.py` - unchanged. Rebuilt via `build-local-mod.sh`,
+deployed.
+
+One more added in the same round: **Francesco Sforza -> Italians/
+Sicilians** (Champion). Confirmed via the wiki to have gotten his own
+real unique skin in Definitive Edition ("similar to a Champion" - HD
+Edition just reused Condottiero's look). Applied directly to Italians
+itself (his own civ - no swap needed, unlike Genghis Khan/Gajah Mada he
+isn't globally recognizable enough that seeing him twice reads as odd)
+and Sicilians, already tied to Italians throughout this mod via
+Genitour/Condottiero. Verified both civs' Champion graphic matches
+Sforza's exactly in the rebuilt `.dat`; `audit_collisions.py` unchanged.
+
+## v37: five more skins - Tariq ibn Ziyad, Sumanguru/Sundjata, Cuman Chief, and a new Hussar-tier skin (Shah Ismail)
+
+- **Tariq ibn Ziyad -> Elite Genitour, all 8 Genitour civs** (Spanish,
+  Portuguese, Persians, Saracens, Malians, Turks, Italians, Sicilians).
+  Confirmed via the wiki to already be "a slightly modified Elite
+  Genitour" with "a unique makeover" in DE - about as clean a fit as this
+  whole exercise has found. Berbers (his own civ) isn't in the Genitour
+  civ list, so no self-duplication.
+- **Sumanguru/Sundjata, same pattern as Genghis Khan/Girgen Khan in v36.**
+  Malians' Sundjata hero keeps its name/stats but now renders as
+  Sumanguru (his real historical rival, the sorcerer-king of Sosso -
+  confirmed via the wiki to have his own genuinely unique DE model, same
+  African Kingdoms art pass as Gidajan/Yodit/Sosso Guard). Sundjata's own
+  freed-up look becomes a new Paladin skin for the Indian civs bucket
+  (Bengalis/Gurjaras/Hindustanis/Dravidians) - none of them had Paladin
+  removed, so no exclusion needed.
+- **Cuman Chief -> Elite Steppe Lancer, all 9 civs that get the grant**
+  (Chinese/Bulgarians/Lithuanians/Hindustanis/Magyars/Slavs/Persians/
+  Turks/Huns). Confirmed via the wiki to already look like "a Steppe
+  Lancer mixed with its Elite version (with a unique barding, a shield on
+  its back, and a larger caparison)" - unclaimed (Cumans' own hero is
+  Kotyan Khan, not this), so no swap needed, and Mongols/Cumans' own
+  native Elite Steppe Lancer is untouched by this mod anyway so no
+  self-duplication risk there either.
+- **New unit type: Hussar skins.** First skin added for this tier.
+  **Shah Ismail -> Berbers/Saracens/Hindustanis/Ethiopians/Bengalis/
+  Gurjaras/Dravidians.** Confirmed via the wiki to have "a unique model"
+  (the older, campaign-title version of the character - a separate,
+  lesser younger "Ismail" exists too, reusing plain Scout Cavalry, not
+  used here). Persians' own hero, but Persians isn't in this civ list.
+  New `give_hussar_skins_to_regional_flavor_civs` function - Hussar isn't
+  touched by any removal in this file, so no exclusions were needed.
+
+Verified all five directly in the rebuilt `.dat` (every listed civ's
+graphic matches its intended donor exactly), confirmed Malians' actual
+cloned hero shows Sumanguru while the reusable Sundjata template stays
+pristine (same verification technique as v35/v36). Re-ran
+`audit_collisions.py` - unchanged. Rebuilt via `build-local-mod.sh`,
+deployed.
