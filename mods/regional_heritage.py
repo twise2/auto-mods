@@ -31,7 +31,8 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     NORSE_WARRIOR, EASTERN_SWORDSMAN, ATAULF, YODIT, SOSSO_GUARD, GAJAH_MADA, GIDAJAN, CUSI_YUPANQUI, \
     VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
     FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
-    KUSHLUK, JARL, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE
+    KUSHLUK, JARL, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE, \
+    ENVOY, JOHN_THE_FEARLESS, ROBERT_GUISCARD
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -941,6 +942,15 @@ def give_paladin_skins_to_regional_flavor_civs(data: DatFile):
     for civ_id in civ_ids_named(data, ['Bengalis', 'Gurjaras', 'Hindustanis', 'Dravidians']):
         reskin_unit_for_civ(data, civ_id, PALADIN, SUNDJATA)
 
+    # Robert Guiscard: same appearance-confirmation caveat as John the
+    # Fearless above (no explicit wiki description, but graphic
+    # cross-checked against every known-used donor with no match, and a
+    # Lords of the West-era hero). Wiki confirms he's "themed on the
+    # Sicilians" - applied there and to Italians, the established
+    # Mediterranean pairing used throughout this mod.
+    for civ_id in civ_ids_named(data, ['Sicilians', 'Italians']):
+        reskin_unit_for_civ(data, civ_id, PALADIN, ROBERT_GUISCARD)
+
 
 def give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data: DatFile):
     # Same cosmetic-only mechanism again, applied to Heavy Cavalry Archer -
@@ -1024,6 +1034,26 @@ def give_hussar_skins_to_regional_flavor_civs(data: DatFile):
     # Norse commander," unclaimed by HERO_FOR_CIV, no swap needed.
     for civ_id in civ_ids_named(data, ['Vikings']):
         reskin_unit_for_civ(data, civ_id, HUSSAR, JARL)
+
+    # Envoy: confirmed via the wiki to have gotten a genuinely unique DE
+    # model (pre-DE was a plain reskinned Light Cavalry) - "similarities
+    # to a Light Cavalry" but its own look since DE. Khmer-context
+    # (appears leading a Khmer diplomatic mission to the Cholas), applied
+    # to the wider Rise of the Rajas Southeast Asian bucket.
+    for civ_id in civ_ids_named(data, ['Khmer', 'Malay', 'Burmese', 'Vietnamese']):
+        reskin_unit_for_civ(data, civ_id, HUSSAR, ENVOY)
+
+    # John the Fearless: no explicit wiki description of his appearance
+    # found after multiple searches (unlike every other donor used this
+    # session) - cross-checked his graphic directly against every donor
+    # already confirmed in use anywhere in this mod (including Burgundians'
+    # own real Coustillier) and found no match. Not as certain as the
+    # others, but he's a Lords of the West-era hero, and every other hero
+    # from that DLC checked this session got genuinely bespoke DE art.
+    # Burgundians' own hero, excluded - applied to the Western European
+    # chivalric bucket instead.
+    for civ_id in civ_ids_named(data, ['French', 'British']):
+        reskin_unit_for_civ(data, civ_id, HUSSAR, JOHN_THE_FEARLESS)
 
 
 def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):

@@ -2375,3 +2375,50 @@ took effect and that Dravidians correctly has no Hussar skin (both
 Shah Ismail and Rajendra Chola deliberately exclude it). Re-ran
 `audit_collisions.py` - unchanged. Rebuilt via `build-local-mod.sh`,
 deployed.
+
+## v39: closed out the three loose ends from v38 - Envoy, John the Fearless, Robert Guiscard
+
+- **Envoy -> Khmer/Malay/Burmese/Vietnamese** (Hussar). Confirmed via the
+  wiki to have gotten a genuinely unique DE model (pre-DE was a plain
+  reskinned Light Cavalry). Khmer-context (leads a Khmer diplomatic
+  mission to the Cholas in his campaign appearance), applied to the wider
+  Rise of the Rajas Southeast Asian bucket. This one was fully verified
+  back in the original research pass but never actually got wired up -
+  just an oversight, closed out now.
+- **John the Fearless -> French/British** (Hussar) and **Robert
+  Guiscard -> Sicilians/Italians** (Paladin). Both were declined in v38
+  because the wiki has no explicit appearance description for either -
+  unlike every other donor used this session. Tried three more searches
+  each with no luck. Fell back to a different verification method
+  instead: cross-checked both units' `standing_graphic` directly against
+  every donor already confirmed in use anywhere in this mod (including
+  Burgundians' own real Coustillier, for John the Fearless specifically,
+  since that's the most likely "secretly reused" candidate given he's
+  Burgundians' hero) - no match found for either. Not as airtight as an
+  explicit wiki confirmation, but combined with both being Lords of the
+  West-era heroes (every other hero from that same DLC checked this
+  session turned out to have genuinely bespoke DE art - Vytautas the
+  Great, Wang Tong, John the Fearless's own campaign-mates), judged
+  confident enough to implement. Robert Guiscard's Elite-Steppe-Lancer
+  idea from v38 couldn't be revived (still no Western civ has the grant),
+  so redirected to Paladin for his own confirmed civ affinity (Sicilians)
+  instead.
+
+Verified all three directly in the rebuilt `.dat`. `audit_collisions.py`
+unchanged. Rebuilt via `build-local-mod.sh`, deployed.
+
+**Still genuinely open, not resolved:**
+- **Le Loi** (Vietnamese) - no same-class alternate ever found to free
+  his own look for reuse; still Vietnamese's unmodified native hero.
+- The **F11 tech-tree entries for the ~60 mod-added hero units** - a
+  known, cosmetic-only gap (heroes work correctly in real games, they
+  just don't show a tech-tree-screen node) flagged back when the
+  `heroes_and_villains.mod()` tracer bug was fixed, never addressed since
+  since it needs synthesizing ~60 tech-tree template entries from
+  scratch, not derived from any existing donor the way the Elite-tier
+  gap was.
+- The original **r/aoe2 "regional skins are already in the game" thread**
+  the user asked to check - Reddit is blocked for this tool entirely, no
+  way found to access it even indirectly. Everything sourced this session
+  instead came from direct `.dat` queries plus the AoE2 Fandom wiki via
+  web search, cross-verified against each other throughout.

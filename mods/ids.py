@@ -606,10 +606,11 @@ CUSI_YUPANQUI = 749  # unique Andean model (young Pachacuti) - Champion skin for
 ZHANG_FEI = 2038  # unique DE model, confirmed distinct from Liu Bei's own look
 SUMANGURU = 1080  # unique DE model, Sundjata's real historical rival - Malay hero skin_override donor
 CUMAN_CHIEF = 1268  # unique DE model - "a Steppe Lancer mixed with its Elite version" per the wiki
-ENVOY = 1186  # unique DE model since DE (was plain Light Cavalry in HD) - Hussar skin candidate
+ENVOY = 1186  # unique DE model since DE (was plain Light Cavalry in HD) - Hussar skin for Khmer/Malay/Burmese/Vietnamese
 JARL = 931  # unique DE model (was Tarkan-with-torch pre-DE), "a generic Norse commander" - Hussar skin for Vikings
 GENERAL_ARAIYAN = 1766  # unique DE model - Elite Steppe Lancer skin for Hindustanis
 SUN_CE = 2040  # unique DE model, distinct from every other Three Kingdoms hero - Elite Steppe Lancer skin for Chinese
+ROBERT_GUISCARD = 1677  # Lords of the West era, graphic checked against every known-used donor this session - no match found
 
 # Water heroes (WARSHIP_CLASS) - paired with an existing land hero of the same person
 ARTEMISIA = 2312
