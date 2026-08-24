@@ -399,6 +399,23 @@ Paladin/Crusader Knight precedent) only ever copies graphic fields
 side effects, and invisible to every trace-based tracer script in 3.9's
 sense (nothing to intercept, since no tech/effect is created).
 
+**`reskin_unit_for_civ` has no conflict detection - calling it twice on
+the same `(civ_id, unit_id)` just silently overwrites, last call wins.**
+Unlike every other grant mechanism in this file, there's no equivalent of
+`audit_collisions.py` for skins, because there's no tech/train_location
+for it to trace - a duplicate assignment produces no warning, no log
+line, nothing. Caught this twice: once where two *different* skin
+functions both targeted Khmer/Malay/Burmese's Heavy Cavalry Archer (the
+second one silently won, so the first's intended donor was never visible
+in the deployed `.dat` at all, undetected until directly diffing
+`standing_graphic` against both candidates), and once self-caught before
+deploying, where two *different user requests in the same session*
+independently proposed the same civs for the same unit's skin. **Before
+adding a new skin assignment, grep the target unit constant (`CHAMPION`,
+`PALADIN`, `HUSSAR`, `HEAVY_CAVALRY_ARCHER`, `ELITE_STEPPE_LANCER`, etc.)
+for every existing `reskin_unit_for_civ` call and check the civ lists for
+overlap** - the only way to catch this, since nothing else will.
+
 **Before treating any named campaign-hero unit as a fresh "regional skin"
 donor, verify it isn't just an existing civ's real unique unit under a
 different name.** A full pass looking for Champion-tier reskin candidates

@@ -2306,3 +2306,72 @@ cloned hero shows Sumanguru while the reusable Sundjata template stays
 pristine (same verification technique as v35/v36). Re-ran
 `audit_collisions.py` - unchanged. Rebuilt via `build-local-mod.sh`,
 deployed.
+
+## v38: real bug found and fixed (silent skin overwrite), plus 8 more skins across Hussar/Heavy Cavalry Archer/Elite Steppe Lancer/Champion
+
+**Real bug found while implementing this round, not by the user:** v35's
+`give_heavy_cavalry_archer_skins_to_regional_flavor_civs` assigned Osman
+to Khmer/Malay/Burmese in a block that ran *after* Subotai's own
+assignment to the same 3 civs (Subotai's group was Chinese/Japanese/
+Koreans/Khitans/Jurchens/Khmer/Malay/Burmese/Vietnamese) - `reskin_unit_
+for_civ` just overwrites graphic fields with no conflict detection, so
+whichever call ran last silently won. Verified directly in the deployed
+`.dat` that Osman's look was the one actually showing, meaning Subotai's
+intended skin for those 3 civs was never visible at all. Fixed by
+removing the Osman block entirely (Qutlugh took its intended niche
+instead, see below) - Khmer/Malay/Burmese now correctly show Subotai
+again. **Lesson for next time: when the same (civ, unit_id) pair gets
+`reskin_unit_for_civ`'d twice, only the last call matters - watch for
+this whenever a new civ group is added to an existing skin tier.**
+
+New skins this round, same standard as v35-v37 (every donor confirmed
+via the wiki before implementing):
+- **Qutlugh -> Bengalis** (Heavy Cavalry Archer). Confirmed "a unique
+  appearance which has similarities with the model of Subotai" - Tatars'
+  own hero, but Tatars is already covered by Kotyan Khan, and Bengalis
+  was the one civ with confirmed real access that wasn't covered yet
+  (Prithviraj's own group deliberately excludes Bengalis itself).
+- **Kushluk -> Mongols/Huns/Tatars/Cumans/Magyars** (Hussar, new tier).
+  Confirmed "a unique model that looks like a Steppe Lancer but armed
+  with a sword instead of a lance." Khitans' own hero, excluded - applied
+  to the same nomadic-civ bucket `give_mule_carts_to_nomadic_civs` uses.
+- **Jarl -> Vikings** (Hussar). Confirmed genuinely unique DE model
+  ("based on a generic Norse commander," pre-DE was a plain Tarkan).
+  Unclaimed, no swap needed.
+- **Rajendra Chola -> Bengalis/Gurjaras/Hindustanis** (Hussar). Confirmed
+  "a unique appearance." Dravidians' own hero, excluded. This directly
+  conflicted with Shah Ismail's existing assignment to the same 3 civs
+  from v37 (the exact same silent-overwrite class of bug caught above,
+  self-inflicted this time before it ever got deployed) - resolved by
+  narrowing **Shah Ismail down to just Berbers/Saracens/Ethiopians** (the
+  camel-heritage civs), giving the Indian civs to the more specific
+  Rajendra Chola instead.
+- **General Araiyan -> Hindustanis** and **Sun Ce -> Chinese** (Elite
+  Steppe Lancer per-civ overrides, applied after the generic Cuman Chief
+  loop so they take priority for just these two civs). Both confirmed "a
+  unique appearance" via the wiki - more specific fits than the generic
+  Cuman Chief look for the one genuinely Indian civ and Chinese
+  specifically among the 9-civ Steppe Lancer grant.
+- **Francesco Sforza group extended to include Portuguese** (Champion) -
+  same Iberian/Mediterranean Renaissance-contact reasoning as
+  Italians/Sicilians.
+
+**Considered and not implemented:**
+- **John the Fearless** (proposed as a Hussar skin) - appearance
+  unresolved after three separate wiki searches; unlike every other
+  candidate this session, no source confirms what he actually looks like
+  or whether it's distinct from an existing unit. Left alone rather than
+  guess and risk another Le Lai/Siegfried-style dead end.
+- **Robert Guiscard** (proposed as a Western Elite Steppe Lancer skin) -
+  checked, and no Western European civ currently receives Elite Steppe
+  Lancer through this mod at all (the grant's civ list is Chinese/
+  Bulgarians/Lithuanians/Hindustanis/Magyars/Slavs/Persians/Turks/Huns -
+  none Western European), so there's currently no civ to apply this to.
+  Appearance also unconfirmed via the wiki. Not implemented.
+
+Verified all 8 new/changed assignments directly in the rebuilt `.dat`,
+including confirming Khmer/Malay/Burmese's Heavy Cavalry Archer bug fix
+took effect and that Dravidians correctly has no Hussar skin (both
+Shah Ismail and Rajendra Chola deliberately exclude it). Re-ran
+`audit_collisions.py` - unchanged. Rebuilt via `build-local-mod.sh`,
+deployed.

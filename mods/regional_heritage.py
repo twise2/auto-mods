@@ -29,8 +29,9 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
     WAR_CHARIOT, ELITE_WAR_CHARIOT, CHAMPION, HEAVY_CAVALRY_ARCHER, \
     NORSE_WARRIOR, EASTERN_SWORDSMAN, ATAULF, YODIT, SOSSO_GUARD, GAJAH_MADA, GIDAJAN, CUSI_YUPANQUI, \
-    VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, OSMAN, LIU_BEI, ZHANG_FEI, \
-    FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL
+    VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
+    FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
+    KUSHLUK, JARL, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -102,6 +103,22 @@ def give_steppe_lancers_to_civs_with_horse_archer_heritage(data: DatFile):
     huns_id, = civ_ids_named(data, ['Huns'])
     set_train_locations_for_civ(data, huns_id, STEPPE_LANCER, [(101, 3)])
     set_train_locations_for_civ(data, huns_id, ELITE_STEPPE_LANCER, [(101, 3)])
+
+    # Per-civ overrides on top of the generic Cuman Chief look above, for
+    # civs where a more specific fit exists - applied after the loop so
+    # they take priority over the generic assignment for just these two.
+    #
+    # General Araiyan: confirmed via the wiki to have "a unique appearance"
+    # (real Chola dynasty commander-in-chief) - more specific than Cuman
+    # Chief for the one genuinely Indian civ in this grant's civ list.
+    hindustanis_id, = civ_ids_named(data, ['Hindustanis'])
+    reskin_unit_for_civ(data, hindustanis_id, ELITE_STEPPE_LANCER, GENERAL_ARAIYAN)
+
+    # Sun Ce: confirmed via the wiki to have "a unique appearance" distinct
+    # from every other Three Kingdoms hero - more specific than Cuman Chief
+    # for Chinese specifically.
+    chinese_id, = civ_ids_named(data, ['Chinese'])
+    reskin_unit_for_civ(data, chinese_id, ELITE_STEPPE_LANCER, SUN_CE)
 
 
 def give_elephant_archers_to_civs_with_elephant_heritage(data: DatFile):
@@ -881,10 +898,11 @@ def give_champion_skins_to_regional_flavor_civs(data: DatFile):
     # Edition just reused Condottiero's look, DE gave him his own).
     # Applied to Italians (his own civ - no same-class alternate was worth
     # swapping into, and unlike Genghis Khan/Gajah Mada he isn't
-    # globally recognizable enough that seeing him twice reads as odd) and
+    # globally recognizable enough that seeing him twice reads as odd),
     # Sicilians, already tied to Italians throughout this mod via
-    # Genitour/Condottiero on the same Mediterranean-contact logic.
-    for civ_id in civ_ids_named(data, ['Italians', 'Sicilians']):
+    # Genitour/Condottiero on the same Mediterranean-contact logic, and
+    # Portuguese - same Iberian/Mediterranean Renaissance-era contact era.
+    for civ_id in civ_ids_named(data, ['Italians', 'Sicilians', 'Portuguese']):
         reskin_unit_for_civ(data, civ_id, CHAMPION, FRANCESCO_SFORZA)
 
     # Le Loi (Vietnamese) was also considered for this same treatment -
@@ -954,13 +972,22 @@ def give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data: DatFile):
     for civ_id in civ_ids_named(data, ['Gurjaras', 'Hindustanis', 'Dravidians']):
         reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, PRITHVIRAJ)
 
-    # Osman's own real look (Turks' hero) reused for the East/SE Asian
-    # bucket - most globally recognizable name in this batch (Ottoman
-    # Empire's founder), but no clean same-class alternate existed to swap
-    # Turks' own hero into, and this was the user's own original idea
-    # going in, so kept as a direct reuse.
-    for civ_id in civ_ids_named(data, ['Khmer', 'Malay', 'Burmese']):
-        reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, OSMAN)
+    # Qutlugh: confirmed via the wiki to have "a unique appearance which
+    # has similarities with the model of Subotai" - genuinely distinct
+    # graphic despite the family resemblance. Tatars' own hero, but Tatars
+    # is already covered by Kotyan Khan above, so applied to Bengalis
+    # instead - the one civ with confirmed real Heavy Cavalry Archer access
+    # that wasn't already covered (Prithviraj's own group above
+    # deliberately excludes Bengalis itself for the same self-duplication
+    # reason).
+    #
+    # (Osman was tried here in an earlier pass for Khmer/Malay/Burmese, but
+    # that silently collided with Subotai's own assignment to the same 3
+    # civs above - whichever ran last always won, so Subotai's skin was
+    # never actually visible for them. Removed rather than hunt for a
+    # third non-overlapping bucket for Osman specifically.)
+    for civ_id in civ_ids_named(data, ['Bengalis']):
+        reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, QUTLUGH)
 
 
 def give_hussar_skins_to_regional_flavor_civs(data: DatFile):
@@ -972,11 +999,31 @@ def give_hussar_skins_to_regional_flavor_civs(data: DatFile):
     # older, campaign-title version of the character - the younger Ismail
     # is a plain reskinned Scout Cavalry with lesser stats, not used here).
     # Persians' own hero, but Persians isn't in this civ list, so no
-    # self-duplication. Applied to the camel-heritage civs and the wider
-    # Indian bucket.
-    for civ_id in civ_ids_named(data, ['Berbers', 'Saracens', 'Hindustanis', 'Ethiopians',
-                                        'Bengalis', 'Gurjaras', 'Dravidians']):
+    # self-duplication. Narrowed to just the camel-heritage civs - Indian
+    # civs moved to Rajendra Chola below instead (a more specific fit,
+    # and avoids double-booking the same civs with two different skins).
+    for civ_id in civ_ids_named(data, ['Berbers', 'Saracens', 'Ethiopians']):
         reskin_unit_for_civ(data, civ_id, HUSSAR, SHAH_ISHMAIL)
+
+    # Rajendra Chola: confirmed via the wiki to have "a unique appearance."
+    # Dravidians' own hero, excluded from this civ list for the same
+    # self-duplication reason used throughout - applied to the rest of the
+    # Indian bucket instead.
+    for civ_id in civ_ids_named(data, ['Bengalis', 'Gurjaras', 'Hindustanis']):
+        reskin_unit_for_civ(data, civ_id, HUSSAR, RAJENDRA_CHOLA)
+
+    # Kushluk: confirmed via the wiki to have "a unique model that looks
+    # like a Steppe Lancer but armed with a sword instead of a lance."
+    # Khitans' own hero, excluded here - applied to the same nomadic-civ
+    # bucket give_mule_carts_to_nomadic_civs already uses.
+    for civ_id in civ_ids_named(data, ['Mongols', 'Huns', 'Tatars', 'Cumans', 'Magyars']):
+        reskin_unit_for_civ(data, civ_id, HUSSAR, KUSHLUK)
+
+    # Jarl: confirmed via the wiki to have gotten a genuinely unique DE
+    # model (pre-DE was a plain reskinned Tarkan) - "based on a generic
+    # Norse commander," unclaimed by HERO_FOR_CIV, no swap needed.
+    for civ_id in civ_ids_named(data, ['Vikings']):
+        reskin_unit_for_civ(data, civ_id, HUSSAR, JARL)
 
 
 def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
