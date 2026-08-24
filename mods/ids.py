@@ -246,6 +246,7 @@ TEUTONIC_KNIGHT = 25
 BOMBARD_CANNON = 36
 KNIGHT = 38
 CAVALRY_ARCHER = 39
+HEAVY_CAVALRY_ARCHER = 474
 CATAPHRACT = 40
 HUSKARL = 41
 JANISSARY = 46
@@ -585,6 +586,21 @@ HARALD_HARDRADA = 426
 FRANSICO_DE_ORELLANA = 425
 
 JOGAILA = 1718
+
+# Skin-donor-only hero/campaign-unit models - confirmed genuinely distinct, real
+# graphics (not reused from any active civ's own unique unit or another
+# hero), unclaimed by HERO_FOR_CIV, verified via the AoE2 wiki + direct .dat
+# checks. Used only as reskin_unit_for_civ donors for Champion/Paladin/Heavy
+# Cavalry Archer skins in regional_heritage.py - never trained as an actual
+# hero themselves.
+NORSE_WARRIOR = 361
+EASTERN_SWORDSMAN = 894
+ATAULF = 453
+YODIT = 1066
+SOSSO_GUARD = 1574
+SUBOTAI = 698
+GIRGEN_KHAN = 1269
+SUNDA_ROYAL_FIGHTER = 1160  # skin-override donor for Malay's Gajah Mada hero
 
 # Water heroes (WARSHIP_CLASS) - paired with an existing land hero of the same person
 ARTEMISIA = 2312

@@ -7,7 +7,7 @@ from genieutils.tech import Tech, ResearchResourceCost, ResearchLocation
 from genieutils.datfile import DatFile
 from genieutils.techtree import UnitConnection, Common
 from genieutils.unit import ResourceCost, ResourceStorage, TrainLocation
-from mods.util import clone, enable_unit_for_civ
+from mods.util import clone, enable_unit_for_civ, reskin_unit_for_civ
 from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE, WHITE_TIGER_YAN, \
     WANG_TONG, ALARIC_THE_GOTH, SUNDJATA, SHAH_ISHMAIL, SALADIN, HARALD_HARDRADA, QUTLUGH, \
     CUAUHTEMOC, ATTILA_THE_HUN, PACAL_II, EL_CID_CAMPEADOR, GENGHIS_KHAN, FRANCESCO_SFORZA, \
@@ -24,7 +24,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     TYPE_SPAWN_UNIT, TOWN_CENTER, TYPE_TOWN_CENTER_BUILT, SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD, CONQUISTADOR_CLASS, \
     WARSHIP_CLASS, CAVLARY_CLASS, INFANTRY_CLASS, ARCHER_CLASS, CAVALRY_ARCHER_CLASS, HAND_CANNONEER_CLASS, \
     HEALER_CLASS, MONK_CLASS, \
-    CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH #auras
+    CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH, SUNDA_ROYAL_FIGHTER #auras
 
 #reserve spaces for hidden resouces. Dont use 501 as its used for sparta already.
 LAND_BASILIUS_RESOURCE_VALUE = 201  
@@ -40,6 +40,30 @@ CIVS_WITH_HEROES_ALREADY = ['Shu', 'Wu', 'Wei']
 # class_ actually matches the slot it's declared under. Use None for a slot
 # that's genuinely empty rather than omitting the key, so it's obvious at a
 # glance which civs are still missing a water (or land) hero.
+#
+# A slot value is normally just a unit id. When a hero's own real look is
+# good enough that another part of the mod wants to reuse it broadly as a
+# skin (e.g. Gajah Mada's look reused for South Asian civs' Champions), that
+# would leave the hero's owning civ standing next to a bunch of visually
+# identical regular troops - use unit_skin_override(unit, skin) instead: the
+# hero keeps its real name/stats/id (still Gajah Mada for Malay), it just
+# renders using a different, same-class donor's graphics, freeing the
+# hero's own original look to be reused elsewhere without a duplicate-look
+# clash. Only worth doing for a hero whose look is actually earmarked for
+# reuse and isn't itself so central to its own civ's identity that no
+# stand-in would do (Le Loi/Vietnamese and Pachacuti/Incas were considered
+# and declined for exactly that reason - no good same-class alternate
+# existed, and both are genuinely iconic to their own civ specifically).
+def unit_skin_override(unit: int, skin: int) -> tuple:
+    return (unit, skin)
+
+
+def _hero_unit_and_skin(value):
+    if isinstance(value, tuple):
+        return value
+    return value, None
+
+
 HERO_FOR_CIV = {
     "British": {"land": EDWARD_LONGSHANKS, "water": None},
     "Byzantine": {"land": BELISARIUS, "water": None},
@@ -69,7 +93,13 @@ HERO_FOR_CIV = {
     "Portuguese": {"land": FRANSICO_DE_ORELLANA, "water": VASCO_DA_GAMA},  # Orellana served the Spanish crown, but kept as a stand-in rather than leaving Portuguese with just one hero
     "Burmese": {"land": TABINSHWEHTI, "water": None},
     "Khmer": {"land": SURYAVARMAN_I, "water": None},
-    "Malay": {"land": GAJAH_MADA, "water": None},
+    # Gajah Mada's own real look is reused broadly as a Champion skin for
+    # South Asian civs (regional_heritage.py) - Malay's own hero keeps the
+    # name/stats but renders as Sunda Royal Fighter instead (a genuinely
+    # distinct, unique model from the same Rise of the Rajas Indonesian
+    # campaign, confirmed via the wiki), so Malay doesn't end up standing
+    # next to a bunch of visually-identical regular Champions.
+    "Malay": {"land": unit_skin_override(GAJAH_MADA, SUNDA_ROYAL_FIGHTER), "water": None},
     "Vietnamese": {"land": LE_LOI, "water": None},
     "Bulgarians": {"land": TSAR_KONSTANTIN, "water": None},
     "Cumans": {"land": KOTYAN_KHAN, "water": None},
@@ -110,14 +140,18 @@ HERO_FOR_CIV = {
 def validate_hero_for_civ(data: DatFile):
     base = data.civs[0]
     for civ_name, slots in HERO_FOR_CIV.items():
-        for slot, unit_id in slots.items():
-            if unit_id is None:
+        for slot, value in slots.items():
+            if value is None:
                 continue
+            unit_id, skin_override = _hero_unit_and_skin(value)
             is_water = base.units[unit_id].class_ == WARSHIP_CLASS
             if slot == 'water' and not is_water:
                 raise ValueError(f'{civ_name}: unit {unit_id} is under "water" but is not WARSHIP_CLASS')
             if slot == 'land' and is_water:
                 raise ValueError(f'{civ_name}: unit {unit_id} is under "land" but is WARSHIP_CLASS')
+            if skin_override is not None and base.units[skin_override].class_ != base.units[unit_id].class_:
+                raise ValueError(f'{civ_name}: skin_override {skin_override} does not match '
+                                  f'unit {unit_id}\'s class_')
 
 class auraClass:
       def __init__(self, data: DatFile):
@@ -323,11 +357,14 @@ def mod(data: DatFile):
     land_basilius_unit_id = limitHeroesForCiv(data, LAND_BASILIUS_RESOURCE_VALUE)
     for civ_id, civ in enumerate(data.civs):
         if civ.name in HERO_FOR_CIV:
-            for slot, unit_id in HERO_FOR_CIV[civ.name].items():
-                if unit_id is None:
+            for slot, value in HERO_FOR_CIV[civ.name].items():
+                if value is None:
                     continue
+                unit_id, skin_override = _hero_unit_and_skin(value)
                 logging.info(f'Creating {slot} hero for civ {civ.name} - hero: {unit_id}')
                 hero_unit_id = makeHero(unit_id, civ, data, land_basilius_unit_id, water_basilius_unit_id)
+                if skin_override is not None:
+                    reskin_unit_for_civ(data, civ_id, hero_unit_id, skin_override)
                 logging.info(f'Enabling unit for civ {civ.name} - hero: {unit_id}')
                 enableUnitForCiv(civ_id, hero_unit_id, data)
 

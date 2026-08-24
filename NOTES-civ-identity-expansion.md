@@ -2115,3 +2115,95 @@ directly in the rebuilt `.dat`: Huns/Turks/Berbers/Chinese's Knight
 unit-disable all now require `(1230, ...)` (TYPE_TOWN_CENTER_BUILT).
 Re-ran `audit_collisions.py` - unchanged (1 confirmed/71 possible).
 Rebuilt via `build-local-mod.sh`, deployed.
+
+## v35: Champion/Paladin/Heavy Cavalry Archer regional skins - cataloguing "free" cosmetic reskins across the whole infantry/cavalry line
+
+User wanted a broader look at infantry variety - the Militia line is the
+same look for every civ except Romans (Legionary). Two-part investigation:
+(1) catalog every alternate-graphic "regional skin"-style unit sitting
+unused in the `.dat`, and check which civs they'd fit; (2) confirm what
+each civ's actual final militia tier is, so a Champion-tier skin doesn't
+end up applied to a civ that never reaches Champion.
+
+**Finding: virtually every civ reaches Champion.** Checked every civ for
+a real, civ-specific tech disabling any militia tier (the same mechanism
+Persians use to hide Paladin for Savar) - only Romans deviate (real
+Legionary swap). The Chronicles Greek-family civs (Spartans, Athenians,
+Achaemenids, Macedonians, Thracians, Puru) don't use the militia line at
+all (separate Hoplite-based line). Every other civ, including every civ
+this mod has already touched, still reaches Champion untouched.
+
+**Finding: two genuine pure reskins exist in the base game, both
+orphaned.** Norse Warrior and Eastern Swordsman are exact stat-clones of
+Long Swordsman (not Champion - a wrong assumption corrected mid-
+investigation), unused by any civ. Confirmed via a user screenshot that
+Eastern Swordsman is a turban/scimitar/sunburst-shield Central-Asian/
+Persian-Islamic look, not Byzantine or Slavic as first guessed - civ list
+narrowed to Saracens/Persians/Turks accordingly.
+
+**Finding: hero-unit graphics are a much smaller pool than hoped, and the
+name is not a reliable guide to the look.** Investigated ~25 unclaimed
+"named campaign hero" models as potential Champion-tier donors. The
+overwhelming majority turned out to just be an existing real civ's own
+active unique unit's graphic under a new name - Siegfried/King Arthur/La
+Hire/Le Lai/Le Trien all render as the literal default Champion (useless);
+Charlemagne/Charles Martel = Franks' Throwing Axeman; Theodoric the Goth
+= Goths' Huskarl; Aethelfrith = Celts' Elite Woad Raider; Erik the Red =
+Vikings' Elite Berserk; Kitabatake/Minamoto = Japanese' Samurai/Elite
+Samurai; Ivaylo/Yury = Bulgarians' Konnik dismount; Topa Yupanqui/Itzcoatl
+= Aztecs' Elite Jaguar Warrior; Zakare/Stephan = Warrior Priest (already a
+real grant in this mod); Amoghavarsha = Urumi Swordsman. All confirmed
+via the AoE2 wiki, not guessed - "shares a graphic with X" turned out to
+be the norm for 1999-2013-era campaign heroes, not the exception. DE-era
+and later-DLC heroes were much more likely to have genuinely bespoke art
+(Gidajan, Le Loi, Vytautas the Great, Wang Tong, Gajah Mada, Yodit, Sosso
+Guard, Dafydd/Llywelyn ap Gruffydd, Subotai, Girgen Khan all confirmed
+distinct this way).
+
+**New mechanism: `unit_skin_override` in `heroes_and_villains.py`.** When
+a hero's own real look is good enough to reuse broadly as a skin, but
+that hero is still someone's actual active hero, reusing the look
+verbatim would leave that civ standing next to visually-identical regular
+troops. `HERO_FOR_CIV`'s per-civ slot value can now be either a plain
+unit id (unchanged) or `unit_skin_override(unit, skin)` - the hero keeps
+its real name/stats/id, it just renders using a different same-class
+donor's graphics via `reskin_unit_for_civ`, freeing the hero's own
+original look for reuse elsewhere. Used once so far: Malay's Gajah Mada
+hero renders as Sunda Royal Fighter (a genuinely distinct, unique model
+from the same Rise of the Rajas campaign, confirmed via the wiki),
+freeing Gajah Mada's own bare-chested two-handed-sword look for the South
+Asian Champion group. Considered and declined the same treatment for
+Le Loi (Vietnamese) and Pachacuti (Incas) - no good same-class alternate
+existed, and both are genuinely central to their own civ's campaign
+identity, not just "a good look that happens to be claimed."
+
+**Implemented** (`give_champion_skins_to_regional_flavor_civs`,
+`give_paladin_skins_to_regional_flavor_civs`,
+`give_heavy_cavalry_archer_skins_to_regional_flavor_civs` in
+`regional_heritage.py`, all pure `reskin_unit_for_civ` calls - no stat,
+cost, or upgrade-path changes anywhere):
+- **Champion**: Norse Warrior→Vikings; Eastern Swordsman→Saracens/
+  Persians/Turks; Ataulf→Goths/Celts/Teutons; Yodit→Ethiopians; Sosso
+  Guard→Malians; Gajah Mada (freed)→Bengalis/Gurjaras/Hindustanis/
+  Dravidians.
+- **Paladin**: Vytautas the Great→Slavs/Bulgarians/Poles/Bohemians; Wang
+  Tong→Tatars/Cumans/Khitans/Jurchens. Explicitly excludes every civ that
+  had Paladin removed earlier in this file (Turks/Huns/Berbers/Saracens/
+  Malay/Burmese/Khmer/Vietnamese/Chinese) - verified in the rebuilt `.dat`
+  that those civs' Paladin graphic is untouched/default, confirming the
+  exclusion actually took.
+- **Heavy Cavalry Archer** (real unit id 474, added to `ids.py` - wasn't
+  there before): Subotai→Chinese/Japanese/Koreans/Khitans/Jurchens/Khmer/
+  Malay/Burmese/Vietnamese; Girgen Khan→Tatars/Cumans; Kotyan Khan
+  (reused)→Turks; Prithviraj (reused)→Gurjaras/Hindustanis/Dravidians;
+  Osman (reused)→Khmer/Malay/Burmese. Verified via real `CivTechTrees`
+  data that every listed civ actually has Cavalry Archer line access
+  before assigning it.
+
+Verified all 20 skin assignments directly in the rebuilt `.dat` (every
+civ's `standing_graphic` matches its intended donor exactly), confirmed
+the 4 excluded Paladin-less civs are untouched, and confirmed Malay's
+hero clone shows Sunda Royal Fighter while the reusable Gajah Mada
+template stays pristine. Re-ran `audit_collisions.py` - unchanged, since
+`reskin_unit_for_civ` never touches `train_locations`. Rebuilt via
+`build-local-mod.sh`, deployed.

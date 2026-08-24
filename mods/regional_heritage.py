@@ -27,7 +27,9 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, \
     HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, GRENADIER, HAND_CANNONEER, \
     JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
-    WAR_CHARIOT, ELITE_WAR_CHARIOT
+    WAR_CHARIOT, ELITE_WAR_CHARIOT, CHAMPION, HEAVY_CAVALRY_ARCHER, \
+    NORSE_WARRIOR, EASTERN_SWORDSMAN, ATAULF, YODIT, SOSSO_GUARD, GAJAH_MADA, \
+    VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, GIRGEN_KHAN, KOTYAN_KHAN, PRITHVIRAJ, OSMAN
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -766,6 +768,138 @@ def give_condottiero_to_other_mercenary_civs(data: DatFile):
         enable_unit_for_civ(data, civ_id, CONDOTTIERO, TECH_REQUIREMENT_IMPERIAL_AGE)
 
 
+def give_champion_skins_to_regional_flavor_civs(data: DatFile):
+    # Purely cosmetic - reskin_unit_for_civ only changes graphics, never
+    # touches stats, cost, or the upgrade path. Every donor here was
+    # confirmed via the AoE2 wiki (and cross-checked directly against the
+    # .dat) to be a genuinely distinct, unclaimed model - not a reused
+    # default look, and not another civ's real active unique unit. Several
+    # tempting "named hero" candidates were checked and dropped for
+    # exactly that reason (Siegfried/King Arthur = plain default Champion;
+    # Charlemagne = Franks' real Throwing Axeman; Theodoric the Goth =
+    # Goths' real Huskarl; Aethelfrith = Celts' real Elite Woad Raider;
+    # Erik the Red = Vikings' real Elite Berserk; Kitabatake/Minamoto =
+    # Japanese' real Samurai/Elite Samurai) - see NOTES-civ-identity-
+    # expansion.md for the full accounting.
+    #
+    # Norse Warrior and Eastern Swordsman are both unused, unclaimed
+    # Long-Swordsman-tier stat-clones sitting in the base game's own data
+    # (confirmed via direct .dat inspection - same hp/attack/train-location
+    # as real Long Swordsman, just +10 food). Applying their look to the
+    # real Champion unit instead keeps every stat/cost/research real while
+    # giving these otherwise-wasted assets an actual home.
+    for civ_id in civ_ids_named(data, ['Vikings']):
+        reskin_unit_for_civ(data, civ_id, CHAMPION, NORSE_WARRIOR)
+    # Confirmed via screenshot: turban, curved scimitar, sunburst-emblem
+    # round shield - a Central Asian/Persian-Islamic steppe-warrior look,
+    # not Byzantine or Slavic.
+    for civ_id in civ_ids_named(data, ['Saracens', 'Persians', 'Turks']):
+        reskin_unit_for_civ(data, civ_id, CHAMPION, EASTERN_SWORDSMAN)
+
+    # Ataulf: real Gothic king (Alaric's brother-in-law and successor),
+    # confirmed via the wiki to NOT share a body model with Alaric or
+    # Theodoric the Goth despite sharing their portrait icon - a genuinely
+    # distinct, unclaimed sculpt. Applied to the wider early-medieval
+    # Germanic/Gothic-warrior aesthetic bucket, not just historical Goths
+    # specifically.
+    for civ_id in civ_ids_named(data, ['Goths', 'Celts', 'Teutons']):
+        reskin_unit_for_civ(data, civ_id, CHAMPION, ATAULF)
+
+    # Yodit: real Ethiopian queen, explicitly given a genuinely new unique
+    # model in Definitive Edition (pre-DE she just reused Gbeto's look;
+    # DE gave her her own). Distinct from the existing Gbeto grant.
+    for civ_id in civ_ids_named(data, ['Ethiopians']):
+        reskin_unit_for_civ(data, civ_id, CHAMPION, YODIT)
+
+    # Sosso Guard: wiki confirms "unique sprite," no reuse. West African -
+    # the Kingdom of Sosso was Sundjata's real historical rival/predecessor,
+    # from the exact same Mali-region history this mod's Sundjata hero and
+    # Malian grants already draw on.
+    for civ_id in civ_ids_named(data, ['Malians']):
+        reskin_unit_for_civ(data, civ_id, CHAMPION, SOSSO_GUARD)
+
+    # Gajah Mada's own real look (a bare-chested two-handed-sword-wielding
+    # warrior, confirmed unique to Definitive Edition) is reused here for
+    # South Asian civs - Malay's own hero keeps the name/stats but renders
+    # as Sunda Royal Fighter instead (see HERO_FOR_CIV's unit_skin_override
+    # in heroes_and_villains.py), freeing Gajah Mada's look up without
+    # leaving Malay standing next to a bunch of visually-identical regular
+    # Champions.
+    for civ_id in civ_ids_named(data, ['Bengalis', 'Gurjaras', 'Hindustanis', 'Dravidians']):
+        reskin_unit_for_civ(data, civ_id, CHAMPION, GAJAH_MADA)
+
+    # Le Loi (Vietnamese) and Pachacuti (Incas) were both considered for
+    # this same treatment - both confirmed genuinely unique DE models - but
+    # no good same-class alternate existed to reskin their own civ's hero
+    # into, and both are genuinely central to their own civ's campaign
+    # identity (not just "a good look that happens to be claimed"). Left
+    # untouched rather than force a bad swap or leave their own civ with a
+    # duplicate-look hero.
+
+
+def give_paladin_skins_to_regional_flavor_civs(data: DatFile):
+    # Same cosmetic-only reskin_unit_for_civ mechanism as Champion skins
+    # above. Excludes every civ that had Knight/Cavalier/Paladin removed
+    # earlier in this file (Turks, Huns, Berbers, Saracens, Malay, Burmese,
+    # Khmer, Vietnamese, Chinese) - a Paladin skin on a civ that can't train
+    # Paladin at all would never actually be seen.
+    #
+    # Vytautas the Great: confirmed unique appearance via the wiki, real
+    # Grand Duke of Lithuania - applied to the wider Eastern European
+    # Paladin-tier bucket.
+    for civ_id in civ_ids_named(data, ['Slavs', 'Bulgarians', 'Poles', 'Bohemians']):
+        reskin_unit_for_civ(data, civ_id, PALADIN, VYTAUTAS_THE_GREAT)
+
+    # Wang Tong: confirmed to have gotten a genuinely new cavalry model in
+    # Definitive Edition (pre-DE he was a plain Cataphract, which would
+    # have collided with Byzantines' real unique). Real Ming general sent
+    # against Le Loi's Vietnamese uprising - applied to the Central
+    # Asian/East Asian steppe-cavalry bucket that still has Paladin access.
+    for civ_id in civ_ids_named(data, ['Tatars', 'Cumans', 'Khitans', 'Jurchens']):
+        reskin_unit_for_civ(data, civ_id, PALADIN, WANG_TONG)
+
+
+def give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data: DatFile):
+    # Same cosmetic-only mechanism again, applied to Heavy Cavalry Archer -
+    # unlike Champion/Paladin, no civ in this mod has lost Cavalry Archer
+    # line access, so no exclusions are needed here. Confirmed via real
+    # CivTechTrees data that every civ below actually has the line.
+    #
+    # Subotai: a real Heavy-Cavalry-Archer-class hero, confirmed unique,
+    # and - unlike almost everything else checked this session - not
+    # referenced anywhere in this mod's code before now, so no swap needed.
+    for civ_id in civ_ids_named(data, ['Chinese', 'Japanese', 'Koreans', 'Khitans', 'Jurchens',
+                                        'Khmer', 'Malay', 'Burmese', 'Vietnamese']):
+        reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, SUBOTAI)
+
+    # Girgen Khan: confirmed genuinely unique model via the wiki ("unknown
+    # which historical figure he is based on" - a low-recognizability
+    # steppe-khan look, not tied to any specific famous figure or active
+    # civ's own unique). Unclaimed, no swap needed.
+    for civ_id in civ_ids_named(data, ['Tatars', 'Cumans']):
+        reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, GIRGEN_KHAN)
+
+    # Kotyan Khan's own real look (Cumans' hero) reused for Turks - low
+    # recognizability outside AoE2 enthusiasts, and no clean same-class
+    # alternate existed to swap Cumans' own hero into, so left as a direct
+    # reuse rather than blocked entirely.
+    for civ_id in civ_ids_named(data, ['Turks']):
+        reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, KOTYAN_KHAN)
+
+    # Prithviraj's own real look (Bengalis' hero) reused for the wider
+    # South Asian bucket - same reasoning as Kotyan above.
+    for civ_id in civ_ids_named(data, ['Gurjaras', 'Hindustanis', 'Dravidians']):
+        reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, PRITHVIRAJ)
+
+    # Osman's own real look (Turks' hero) reused for the East/SE Asian
+    # bucket - most globally recognizable name in this batch (Ottoman
+    # Empire's founder), but no clean same-class alternate existed to swap
+    # Turks' own hero into, and this was the user's own original idea
+    # going in, so kept as a direct reuse.
+    for civ_id in civ_ids_named(data, ['Khmer', 'Malay', 'Burmese']):
+        reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, OSMAN)
+
+
 def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
     # Two-part test for every disable_unit_line_for_civ call in this file:
     # (1) the civ has its own distinct gold-cost unit line training from the
@@ -901,3 +1035,6 @@ def mod(data: DatFile):
     give_harbor_to_vietnamese(data)
     give_longboats_the_ability_to_transport_units(data)
     give_fortified_church_to_teutons_and_spanish(data)
+    give_champion_skins_to_regional_flavor_civs(data)
+    give_paladin_skins_to_regional_flavor_civs(data)
+    give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data)

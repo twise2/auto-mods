@@ -391,6 +391,58 @@ easy to catch by checking `grep -n "^<id> " resources/en/strings/
 key-value/*.txt` for whatever id a `Tech`/`Unit` field holds before
 assuming it renders correctly.
 
+### 3.12 Cosmetic reskins - a name is not proof of a distinct look
+`reskin_unit_for_civ(data, civ_id, unit_id, donor_unit_id)` (3.1's Frankish
+Paladin/Crusader Knight precedent) only ever copies graphic fields
+(`standing_graphic`, `dying_graphic`, `undead_graphic`, `damage_graphics`,
+`type_50.attack_graphic`) - completely safe, no stat/cost/train-location
+side effects, and invisible to every trace-based tracer script in 3.9's
+sense (nothing to intercept, since no tech/effect is created).
+
+**Before treating any named campaign-hero unit as a fresh "regional skin"
+donor, verify it isn't just an existing civ's real unique unit under a
+different name.** A full pass looking for Champion-tier reskin candidates
+checked ~25 candidates from the AoE2 wiki and found the overwhelming
+majority were exactly this trap: Siegfried/King Arthur/La Hire/Le Lai/Le
+Trien all render as the *plain default Champion* (5 different names, one
+completely generic look); Charlemagne/Charles Martel = Franks' real
+Throwing Axeman; Theodoric the Goth = Goths' real Huskarl; Aethelfrith =
+Celts' real Elite Woad Raider; Erik the Red = Vikings' real Elite
+Berserk; Kitabatake/Minamoto = Japanese' real Samurai/Elite Samurai;
+Ivaylo/Yury = Bulgarians' real Konnik dismounted form; Topa Yupanqui/
+Itzcoatl = Aztecs' real Elite Jaguar Warrior. Only ~8 of ~25 checked
+turned out to be genuinely distinct, unclaimed art. **The AoE2 wiki
+(ageofempires.fandom.com) reliably states "represented by/appears as
+[real unit]" for every one of these** - always check there (or a targeted
+web search quoting the hero's name) before spending implementation time
+on a candidate. Heuristic that held up in every case checked: 1999-2013-
+era campaign heroes (Age of Kings through The Forgotten) almost always
+reuse an existing look; heroes added in Definitive Edition or later DLC
+(Lords of the West, Dynasties of India, Last Khans, Rise of the Rajas-era
+updates) were much more likely to get genuinely bespoke art.
+
+**A name is also not proof the look is what the name implies - verify
+against a real screenshot when the identity is ambiguous.** "Eastern
+Swordsman" turned out to need a user-provided screenshot to resolve
+(turban/scimitar/sunburst-shield = Central Asian/Persian-Islamic, not the
+initially-guessed Byzantine or Slavic reading) - don't assign a "sounds
+about right" civ list to an unverified look.
+
+**`unit_skin_override` (`heroes_and_villains.py`)**: when a hero's own
+look is good enough to reuse broadly as a skin, but that hero is still
+someone's actual active hero, reusing the look verbatim leaves that civ
+standing next to visually-identical regular troops. `HERO_FOR_CIV`'s
+per-civ slot value can be `unit_skin_override(unit, skin)` instead of a
+plain unit id - the hero keeps its real name/stats/id, it just renders
+using a different same-`class_` donor's graphics via
+`reskin_unit_for_civ`, freeing the hero's own original look for reuse
+elsewhere (see Malay's Gajah Mada -> Sunda Royal Fighter in
+`NOTES-civ-identity-expansion.md` v35 for the worked example). Only worth
+doing when a good same-class alternate actually exists *and* the hero
+isn't so central to its own civ's identity that no stand-in would do -
+Le Loi (Vietnamese) and Pachacuti (Incas) were both considered and
+declined for exactly that reason.
+
 ---
 
 ## 4. Traps already fallen into once - don't repeat these
