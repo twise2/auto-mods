@@ -312,6 +312,22 @@ def reskin_unit_for_civ(data: DatFile, civ_id: int, unit_id: int, donor_unit_id:
     (or reused as a donor) elsewhere. genieutils-py can't rewrite language-file
     strings, so the unit's displayed name can't change this way, only how it
     looks - matches how the old regionalAdditions branch did civ skins.
+
+    Real, confirmed bug fixed here: this used to only copy standing/dying/
+    undead/damage/attack graphics, never `dead_fish.walking_graphic` or
+    `running_graphic` - so every reskin this project has ever made (going
+    back to the original Frankish Paladin/Crusader Knight skins) looked
+    right standing still, attacking, or dying, but reverted to the
+    *original* unit's own walk animation the moment it moved (user report:
+    "the skins dont seem to be working for any units when they are
+    moving"). Confirmed directly in the .dat: Champion's real
+    walking_graphic (2906) and Norse Warrior's (7630) are completely
+    different values, and the old version of this function never touched
+    that field at all. Also now copies `type_50.attack_graphic_2` and
+    `creatable`'s idle_attack/special/garrison graphics while at it, since
+    those are exactly the same class of "extra animation state" field and
+    at least one (special_graphic) was already confirmed to sometimes
+    carry a real, different value between donor and target.
     """
     civ = data.civs[civ_id]
     unit = civ.units[unit_id]
@@ -322,6 +338,14 @@ def reskin_unit_for_civ(data: DatFile, civ_id: int, unit_id: int, donor_unit_id:
     unit.undead_graphic = donor.undead_graphic
     unit.damage_graphics = donor.damage_graphics
     unit.type_50.attack_graphic = donor.type_50.attack_graphic
+    unit.type_50.attack_graphic_2 = donor.type_50.attack_graphic_2
+    if unit.dead_fish is not None and donor.dead_fish is not None:
+        unit.dead_fish.walking_graphic = donor.dead_fish.walking_graphic
+        unit.dead_fish.running_graphic = donor.dead_fish.running_graphic
+    if unit.creatable is not None and donor.creatable is not None:
+        unit.creatable.idle_attack_graphic = donor.creatable.idle_attack_graphic
+        unit.creatable.special_graphic = donor.creatable.special_graphic
+        unit.creatable.garrison_graphic = donor.creatable.garrison_graphic
 
 
 def set_train_locations_for_civ(data: DatFile, civ_id: int, unit_id: int, locations: list[tuple[int, int]]):

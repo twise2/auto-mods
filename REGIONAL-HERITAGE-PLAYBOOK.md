@@ -393,11 +393,29 @@ assuming it renders correctly.
 
 ### 3.12 Cosmetic reskins - a name is not proof of a distinct look
 `reskin_unit_for_civ(data, civ_id, unit_id, donor_unit_id)` (3.1's Frankish
-Paladin/Crusader Knight precedent) only ever copies graphic fields
-(`standing_graphic`, `dying_graphic`, `undead_graphic`, `damage_graphics`,
-`type_50.attack_graphic`) - completely safe, no stat/cost/train-location
-side effects, and invisible to every trace-based tracer script in 3.9's
-sense (nothing to intercept, since no tech/effect is created).
+Paladin/Crusader Knight precedent) copies graphic fields - completely
+safe, no stat/cost/train-location side effects, and invisible to every
+trace-based tracer script in 3.9's sense (nothing to intercept, since no
+tech/effect is created). **Copy every animation-state graphic, not just
+the obvious ones, or the reskin only looks right standing still.** A real,
+user-reported bug shipped for this whole project's entire history of
+reskins (going back to the original Frankish Paladin/Crusader Knight
+skins) before being caught: the function copied `standing_graphic`,
+`dying_graphic`, `undead_graphic`, `damage_graphics`, and `type_50.
+attack_graphic`, but never `unit.dead_fish.walking_graphic` or
+`running_graphic` - so every skin reverted to the *original* unit's own
+walk cycle the entire time it was moving, which is most of a real game.
+**`dead_fish` is genieutils-py's name for the movement component** -
+inherited from the original 1997 codebase's internal naming, gives no
+hint from the name alone that it's where the walking/running graphics
+live. Now also copies `type_50.attack_graphic_2` and `creatable.
+idle_attack_graphic`/`special_graphic`/`garrison_graphic` for the same
+reason - `special_graphic` was directly confirmed to sometimes carry a
+real distinct value between donor and target. When adding a *new* kind of
+cosmetic swap (not just calling the existing function), check every field
+across `Unit`, `Type50`, `Creatable`, and `DeadFish` with "graphic" in the
+name, not just the ones that seem obviously relevant from the state
+you're currently testing.
 
 **`reskin_unit_for_civ` has no conflict detection - calling it twice on
 the same `(civ_id, unit_id)` just silently overwrites, last call wins.**

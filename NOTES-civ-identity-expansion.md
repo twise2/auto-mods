@@ -2422,3 +2422,38 @@ unchanged. Rebuilt via `build-local-mod.sh`, deployed.
   way found to access it even indirectly. Everything sourced this session
   instead came from direct `.dat` queries plus the AoE2 Fandom wiki via
   web search, cross-verified against each other throughout.
+
+## v40: real bug - every skin this whole project has ever made was missing its walking animation
+
+User reported directly: "the skins dont seem to be working for any units
+when they are moving." Root cause, confirmed directly in the `.dat`:
+`reskin_unit_for_civ` (`mods/util.py`) only ever copied `standing_graphic`,
+`dying_graphic`, `undead_graphic`, `damage_graphics`, and `type_50.
+attack_graphic` - it never touched `unit.dead_fish.walking_graphic` or
+`running_graphic` (genieutils-py's `Unit.dead_fish` is the movement
+component - inherited internal naming from the original 1997 codebase, not
+a hint about what it does). Confirmed the real values differ: Champion's
+real `walking_graphic` is 2906, Norse Warrior's is 7630 - completely
+different animations, and the old function silently left the *original*
+unit's walking graphic in place. Every reskin this project has ever made -
+going all the way back to the original Frankish Paladin/Crusader Knight
+skins from earlier this session, not just the ~30 added in v35-v39 - was
+affected: correct while standing, attacking, or dying, wrong (reverted to
+the un-skinned unit's own walk cycle) the entire time a unit was actually
+moving, which is most of the time in a real game.
+
+Fixed in the one shared function so every call site benefits automatically
+- no per-skin changes needed anywhere in `regional_heritage.py` or
+`heroes_and_villains.py`. While in there, also started copying `type_50.
+attack_graphic_2`, and `creatable.idle_attack_graphic`/`special_graphic`/
+`garrison_graphic` - the same class of "extra animation state" field, and
+`special_graphic` was already directly confirmed to sometimes carry a real
+distinct value between donor and target (Champion's mirrors its own
+`attack_graphic`, Norse Warrior's doesn't), so leaving it uncopied would
+have been the same bug in a smaller, still-real form.
+
+Rebuilt via `build-local-mod.sh`, re-ran `audit_collisions.py` - unchanged
+(this function still never touches `train_locations`). Every existing skin
+assignment automatically inherits the fix on rebuild; no verification
+table needed since the fix lives in the shared function itself, not in any
+individual call site.
