@@ -2457,3 +2457,49 @@ Rebuilt via `build-local-mod.sh`, re-ran `audit_collisions.py` - unchanged
 assignment automatically inherits the fix on rebuild; no verification
 table needed since the fix lives in the shared function itself, not in any
 individual call site.
+
+## v41: Knight-line removal was silently losing a race against real vanilla Knight access - affected all 9 civs, not just Chinese
+
+User report: "Chinese have knights and not Hei Guang cavalry (but have
+the elite Hei Guang upgrade." Investigated directly rather than guess -
+Chinese's Knight-disable tech and Hei-Kuang's enable tech both looked
+completely correct in the `.dat` in isolation, which pointed at a timing
+interaction rather than a structural bug.
+
+**Root cause, confirmed via direct `.dat` query:** there is exactly ONE
+tech in the entire game that enables Knight - tech 166, "Knight (make
+avail)", `civ=-1` (universal), gated on Castle Age. It has no awareness
+of this mod's own Knight-removal disable. v34 (an earlier fix this
+session) made the Knight-removal disable fire immediately
+(`TYPE_TOWN_CENTER_BUILT`) specifically to close a different bug (Huns
+training Knight until an actual Castle got built) - but that meant the
+disable now fires *before* tech 166 does. Since tech 166 fires later (at
+Castle Age) and doesn't know about the disable, it silently re-enables
+Knight for every one of the 9 removal-list civs the moment they reach
+Castle Age, undoing the disable that already ran. This exactly explains
+the reported symptom: Knight comes back, Hei-Kuang Cavalry loses the
+shared button, but Elite Hei-Kuang Cavalry still shows as researchable
+since its own prerequisite (Hei-Kuang's enable tech) genuinely did fire
+and never got raced against anything.
+
+This wasn't Chinese-specific - it affected all 9 civs across all three
+`remove_knight_line_from_*` functions (Turks/Huns, Berbers/Saracens,
+Malay/Burmese/Khmer/Vietnamese, Chinese) identically, since tech 166
+applies universally with no per-civ carve-out possible. Chinese was
+likely just the first one actually tested in a real game since the v34
+change shipped.
+
+**Fix:** require tech 166 itself (`TECH_KNIGHT_MAKE_AVAIL`, added to
+`ids.py`) as the Knight-line disable's own prerequisite, for both the
+unit-level disable and the Cavalier/Paladin research-button disable, in
+all three functions - the same pattern `research_elite_upgrade_for_civ`
+already uses to avoid this exact class of race (v31). This isn't a timing
+guess like the two previous attempts (TECH_CASTLE_BUILT, then
+`TYPE_TOWN_CENTER_BUILT`) - it's an explicit dependency, so the disable
+is now *structurally* guaranteed to complete after tech 166 has, for
+every civ, permanently, regardless of any other timing consideration.
+
+Verified directly in the rebuilt `.dat`: Chinese/Huns/Turks/Berbers/
+Malay's Knight-disable techs all now require `(166, ...)`. Re-ran
+`audit_collisions.py` - unchanged. Rebuilt via `build-local-mod.sh`,
+deployed.

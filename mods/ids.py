@@ -611,6 +611,7 @@ JARL = 931  # unique DE model (was Tarkan-with-torch pre-DE), "a generic Norse c
 GENERAL_ARAIYAN = 1766  # unique DE model - Elite Steppe Lancer skin for Hindustanis
 SUN_CE = 2040  # unique DE model, distinct from every other Three Kingdoms hero - Elite Steppe Lancer skin for Chinese
 ROBERT_GUISCARD = 1677  # Lords of the West era, graphic checked against every known-used donor this session - no match found
+TECH_KNIGHT_MAKE_AVAIL = 166  # real vanilla "Knight (make avail)", civ=-1, gated on Castle Age - THE actual, sole source of Knight access for every civ
 
 # Water heroes (WARSHIP_CLASS) - paired with an existing land hero of the same person
 ARTEMISIA = 2312

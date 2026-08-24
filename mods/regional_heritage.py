@@ -32,7 +32,7 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
     FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
     KUSHLUK, JARL, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE, \
-    ENVOY, JOHN_THE_FEARLESS, ROBERT_GUISCARD
+    ENVOY, JOHN_THE_FEARLESS, ROBERT_GUISCARD, TECH_KNIGHT_MAKE_AVAIL
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -1067,19 +1067,27 @@ def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
     # both train from the Stable (101) for Food+Gold, identical to Knight's
     # own building/resource profile.
     #
-    # Gated on TYPE_TOWN_CENTER_BUILT (essentially immediate), not
-    # TECH_CASTLE_BUILT - real user report: Huns could still train Knight
-    # for the entire early-mid game and only lost it once a Castle
-    # happened to get built, well after their Steppe Lancer substitute
-    # was already available. Tried gating on CASTLE_AGE next (matching
-    # the substitute's own trigger) - works, but depends on staying in
-    # sync with whatever the substitute grant uses, forever. Simpler and
-    # strictly safer: confirmed real vanilla Knight itself (tech 166,
-    # civ=-1) requires Castle Age and nothing earlier for every civ, so
-    # these civs could never actually train Knight before Castle Age
-    # anyway, regardless of when this disable fires - gating it immediate
-    # produces the identical practical result with no ongoing dependency
-    # on any other grant's trigger.
+    # Gated on TECH_KNIGHT_MAKE_AVAIL (tech 166, "Knight (make avail)",
+    # the real vanilla civ=-1 tech that's the ONE AND ONLY source of Knight
+    # access for every civ in the game) - not TECH_CASTLE_BUILT, and not
+    # TYPE_TOWN_CENTER_BUILT either, despite both having been tried here
+    # already. History: TECH_CASTLE_BUILT (an actually-constructed Castle)
+    # left Huns training Knight for the entire early-mid game. Switched to
+    # TYPE_TOWN_CENTER_BUILT (essentially immediate) to fix that - but that
+    # introduced a *worse*, silent bug: tech 166 is civ=-1 and fires the
+    # moment a civ reaches Castle Age, completely unaware of this mod's own
+    # disable. Since our disable fired *before* tech 166 (immediate vs.
+    # Castle Age), tech 166 would fire *later* and silently re-enable
+    # Knight for every one of these civs the instant they reached Castle
+    # Age - confirmed via a real user report (Chinese training Knight
+    # instead of Hei-Kuang Cavalry, despite Elite Hei-Kuang Cavalry showing
+    # as researchable) and by finding tech 166 is the sole Knight-enable
+    # tech in the whole game, with no per-civ carve-out possible since it's
+    # civ=-1. Requiring tech 166 itself as this disable's own prerequisite
+    # (the same pattern research_elite_upgrade_for_civ already uses to
+    # avoid an equivalent race) guarantees this disable can only complete
+    # *after* tech 166 already has, for every civ, permanently - not a
+    # timing guess, an explicit dependency.
     #
     # Turks: fully-upgraded Steppe Lancer from this mod; Janissary/Sipahi and
     # gunpowder identity, not Western knights.
@@ -1095,24 +1103,24 @@ def remove_knight_line_from_true_steppe_and_camel_civs(data: DatFile):
     # are the textbook nomadic horse-archer civ historically, an even
     # cleaner fit for rule 2 than Turks.
     for civ_id in civ_ids_named(data, ['Turks', 'Huns']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TYPE_TOWN_CENTER_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_KNIGHT_MAKE_AVAIL)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
         # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
         # Disable Paladin", civ=8/Persians, hides Paladin for them since
         # Savar replaces it - confirmed via direct .dat inspection).
-        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TYPE_TOWN_CENTER_BUILT)
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_KNIGHT_MAKE_AVAIL)
     # Berbers and Saracens: native Camel Rider/Heavy Camel Rider (not
     # granted by this mod - they've always had it); Almoravid/Almohad and
     # early-Islamic camel-cavalry identity, not knights.
     for civ_id in civ_ids_named(data, ['Berbers', 'Saracens']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TYPE_TOWN_CENTER_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_KNIGHT_MAKE_AVAIL)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
         # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
         # Disable Paladin", civ=8/Persians, hides Paladin for them since
         # Savar replaces it - confirmed via direct .dat inspection).
-        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TYPE_TOWN_CENTER_BUILT)
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_KNIGHT_MAKE_AVAIL)
 
 
 def remove_knight_line_from_true_elephant_civs(data: DatFile):
@@ -1125,13 +1133,13 @@ def remove_knight_line_from_true_elephant_civs(data: DatFile):
     # entirely), so rule 1 doesn't hold for them despite rule 2 clearly
     # fitting.
     for civ_id in civ_ids_named(data, ['Malay', 'Burmese', 'Khmer', 'Vietnamese']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TYPE_TOWN_CENTER_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_KNIGHT_MAKE_AVAIL)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
         # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
         # Disable Paladin", civ=8/Persians, hides Paladin for them since
         # Savar replaces it - confirmed via direct .dat inspection).
-        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TYPE_TOWN_CENTER_BUILT)
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_KNIGHT_MAKE_AVAIL)
 
 
 def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
@@ -1143,13 +1151,13 @@ def remove_knight_line_from_chinese_for_hei_kuang_cavalry(data: DatFile):
     # group above since the reasoning (a specific regional cavalry unit,
     # not a steppe/camel or elephant identity) is its own thing.
     for civ_id in civ_ids_named(data, ['Chinese']):
-        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TYPE_TOWN_CENTER_BUILT)
+        disable_unit_line_for_civ(data, civ_id, {KNIGHT, CAVALIER, PALADIN}, TECH_KNIGHT_MAKE_AVAIL)
         # Cavalier/Paladin are real, player-researched techs (not just the
         # units) - without this, the now-pointless upgrade research still
         # shows up. Uses DE's own real "[FTT]" mechanism (tech 527, "[FTT]
         # Disable Paladin", civ=8/Persians, hides Paladin for them since
         # Savar replaces it - confirmed via direct .dat inspection).
-        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TYPE_TOWN_CENTER_BUILT)
+        disable_tech_for_civ(data, civ_id, {TECH_CAVALIER, TECH_PALADIN}, TECH_KNIGHT_MAKE_AVAIL)
 
 
 def mod(data: DatFile):

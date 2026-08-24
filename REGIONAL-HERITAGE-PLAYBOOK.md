@@ -285,20 +285,34 @@ Age, *and* effectively immediate (`TYPE_TOWN_CENTER_BUILT`, id 1230,
 essentially immediate since every civ starts with a Town Center) all
 mislabeled as `TECH_CASTLE_BUILT`, in both directions.
 
-**A removal doesn't need to match its replacement's trigger - fire it as
-early as the removed content's own real gate allows.** First instinct
-when a Knight-line removal felt out of sync with its Steppe Lancer
-replacement (both should swap at the same moment) was to gate the
-removal on the same trigger the replacement uses (`CASTLE_AGE`) - works,
-but creates an ongoing coupling between two independent grants that has
-to be remembered and kept in sync forever. Better: check the removed
-content's *own* real vanilla gate (Knight itself requires Castle Age for
-every civ, confirmed via its real `civ=-1` enable tech) - since it was
-never actually reachable earlier than that anyway, gating the removal on
-something that fires immediately (`TYPE_TOWN_CENTER_BUILT`) produces the
-identical practical result with zero coupling to any other grant's
-timing. Prefer "as early as safely possible, checked against the real
-gate" over "matched to a specific other grant" when removing something.
+**When removing something that has a real, universal `civ=-1` enable
+tech, gating the removal *earlier* than that tech doesn't just fail to
+help - it loses a race and gets silently undone.** This took three
+attempts to get right, and the middle one shipped and broke Knight
+removal for all 9 affected civs before a live bug report caught it.
+Attempt 1: gate the removal on `TECH_CASTLE_BUILT` (an actually-
+constructed Castle) - real bug, left civs training Knight for the whole
+early-mid game. Attempt 2: reasoned that since Knight's own real enable
+tech (166, `civ=-1`) requires Castle Age and nothing earlier, gating the
+removal on something that fires *immediately* (`TYPE_TOWN_CENTER_BUILT`)
+"produces the identical practical result with zero coupling to any other
+grant's timing" - this reasoning is a trap. It ignores that tech 166
+*itself* still fires later, at Castle Age, and has no idea a removal
+tech is trying to disable Knight - so tech 166 silently re-enables
+Knight for every affected civ the moment they reach Castle Age,
+overwriting the earlier disable. Confirmed via a live report (Chinese
+training Knight instead of Hei-Kuang Cavalry, while Elite Hei-Kuang
+Cavalry still showed as researchable since *that* prerequisite chain was
+never raced). Attempt 3, the actual fix: require the real enable tech
+itself (166) as the removal's own prerequisite - not a timing guess but
+an explicit dependency, so the removal is *structurally* guaranteed to
+complete after the competing tech has, permanently. **The general rule:
+before gating a removal on any trigger "because the target couldn't have
+existed before that point anyway," check whether the target has its own
+active `civ=-1` (or otherwise-competing) enable tech that keeps firing on
+its own schedule - if so, the removal needs to explicitly depend on that
+tech completing, not just estimate a safe-looking earlier or matching
+trigger.**
 
 ### 3.9 CivTechTrees sync gaps
 `sync_tech_trees.py` builds F11-tech-tree-screen entries by finding an
