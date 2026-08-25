@@ -114,6 +114,9 @@ def trace_grants(data: DatFile) -> dict[int, set[int]]:
     def noop_reskin(data, civ_id, unit_id, donor_unit_id):
         pass
 
+    def noop_research_location(data, civ_id, base_unit_id, upgraded_unit_id, button_id):
+        pass
+
     def rec_research_elite(data, civ_id, upgrade_pairs, extra_required_techs, building_id, button_id,
                             resource_costs, research_time, name, donor_tech_id, age_tech=None):
         for _base_unit_id, upgraded_unit_id in upgrade_pairs:
@@ -121,13 +124,15 @@ def trace_grants(data: DatFile) -> dict[int, set[int]]:
 
     import mods.util as util
     orig = (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-            util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.research_elite_upgrade_for_civ)
+            util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.research_elite_upgrade_for_civ,
+            util.set_research_location_for_civ)
     regional_heritage.enable_unit_for_civ = rec_enable
     regional_heritage.upgrade_unit_for_civ = rec_upgrade
     regional_heritage.grant_effect_to_civ = rec_grant_effect
     regional_heritage.set_train_locations_for_civ = noop_button
     regional_heritage.reskin_unit_for_civ = noop_reskin
     regional_heritage.research_elite_upgrade_for_civ = rec_research_elite
+    regional_heritage.set_research_location_for_civ = noop_research_location
     heroes_and_villains.enable_unit_for_civ = rec_enable
     # Same gap fixed in disable_unit_lines.py's trace_granted_units:
     # heroes_and_villains.mod() was never actually called here, only
@@ -137,7 +142,8 @@ def trace_grants(data: DatFile) -> dict[int, set[int]]:
     heroes_and_villains.mod(data)
     regional_heritage.mod(data)
     (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
-     util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.research_elite_upgrade_for_civ) = orig
+     util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.research_elite_upgrade_for_civ,
+     util.set_research_location_for_civ) = orig
 
     return grants
 

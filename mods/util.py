@@ -371,5 +371,42 @@ def set_train_locations_for_civ(data: DatFile, civ_id: int, unit_id: int, locati
     ]
 
 
+def set_research_location_for_civ(data: DatFile, civ_id: int, base_unit_id: int, upgraded_unit_id: int,
+                                   button_id: int):
+    """Move one civ's copy of an Elite-tier research button to a different
+    button at the same building, without touching cost, time, or the
+    upgrade itself. Finds the specific Tech `research_elite_upgrade_for_civ`
+    already built for this civ by matching its TYPE_UPGRADE_UNIT effect
+    command, so there's no need to plumb a tech id back out of that
+    function just for this.
+
+    Real vanilla convention (confirmed directly in the .dat: Knight trains
+    at button 2, Paladin's own real research is at button 7; Steppe Lancer
+    trains at button 4, Elite Steppe Lancer's own real research is at
+    button 9) is that a tier's research sits exactly 5 buttons after its
+    unit's own training button (row 2, same column, in the 2x5 button
+    grid) - use this whenever `set_train_locations_for_civ` moves a
+    granted unit's button somewhere other than its real vanilla default,
+    so the research button doesn't end up visually orphaned under the
+    wrong column.
+    """
+    civ = data.civs[civ_id]
+    for tech in data.techs:
+        if tech is None or tech.civ != civ_id or tech.effect_id < 0:
+            continue
+        eff = data.effects[tech.effect_id]
+        if any(cmd.type == TYPE_UPGRADE_UNIT and cmd.a == base_unit_id and cmd.b == upgraded_unit_id
+               for cmd in eff.effect_commands):
+            old_location = tech.research_locations[0]
+            logging.info(f'Moving {civ.units[upgraded_unit_id].name} research to button {button_id} '
+                         f'for {civ.name}')
+            tech.research_locations = [ResearchLocation(location_id=old_location.location_id,
+                                                          research_time=old_location.research_time,
+                                                          button_id=button_id, hot_key_id=-1)]
+            return
+    raise ValueError(f'No research_elite_upgrade_for_civ tech found for civ {civ_id}, '
+                      f'{base_unit_id}->{upgraded_unit_id}')
+
+
 def affects_units(data: DatFile, effect_command: EffectCommand) -> bool:
     return is_unit(data, effect_command.a) and is_unit(data, effect_command.b)

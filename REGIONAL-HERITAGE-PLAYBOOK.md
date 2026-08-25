@@ -572,6 +572,31 @@ place since the unit isn't created fresh by `makeHero()`.
   Steppe Lancer substitute (relocated to Stable button 3), the Knight
   line was removed from them again - current state, see 5 below, is
   Huns *without* Knight/Cavalier/Paladin.
+- **A relocated training button strands its Elite-tier research button
+  unless you move that too.** Real vanilla convention, confirmed against
+  Knight/Paladin's own placement: a unit's Elite-tier research button
+  sits at `train_button + 5` (same column, one row down - buildings are a
+  2x5 grid, row 1 trains, row 2 researches). `set_train_locations_for_civ`
+  only ever moved the *unit's* button; nothing moved the matching
+  research button, so a relocated unit (Huns' Steppe Lancer -> button 3,
+  Aztecs' Temple Guard -> button 3) visually orphaned its own upgrade
+  under the generic default column instead. Fixed with a new
+  `set_research_location_for_civ` (mods/util.py) - use it any time
+  `set_train_locations_for_civ` is called for a unit that also has an
+  Elite-tier upgrade.
+- **`CivTechTrees/<CIV>.json`'s `Node Status` field is a real per-civ
+  restriction signal - but a *presence* check (`grep -c '"Node ID": X'`)
+  is worthless on its own,** since a node can be listed and still be
+  `NotAvailable`. Only 3 real values exist in the base game
+  (`ResearchRequired`, `NotAvailable`, `ResearchedCompleted`), and it does
+  genuinely track real access (verified: Vikings/Bulgarians/Poles/etc.
+  show `NotAvailable` for Paladin, matching their real lack of access;
+  Cumans shows `ResearchedCompleted`, matching real access) - but always
+  sanity-check a batch result against at least one known-good and one
+  known-bad civ before trusting it. This session got a control civ
+  backwards once purely from mis-remembering which vanilla civ actually
+  has Paladin, not from the data being wrong - the data was right both
+  times.
 
 ---
 

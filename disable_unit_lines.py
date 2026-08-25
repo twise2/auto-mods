@@ -117,10 +117,13 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
         for _base_unit_id, upgraded_unit_id in upgrade_pairs:
             upgraded[civ_id].add(upgraded_unit_id)
 
+    def noop_research_location(data, civ_id, base_unit_id, upgraded_unit_id, button_id):
+        pass
+
     import mods.util as util
     orig = (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
             util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ,
-            util.research_elite_upgrade_for_civ)
+            util.research_elite_upgrade_for_civ, util.set_research_location_for_civ)
     regional_heritage.enable_unit_for_civ = rec_enable
     regional_heritage.upgrade_unit_for_civ = rec_upgrade
     regional_heritage.grant_effect_to_civ = rec_grant_effect
@@ -128,6 +131,7 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
     regional_heritage.reskin_unit_for_civ = noop_reskin
     regional_heritage.disable_unit_line_for_civ = rec_disable_line
     regional_heritage.research_elite_upgrade_for_civ = rec_research_elite
+    regional_heritage.set_research_location_for_civ = noop_research_location
     heroes_and_villains.enable_unit_for_civ = rec_enable
     # Real, previously-undiscovered gap: heroes_and_villains.mod() was never
     # actually called here - only regional_heritage.mod() was - so every
@@ -141,7 +145,7 @@ def trace_granted_units(data: DatFile) -> tuple[dict[int, set[int]], dict[int, s
     regional_heritage.mod(data)
     (util.enable_unit_for_civ, util.upgrade_unit_for_civ, util.grant_effect_to_civ,
      util.set_train_locations_for_civ, util.reskin_unit_for_civ, util.disable_unit_line_for_civ,
-     util.research_elite_upgrade_for_civ) = orig
+     util.research_elite_upgrade_for_civ, util.set_research_location_for_civ) = orig
 
     return enabled, upgraded, disabled, location_overrides
 

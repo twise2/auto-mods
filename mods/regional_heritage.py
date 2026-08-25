@@ -7,7 +7,7 @@ from genieutils.unit import AttackOrArmor
 
 from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ, \
     disable_unit_line_for_civ, set_train_locations_for_civ, disable_tech_for_civ, set_starting_scout_for_civ, \
-    research_elite_upgrade_for_civ
+    research_elite_upgrade_for_civ, set_research_location_for_civ
 from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUDAL_AGE, \
     CASTLE_AGE, \
     TYPE_ENABLE_DISABLE_UNIT, TYPE_FOOD, TYPE_WOOD, TYPE_GOLD, \
@@ -104,6 +104,13 @@ def give_steppe_lancers_to_civs_with_horse_archer_heritage(data: DatFile):
     huns_id, = civ_ids_named(data, ['Huns'])
     set_train_locations_for_civ(data, huns_id, STEPPE_LANCER, [(101, 3)])
     set_train_locations_for_civ(data, huns_id, ELITE_STEPPE_LANCER, [(101, 3)])
+    # Real user report: Elite Steppe Lancer's research button showed up
+    # under column 4 (the generic default, matching button 9) instead of
+    # under button 3, where Huns' own Steppe Lancer actually trains. Real
+    # vanilla convention (button 3 -> button 8, confirmed against Knight/
+    # Paladin's own real button 2/7 pairing) puts research one row below
+    # its unit, same column - button 8 was confirmed free for Huns.
+    set_research_location_for_civ(data, huns_id, STEPPE_LANCER, ELITE_STEPPE_LANCER, 8)
 
     # Per-civ overrides on top of the generic Cuman Chief look above, for
     # civs where a more specific fit exists - applied after the loop so
@@ -126,14 +133,27 @@ def give_elephant_archers_to_civs_with_elephant_heritage(data: DatFile):
     # Elephant Archers are currently Bengali/Dravidian/Gurjaran only, despite several
     # other civs having a strong historical elephant-warfare tradition.
     # https://www.reddit.com/r/aoe2/comments/10mqm64/sotl_should_more_civs_get_elephant_archers/
+    # Real user report: Elephant Archer wasn't showing up in-game for Malay -
+    # confirmed via direct .dat inspection that all 5 of these civs have
+    # real native Cavalry Archer/Heavy Cavalry Archer access at the exact
+    # same Archery Range button 3 Elephant Archer defaults to (and Heavy
+    # Cavalry Archer's own real research at button 8, the exact button
+    # Elite Elephant Archer defaults to too) - a genuine double collision,
+    # not just the usual "civ=-1 sourced, unconfirmed" noise. Relocated the
+    # whole grant to column 0 (button 0 train / button 5 research),
+    # confirmed free for all 5 civs.
     civs = ['Persians', 'Burmese', 'Malay', 'Khmer', 'Vietnamese']
     for civ_id in civ_ids_named(data, civs):
         enable_tech = enable_unit_for_civ(data, civ_id, ELEPHANT_ARCHER, CASTLE_AGE)
-        # Real cost/location, matching vanilla's own "Elite Elephant Archer"
-        # (900 food/500 gold, Archery Range button 8, 80s).
+        # Real cost, matching vanilla's own "Elite Elephant Archer" (900
+        # food/500 gold, 80s) - location moved off the real vanilla button
+        # 8 for the collision reasons above; button 5 keeps the same
+        # train-button-plus-5 column alignment as button 0 below.
         research_elite_upgrade_for_civ(data, civ_id, [(ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER)], [enable_tech],
-                                        87, 8, [(TYPE_FOOD, 900), (TYPE_GOLD, 500)], 80,
+                                        87, 5, [(TYPE_FOOD, 900), (TYPE_GOLD, 500)], 80,
                                         f'Elite Elephant Archer for {data.civs[civ_id].name}', 481)
+        set_train_locations_for_civ(data, civ_id, ELEPHANT_ARCHER, [(87, 0)])
+        set_train_locations_for_civ(data, civ_id, ELITE_ELEPHANT_ARCHER, [(87, 0)])
 
 
 def give_armored_elephants_to_other_elephant_civs(data: DatFile):
@@ -503,6 +523,11 @@ def give_temple_guard_to_andean_and_mesoamerican_civs(data: DatFile):
                                     f'Elite Temple Guard for {data.civs[aztecs_id].name}', 1401)
     set_train_locations_for_civ(data, aztecs_id, TEMPLE_GUARD, [(12, 3)])
     set_train_locations_for_civ(data, aztecs_id, ELITE_TEMPLE_GUARD, [(12, 3)])
+    # Same button-alignment fix as Huns' Steppe Lancer above - Aztecs'
+    # Temple Guard trains from button 3, so its research belongs at
+    # button 8 (button+5), not the generic default button 9. Confirmed
+    # free.
+    set_research_location_for_civ(data, aztecs_id, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, 8)
 
 
 def give_war_chariot_to_celts(data: DatFile):
@@ -891,7 +916,11 @@ def give_champion_skins_to_regional_flavor_civs(data: DatFile):
     # freeing Liu Bei's real look for use as a Champion skin below.
     shu_id, = civ_ids_named(data, ['Shu'])
     reskin_unit_for_civ(data, shu_id, LIU_BEI, ZHANG_FEI)
-    for civ_id in civ_ids_named(data, ['Chinese']):
+    # Shu/Wu/Wei get every skin Chinese gets below - Champion (Liu Bei) is
+    # an especially good fit for Shu specifically, since he's literally
+    # their own founding emperor (their actual hero renders as Zhang Fei
+    # instead - a different unit entirely, no conflict).
+    for civ_id in civ_ids_named(data, ['Chinese', 'Shu', 'Wu', 'Wei']):
         reskin_unit_for_civ(data, civ_id, CHAMPION, LIU_BEI)
 
     # Francesco Sforza: confirmed via the wiki to have gotten his own real
@@ -962,7 +991,7 @@ def give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data: DatFile):
     # and - unlike almost everything else checked this session - not
     # referenced anywhere in this mod's code before now, so no swap needed.
     for civ_id in civ_ids_named(data, ['Chinese', 'Japanese', 'Koreans', 'Khitans', 'Jurchens',
-                                        'Khmer', 'Malay', 'Burmese', 'Vietnamese']):
+                                        'Khmer', 'Malay', 'Burmese', 'Vietnamese', 'Shu', 'Wu', 'Wei']):
         reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, SUBOTAI)
 
     # Girgen Khan's own genuinely unique model (confirmed via the wiki -
@@ -973,8 +1002,10 @@ def give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data: DatFile):
     # the whole Central Asian/Turk bucket here instead - low recognizability
     # outside AoE2 enthusiasts, and no clean same-class alternate existed to
     # swap Cumans' own hero into, so left as a direct reuse rather than
-    # blocked entirely.
-    for civ_id in civ_ids_named(data, ['Tatars', 'Cumans', 'Turks']):
+    # blocked entirely. Huns added here too - confirmed via real
+    # CivTechTrees data to have genuine Heavy Cavalry Archer access
+    # (Magyars checked and excluded - no real access to skin at all).
+    for civ_id in civ_ids_named(data, ['Tatars', 'Cumans', 'Turks', 'Huns']):
         reskin_unit_for_civ(data, civ_id, HEAVY_CAVALRY_ARCHER, KOTYAN_KHAN)
 
     # Prithviraj's own real look (Bengalis' hero) reused for the wider

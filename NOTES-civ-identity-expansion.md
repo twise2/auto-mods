@@ -2503,3 +2503,92 @@ Verified directly in the rebuilt `.dat`: Chinese/Huns/Turks/Berbers/
 Malay's Knight-disable techs all now require `(166, ...)`. Re-ran
 `audit_collisions.py` - unchanged. Rebuilt via `build-local-mod.sh`,
 deployed.
+
+## v42: button-grid alignment fix, real Elephant Archer collision, Huns/Chinese-Chronicle-civ skin gaps, relic cart skin
+
+**Real vanilla button-grid convention, confirmed against Knight/Paladin's
+own real button placement (button 2 train -> button 7 research, i.e.
+`train_button + 5`, same column, one row down):** when
+`set_train_locations_for_civ` relocates a unit's training button (Huns'
+Steppe Lancer -> button 3, Aztecs' Temple Guard -> button 3), the
+matching Elite-tier research button has to move with it or it's stranded
+under the wrong column. User report: "the steppe lancer upgrade is below
+button 4 and not button 3." Added `set_research_location_for_civ` to
+`mods/util.py` (finds the civ's own `research_elite_upgrade_for_civ` tech
+by matching its `TYPE_UPGRADE_UNIT` effect command, then rewrites just
+its `button_id`, leaving cost/time/the upgrade itself untouched) and
+applied it to both cases: Huns' Elite Steppe Lancer -> button 8,
+Aztecs' Elite Temple Guard -> button 8 (both confirmed free). Also fixed
+a 3rd recurrence of this session's recurring tracer-awareness gap - the
+new function crashed `sync_tech_trees.py`/`disable_unit_lines.py`'s trace
+runs until it got the same no-op monkeypatch stub every other mutating
+util function already has.
+
+**Real, confirmed collision, not just audit noise: Elephant Archer vs.
+native Cavalry Archer.** User report: "elephant archers are not working
+for Malay." All 5 receiving civs (Persians/Burmese/Malay/Khmer/
+Vietnamese) have real native Cavalry Archer at the exact same Archery
+Range button 3 Elephant Archer defaulted to, and real Heavy Cavalry
+Archer research at button 8 - the same button Elite Elephant Archer
+defaulted to. Confirmed via direct `CivTechTrees` checks and
+`audit_collisions.py`'s `real_competitors()`. Relocated the whole grant
+to column 0 (button 0 train / button 5 research), confirmed free for all
+5 civs - `audit_collisions.py`'s POSSIBLE count dropped 71 -> 61,
+confirming the fix landed on what had actually been flagged.
+
+**Huns missing a Heavy Cavalry Archer skin**, user report. Added to the
+Kotyan Khan group (`civ_ids_named(data, ['Tatars', 'Cumans', 'Turks',
+'Huns'])`) - confirmed via `CivTechTrees` node 474 present for Huns,
+absent for Magyars (checked and correctly excluded).
+
+**Shu/Wu/Wei get every skin Chinese gets**, user request ("All 3 chinese
+chronicle civs should get the reskins chinese get"). Added to both the
+Liu Bei Champion group and the Subotai Heavy Cavalry Archer group -
+verified real `CivTechTrees` node 474 access for all 3 before adding to
+the latter.
+
+**Cosmetic: relic-cart-on-king-death now looks like a king's own
+palanquin.** User request: "can we change rewarding snipes relic carts
+we create to use 'emperor in a litter' as a skin." `EMPERORLITTER` (real
+unit 1988) exists in the base game but is disabled and has only a
+standing + walking graphic (no dying/undead/attack frames) - the stock
+Relic Cart doesn't have those either (`dying=-1`, `undead=-1` on the real
+unit), so copying just `standing_graphic` and `dead_fish.walking_graphic
+/running_graphic` loses nothing. Added `EMPEROR_IN_A_LITTER = 1988` to
+`ids.py`; the copy happens inline in
+`rewarding_snipes.clone_and_patch_relic_cart` rather than through the
+shared `reskin_unit_for_civ` helper, since the cart clone's unit id is
+allocated dynamically per civ (`len(civ.units)`), not a fixed constant
+`reskin_unit_for_civ`'s signature expects. Verified in the rebuilt
+`.dat`: the cart's `standing_graphic` changed from `(8369, -1)` (stock
+Relic Cart) to `(12775, -1)` (EMPERORLITTER's) across every civ checked,
+`fog_visibility`/30k HP untouched.
+
+Also investigated two things that turned out to be dead ends, worth
+recording so they don't get re-investigated later: (1) whether Wonders'
+minimap-reveal-on-completion could be replicated for the relic cart -
+surveyed every real `fog_visibility` value in the `.dat` (only `0`
+"needs live LOS", `1` "stays visible once explored" - already what the
+cart uses - and one oddball `3` for the Doppelganger decoy exist
+anywhere in the file), found no data-level "reveal fog for everyone"
+mechanism; this is genuinely hardcoded to the Wonder unit in the engine,
+not something `.dat` exposes. (2) whether a transport ship's garrisoned
+units could be made to disembark onto the nearest land on death instead
+of dying with the ship - no `.dat` field anywhere governs
+transport-death handling; also hardcoded.
+
+Also investigated, per user report ("vikings need cavalier re-skinned
+and not paladin as they don't have paladin") - real, confirmed: Vikings
+lack Paladin in vanilla (`CivTechTrees` Node Status, cross-checked
+against Teutons as a known-good control). Generalizing the check across
+all 14 civs currently holding one of this mod's 4 Paladin-tier skins
+(Vytautas/Wang Tong/Sundjata/Robert Guiscard groups) found 12 of 14 in
+the same boat, several (Khitans/Jurchens/Bengalis/Gurjaras/Dravidians)
+missing the *entire* Knight line, not just Paladin. Per explicit user
+call ("if a civ doesn't have paladin it's fine to not worry about"),
+**not fixed** - flagging here only so the finding isn't silently lost;
+`Node Status` (not raw Node-ID presence) is the reliable signal if this
+gets revisited.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py`, deployed.
