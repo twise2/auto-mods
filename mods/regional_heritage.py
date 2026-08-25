@@ -27,7 +27,7 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, \
     HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, GRENADIER, HAND_CANNONEER, \
     JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
-    WAR_CHARIOT, ELITE_WAR_CHARIOT, CHAMPION, HEAVY_CAVALRY_ARCHER, \
+    WAR_CHARIOT, ELITE_WAR_CHARIOT, CHAMPION, HEAVY_CAVALRY_ARCHER, PIKEMAN, HALBERDIER, \
     NORSE_WARRIOR, EASTERN_SWORDSMAN, ATAULF, YODIT, SOSSO_GUARD, GAJAH_MADA, GIDAJAN, CUSI_YUPANQUI, \
     VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
     FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
@@ -411,11 +411,31 @@ def give_traction_trebuchet_to_east_asian_civs(data: DatFile):
     # specifically this is actually a real replacement, not a pure addition:
     # Khitans' own native second unique unit, Mounted Trebuchet (id 1923),
     # trains from the exact same Siege Workshop button 4 as Traction
-    # Trebuchet - confirmed via disable_unit_lines.py's auto-collision
-    # detector, which correctly removes Mounted Trebuchet in favor of this
-    # grant rather than leaving both fighting over one button.
+    # Trebuchet.
+    #
+    # Real bug found by audit_collisions.py (which reads the actual .dat,
+    # unlike disable_unit_lines.py): the "fix" this comment used to claim -
+    # disable_unit_lines.py's auto-collision detector removing Mounted
+    # Trebuchet - only ever patched futuravailableunits.json, a cosmetic F11
+    # hint file confirmed NOT load-bearing for real training access (see
+    # that script's own module docstring and NOTES-civ-identity-expansion.md).
+    # The real .dat still had both units' real train_locations pointing at
+    # the identical (Siege Workshop, button 4), so Khitans never actually
+    # lost access to Mounted Trebuchet - both were still fighting over one
+    # button in an actual game.
     for civ_id in civ_ids_named(data, ['Chinese', 'Jurchens', 'Khitans']):
         enable_unit_for_civ(data, civ_id, TRACTION_TREBUCHET, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+    # The real fix, Khitans only: Mounted Trebuchet is a genuinely cool,
+    # genuinely native unique unit - keep it, and move Traction Trebuchet
+    # off its button instead. Checked every Siege Workshop button (0-9) via
+    # audit_collisions.py's own real_competitors(): 0 and 5-9 are all
+    # completely free (no civ-specific or universal competitor), 1-4 are
+    # all real occupied slots (Ram/Onager/Scorpion/Bombard families).
+    # Button 0 - same row as the family it's landing next to, unused by
+    # anything - confirmed free.
+    for civ_id in civ_ids_named(data, ['Khitans']):
+        set_train_locations_for_civ(data, civ_id, TRACTION_TREBUCHET, [(49, 0)])  # Siege Workshop
 
 
 def give_lou_chuan_to_other_east_asian_civs(data: DatFile):
@@ -857,11 +877,12 @@ def give_champion_skins_to_regional_flavor_civs(data: DatFile):
     # Gidajan: real Ethiopian emperor, confirmed via the wiki to have gotten
     # a genuinely unique DE model (sword and shield - pre-DE just reused
     # Shotel Warrior's look, DE gave him his own). Not used for Ethiopians
-    # itself (already has the separate Yodit skin above) - Berbers is the
-    # one African-heritage civ in this mod that was never assigned a
-    # Champion skin (Eastern Swordsman's steppe/Persian look was checked
-    # and ruled out as too weak a fit for them specifically).
-    for civ_id in civ_ids_named(data, ['Berbers']):
+    # itself (already has the separate Yodit skin above). User correction:
+    # this is the real African-civs Champion skin - originally Berbers-only,
+    # extended to Malians too (Malians previously had Sosso Guard here
+    # instead - moved below to the pike line, its better fit; see there for
+    # why).
+    for civ_id in civ_ids_named(data, ['Berbers', 'Malians']):
         reskin_unit_for_civ(data, civ_id, CHAMPION, GIDAJAN)
 
     # Ataulf: real Gothic king (Alaric's brother-in-law and successor),
@@ -882,9 +903,20 @@ def give_champion_skins_to_regional_flavor_civs(data: DatFile):
     # Sosso Guard: wiki confirms "unique sprite," no reuse. West African -
     # the Kingdom of Sosso was Sundjata's real historical rival/predecessor,
     # from the exact same Mali-region history this mod's Sundjata hero and
-    # Malian grants already draw on.
-    for civ_id in civ_ids_named(data, ['Malians']):
-        reskin_unit_for_civ(data, civ_id, CHAMPION, SOSSO_GUARD)
+    # Malian grants already draw on. User correction: this is a pike-line
+    # skin, not a Champion skin (that slot now goes to Gidajan, above) -
+    # a halberdier is a much closer visual/thematic match for a "Guard"
+    # unit anyway. Checked real per-civ access via CivTechTrees Node Status
+    # (see REGIONAL-HERITAGE-PLAYBOOK.md - Node ID presence alone isn't
+    # reliable, the actual status is) across the 3 African-heritage civs in
+    # this mod: Ethiopians genuinely reach Halberdier, Berbers and Malians
+    # are both real-blocked at Pikeman. Since at least one civ in the group
+    # does have Halberdier, split by what each civ can actually reach
+    # rather than falling the whole group back to Pikeman.
+    for civ_id in civ_ids_named(data, ['Ethiopians']):
+        reskin_unit_for_civ(data, civ_id, HALBERDIER, SOSSO_GUARD)
+    for civ_id in civ_ids_named(data, ['Berbers', 'Malians']):
+        reskin_unit_for_civ(data, civ_id, PIKEMAN, SOSSO_GUARD)
 
     # Gajah Mada's own real look (a bare-chested two-handed-sword-wielding
     # warrior, confirmed unique to Definitive Edition) is reused here for

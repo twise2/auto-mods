@@ -2592,3 +2592,77 @@ gets revisited.
 
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py`, deployed.
+
+## v43: Khitans' real Mounted Trebuchet/Traction Trebuchet collision fixed for real, African-civs skin correction
+
+**The Khitans Mounted-Trebuchet-vs-Traction-Trebuchet collision flagged as
+CONFIRMED by v42's audit was real, and the "resolved" claim in the old
+comment was wrong** - `disable_unit_lines.py` only ever patches
+`futuravailableunits.json`, a cosmetic F11 hint file confirmed NOT
+load-bearing for real training access (see that script's own docstring
+and the Chinese Hei-Kuang Cavalry incident earlier in this project). The
+real `.dat` still had both `SIEGECAMEL` (Mounted Trebuchet, Khitans' own
+real native unique) and `TRTREB` (Traction Trebuchet, this mod's grant)
+pointing at the identical (Siege Workshop, button 4) - genuinely fighting
+over one slot in an actual game, the whole time.
+
+First fix attempt disabled Mounted Trebuchet outright (gated on its own
+real "make avail" tech, 1005, as a hard prerequisite - same race-avoidance
+pattern as the v41 Knight-line fix). **User pushed back**: Mounted
+Trebuchet is a cool unit, don't remove it - find it a working location
+instead. Correct call, and the better fix anyway: checked every Siege
+Workshop button 0-9 for Khitans via `audit_collisions.py`'s own
+`real_competitors()` (0 and 5-9 completely free, 1-4 genuinely occupied
+by the Ram/Onager/Scorpion/Bombard families) and moved Traction Trebuchet
+to button 0 via `set_train_locations_for_civ`, for Khitans only (Chinese/
+Jurchens keep the default button 4, no collision for them). Both units
+now train from real, distinct, confirmed-free slots. Verified in the
+rebuilt `.dat`: `SIEGECAMEL` still at button 4 enabled=0 (normal - see
+3.6.1, everything's 0 until its trigger fires), `TRTREB` now at button 0.
+`audit_collisions.py`: 1 confirmed -> 0.
+
+**African-civs skin correction**, user report: "African civs should use
+Sosso Guard for a halberdier replacement and use Gidajan for their
+champion skin (malians being the example i see is wrong)." Previously:
+Berbers had Gidajan on Champion, Malians had Sosso Guard on Champion.
+Swapped per the user's read:
+- Gidajan (Champion) extended to `['Berbers', 'Malians']` - Ethiopians
+  still excluded (already has its own separate Yodit skin).
+- Sosso Guard moved off Champion entirely, onto the pike line instead -
+  checked real per-civ access via `CivTechTrees` Node Status (not just
+  Node-ID presence - see the v42 lesson in the playbook) across the 3
+  African-heritage civs in this mod: Ethiopians genuinely reaches
+  Halberdier, Berbers and Malians are both really blocked at Pikeman.
+  Per the user's own conditional ("only if none of the civs we're using
+  the skin for have halberdier" -> fall back to Pikeman) - since at least
+  one civ (Ethiopians) does have real Halberdier, split by what each civ
+  can actually reach rather than flattening the whole group to Pikeman:
+  Ethiopians gets Sosso Guard on Halberdier, Berbers/Malians get it on
+  Pikeman.
+
+Verified in the rebuilt `.dat`: Malians/Berbers Champion standing graphic
+now matches Gidajan's (9350); Malians/Berbers Pikeman and Ethiopians
+Halberdier standing graphic now matches Sosso Guard's (3027); Ethiopians'
+own Pikeman and Champion (Yodit, 3902/3903) untouched.
+
+**Steppe-civ Champion skin, researched and declined.** User idea: "It
+would be cool if mongols had a unique champion upgrade (maybe find an
+infantry for steppe civs?)." Systematically scanned every melee-infantry
+(`class_=6`) hero unit in the real `.dat` (74 candidates) for anything
+with Mongol/steppe/Central-Asian identity - none exist; the roster is
+Byzantine (Return of Rome), Andean/Amazonian, Southeast Asian, Iberian,
+Georgian/Armenian, Welsh, Bulgarian, etc., with zero Mongol-flavored
+entries. Broadened to a plain keyword scan (mongol/khan/nomad/horde/
+steppe/tatar/keshig) across every unit regardless of class: the only real
+hits are Keshik (already Mongols' own real native unique, not unclaimed)
+and several Khan hero variants (`HKHAN`/`HGKHAN`, cavalry-class, likely
+already reserved for Mongols' own `HERO_FOR_CIV` slot). No genuine
+unclaimed infantry asset exists for this - matches real history (steppe
+military culture was built around cavalry, not infantry), not a gap in
+research. **Not implemented** - forcing an unrelated donor onto Champion
+just to fill the ask would repeat the exact "weak fit, don't force it"
+mistake already avoided once this session for Berbers/Eastern Swordsman.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
+deployed.

@@ -597,6 +597,33 @@ place since the unit isn't created fresh by `makeHero()`.
   backwards once purely from mis-remembering which vanilla civ actually
   has Paladin, not from the data being wrong - the data was right both
   times.
+- **A code comment claiming a collision was "resolved via
+  `disable_unit_lines.py`'s auto-collision detector" is not proof the
+  real `.dat` collision is gone.** That script (and its whole family of
+  auto-detected-collision logic) only ever writes to
+  `futuravailableunits.json`, confirmed multiple times this session to be
+  a cosmetic F11 hint file with no bearing on real training access (see
+  its own module docstring). Khitans' Mounted Trebuchet vs. this mod's
+  Traction Trebuchet grant carried exactly this false-resolved comment for
+  an entire version - both units' real `train_locations` still pointed at
+  the identical (Siege Workshop, button 4) the whole time, `audit_collisions.py`
+  (which reads the actual `.dat`) is what finally caught it. Any claim
+  that a collision is "resolved" needs a real `.dat`-level citation
+  (`set_train_locations_for_civ`, `disable_unit_line_for_civ`, etc.), not
+  a reference to this JSON-only script.
+- **When a fix removes a civ's real native unit to make room for a grant,
+  check whether relocating the *grant* instead is possible before
+  removing anything.** Default instinct for the Khitans fix above was to
+  disable their native Mounted Trebuchet (matching the precedent of
+  `disable_unit_line_for_civ` used for civ-identity Knight-line removals
+  elsewhere) - but those removals were deliberate identity choices, not
+  forced by a button shortage. Here the building had free slots the whole
+  time (Siege Workshop buttons 0, 5-9 were all genuinely empty for
+  Khitans); relocating the *new* grant preserved a "cool unit" (the
+  user's own words) that removal would have thrown away for no reason.
+  Prefer relocation over removal whenever a free slot exists - removal
+  should be reserved for cases where no free slot exists, or where the
+  removal itself is the actual intent (e.g. Knight-line-for-identity).
 
 ---
 
