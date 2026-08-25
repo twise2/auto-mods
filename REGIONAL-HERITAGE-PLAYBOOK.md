@@ -79,6 +79,20 @@ this session actually made, not theoretical caution.
   e.g., a ranged unit as a starting-scout replacement was rejected
   because it lets players snipe enemy scouts/villagers risk-free from
   minute one, even though the historical case for it existed.
+- **A donor's look must never render as two different unit types, ever
+  (hard user rule).** Multiple civs sharing one donor for the *same* unit
+  type is fine and is this mod's whole group pattern (e.g. Gidajan as
+  Champion for both Berbers and Malians) - the rule is specifically about
+  one donor spanning two different real units (e.g. Sosso Guard as both a
+  Halberdier look and a Pikeman look was caught and reverted: same model
+  rendering as two mechanically different units with different stats is
+  confusing in a real game, even though each individual assignment passed
+  every other check). Before landing a skin on more than one unit type in
+  the same or a related grant, stop and pick one tier for the whole group
+  instead - see the Sosso Guard entry in `NOTES-civ-identity-expansion.md`
+  (v43/v44) for the concrete resolution pattern (fall the whole group back
+  to whatever tier every civ in it can actually reach, rather than
+  splitting per-civ by who reaches the higher tier).
 
 ---
 

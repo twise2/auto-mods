@@ -27,7 +27,7 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, \
     HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, GRENADIER, HAND_CANNONEER, \
     JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
-    WAR_CHARIOT, ELITE_WAR_CHARIOT, CHAMPION, HEAVY_CAVALRY_ARCHER, PIKEMAN, HALBERDIER, \
+    WAR_CHARIOT, ELITE_WAR_CHARIOT, CHAMPION, HEAVY_CAVALRY_ARCHER, PIKEMAN, \
     NORSE_WARRIOR, EASTERN_SWORDSMAN, ATAULF, YODIT, SOSSO_GUARD, GAJAH_MADA, GIDAJAN, CUSI_YUPANQUI, \
     VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
     FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
@@ -904,18 +904,22 @@ def give_champion_skins_to_regional_flavor_civs(data: DatFile):
     # the Kingdom of Sosso was Sundjata's real historical rival/predecessor,
     # from the exact same Mali-region history this mod's Sundjata hero and
     # Malian grants already draw on. User correction: this is a pike-line
-    # skin, not a Champion skin (that slot now goes to Gidajan, above) -
-    # a halberdier is a much closer visual/thematic match for a "Guard"
-    # unit anyway. Checked real per-civ access via CivTechTrees Node Status
-    # (see REGIONAL-HERITAGE-PLAYBOOK.md - Node ID presence alone isn't
+    # skin, not a Champion skin (that slot now goes to Gidajan, above).
+    #
+    # Checked real per-civ access via CivTechTrees Node Status (see
+    # REGIONAL-HERITAGE-PLAYBOOK.md - Node ID presence alone isn't
     # reliable, the actual status is) across the 3 African-heritage civs in
     # this mod: Ethiopians genuinely reach Halberdier, Berbers and Malians
-    # are both real-blocked at Pikeman. Since at least one civ in the group
-    # does have Halberdier, split by what each civ can actually reach
-    # rather than falling the whole group back to Pikeman.
-    for civ_id in civ_ids_named(data, ['Ethiopians']):
-        reskin_unit_for_civ(data, civ_id, HALBERDIER, SOSSO_GUARD)
-    for civ_id in civ_ids_named(data, ['Berbers', 'Malians']):
+    # are both real-blocked at Pikeman. A first pass split the donor across
+    # both tiers (Halberdier for Ethiopians, Pikeman for the other two) -
+    # reverted per a hard rule: one donor's look should never render as two
+    # different unit types, since that's confusing in a real game (two
+    # different units, different stats, identical model). Landing the
+    # whole group on Pikeman instead - the tier every one of the 3 civs
+    # genuinely has - matches the user's own original fallback intent
+    # ("if not everyone has halberdier, use pikeman instead") once read as
+    # one shared tier for the whole group rather than a per-civ split.
+    for civ_id in civ_ids_named(data, ['Ethiopians', 'Berbers', 'Malians']):
         reskin_unit_for_civ(data, civ_id, PIKEMAN, SOSSO_GUARD)
 
     # Gajah Mada's own real look (a bare-chested two-handed-sword-wielding

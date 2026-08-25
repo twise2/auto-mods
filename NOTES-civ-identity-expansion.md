@@ -2666,3 +2666,32 @@ mistake already avoided once this session for Berbers/Eastern Swordsman.
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
 deployed.
+
+## v44: new hard rule - one donor, one unit type, ever
+
+User: "I dont like different units having the same skin ever." Clarified
+scope directly: this is about one donor's look rendering as two
+*different unit types* (real problem) - multiple civs sharing one donor
+for the *same* unit type (this mod's whole group pattern, e.g. Gidajan as
+Champion for both Berbers and Malians) is fine and not what this rule
+targets.
+
+Audited every `reskin_unit_for_civ` call in the mod for this specific
+violation (grouped by donor, checked whether any donor maps to more than
+one target unit id) - exactly one hit: v43's Sosso Guard split (Halberdier
+for Ethiopians, Pikeman for Berbers/Malians). Fixed by dropping the split
+- the whole group now lands on Pikeman, the one tier all 3 civs genuinely
+reach, matching the user's own original fallback wording ("if not
+everyone has halberdier, use pikeman instead") read as one shared tier
+for the group rather than a per-civ split. Verified in the rebuilt
+`.dat`: all 3 civs' Pikeman now share standing graphic 3027 (Sosso
+Guard's), Halberdier reverted to its real native default (2623) for all
+3, identical across them (no longer split).
+
+Documented as a standing rule in `REGIONAL-HERITAGE-PLAYBOOK.md` section
+2 (Core philosophy), not just a traps-list entry, since this governs
+every future skin assignment going forward, not just a one-off bug.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
+deployed.
