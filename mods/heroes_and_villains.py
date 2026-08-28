@@ -17,7 +17,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     JOHN_THE_FEARLESS, ROGER_BOSSO, JAN_ZIZKA, JOGAILA, IBRAHIM_LODI, PRITHVIRAJ, TAMAR, \
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
     VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, FRANSICO_DE_ORELLANA, \
-    ALEXANDER_THE_GREAT, PORUS, THRACIAN_CHIEFTAIN, LAUTARO, PACANCHIQUE, ARARIBOIA, \
+    ALEXANDER_THE_GREAT, PORUS, THRACIAN_CHIEFTAIN, LAUTARO, PACANCHIQUE, ARARIBOIA, CUNHAMBEBE, \
     TYPE_POPULATION_HEADROOM, TYPE_CURRENT_POPULATION, TYPE_TOTAL_UNITS_OWNED, TYPE_FOOD_STORAGE, \
     TYPE_GOLD_STORAGE, TYPE_CASTLE_TRAIN_LOCATION, TYPE_DOCK_TRAIN_LOCATION, TYPE_POPULATION_HEADROOM, \
     TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
@@ -137,7 +137,16 @@ HERO_FOR_CIV = {
     "Thracians": {"land": THRACIAN_CHIEFTAIN, "water": None},
     "Puru": {"land": PORUS, "water": None},
     "Mapuche": {"land": LAUTARO, "water": None},
-    "Muisca": {"land": PACANCHIQUE, "water": None},
+    # Pacanchique's own real look is freed up for reuse as a Pikeman skin
+    # for the broader pre-Columbian Americas group (regional_heritage.py) -
+    # Muisca's own hero keeps the name/stats but renders as Cunhambebe
+    # instead (real Tupinamba chief, complete DE graphics; no same-culture
+    # Chibcha/Muisca-specific donor exists anywhere in the data - Itzcoatl
+    # was considered first but read as too visually Aztec-specific,
+    # Galvarino next but user preferred Cunhambebe - same "broader
+    # Americas" fit this mod already accepted for Muisca's Champion skin,
+    # Cusi Yupanqui, an Inca figure).
+    "Muisca": {"land": unit_skin_override(PACANCHIQUE, CUNHAMBEBE), "water": None},
     "Tupi": {"land": ARARIBOIA, "water": None},
     # Shu/Wu/Wei already have real native land heroes (Cao Cao/Liu Bei/Sun
     # Jian - see CIVS_WITH_HEROES_ALREADY, which skips them entirely below).

@@ -29,6 +29,7 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
     WAR_CHARIOT, ELITE_WAR_CHARIOT, CHAMPION, HEAVY_CAVALRY_ARCHER, PIKEMAN, \
     NORSE_WARRIOR, EASTERN_SWORDSMAN, ATAULF, YODIT, SOSSO_GUARD, GAJAH_MADA, GIDAJAN, CUSI_YUPANQUI, \
+    PACANCHIQUE, \
     VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
     FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
     KUSHLUK, JARL, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE, \
@@ -941,6 +942,20 @@ def give_champion_skins_to_regional_flavor_civs(data: DatFile):
     # together via Settlement/Warrior Priest/Slinger.
     for civ_id in civ_ids_named(data, ['Aztecs', 'Mayan', 'Muisca', 'Mapuche', 'Tupi']):
         reskin_unit_for_civ(data, civ_id, CHAMPION, CUSI_YUPANQUI)
+
+    # Pacanchique: real, complete DE model (Muisca's own hero used to
+    # render this way directly - freed up via unit_skin_override in
+    # heroes_and_villains.py, Muisca's hero now renders as Itzcoatl
+    # instead, keeping its own name/stats). Applied to the same
+    # pre-Columbian Americas bucket as Cusi Yupanqui above, this time
+    # including Incas (no narrative conflict here the way Cusi Yupanqui
+    # had). Checked real per-civ access via CivTechTrees Node Status:
+    # Aztecs and Muisca are both real-blocked at Pikeman (no Halberdier),
+    # Mayan/Incas/Mapuche/Tupi do reach Halberdier - per the one-donor-
+    # one-unit-type rule, the whole group lands on Pikeman, the tier every
+    # civ here genuinely has, rather than splitting by who reaches higher.
+    for civ_id in civ_ids_named(data, ['Aztecs', 'Mayan', 'Incas', 'Muisca', 'Mapuche', 'Tupi']):
+        reskin_unit_for_civ(data, civ_id, PIKEMAN, PACANCHIQUE)
 
     # Liu Bei is Shu's own real, native hero (not part of HERO_FOR_CIV at
     # all - CIVS_WITH_HEROES_ALREADY skips Shu/Wu/Wei since they already

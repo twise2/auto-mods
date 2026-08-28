@@ -2695,3 +2695,57 @@ every future skin assignment going forward, not just a one-off bug.
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
 deployed.
+
+## v45: Pacanchique freed for a new American-civs Pikeman skin, Muisca's hero re-skinned to Cunhambebe
+
+User request: use Pacanchique for an American-civs Pikeman/Halberdier
+skin. Pacanchique was already claimed - it's Muisca's own real hero
+(`HERO_FOR_CIV["Muisca"]` in `heroes_and_villains.py`, no
+`unit_skin_override` wrapper, so the hero rendered as its own real look
+directly). Flagged this before implementing rather than silently
+creating a hero-vs-common-unit skin clash, per the new one-donor-one-
+unit-type rule from v44 (that rule covers any two different units, not
+just two `reskin_unit_for_civ` targets).
+
+Resolved the same way Malay's hero was freed up for Gajah Mada earlier
+this project: wrapped Muisca's hero in `unit_skin_override(PACANCHIQUE,
+<new donor>)` so it keeps its own name/stats but renders as something
+else, freeing Pacanchique's actual graphic for reuse. Checked every
+unclaimed hero-class unit for a genuine Chibcha/Muisca-specific match -
+none exists anywhere in the data (no Zipa/Bogota/Tunja-named unit at
+all). Went through 3 candidates before landing: Itzcoatl (Aztec Triple
+Alliance founder - rejected, "too Aztec-looking"), Galvarino (Mapuche War
+of Arauco - superseded), **Cunhambebe** (real Tupinamba chief, complete
+DE graphics) - final pick.
+
+Applied Pacanchique's freed-up look to Pikeman (not Halberdier - checked
+CivTechTrees Node Status: Aztecs and Muisca are both real-blocked at
+Halberdier, Mayan/Incas/Mapuche/Tupi do reach it, so per the v44 rule the
+whole 6-civ group lands on the one tier everyone genuinely has, matching
+the Sosso Guard resolution pattern) for Aztecs/Mayan/Incas/Muisca/
+Mapuche/Tupi - the same pre-Columbian Americas bucket as Cusi Yupanqui's
+Champion skin, this time including Incas (no narrative conflict here).
+
+Verified in the rebuilt `.dat`: the shared `PACANCHIQUE` template (unit
+2640) keeps its own original graphic (correct - that's what the Pikeman
+skin copies from); Muisca's actual cloned hero (a separate unit, 2760,
+not 2640 - hero creation clones to a new id, initial verification query
+checked the wrong one) shows Cunhambebe's graphic; all 6 American civs'
+Pikeman share standing graphic 13883 (Pacanchique's).
+
+Also researched and declined a "Flemish Militia" reskin candidate for
+Burgundians' Halberdier - looked like a genuinely unclaimed unique
+sprite (complete standing/dying/walking/attack graphics, distinct from
+both vanilla Pikeman and Halberdier), but user caught that it's real
+native Burgundians content: `Flemish Militia (make avail)` (tech 773)
+and `Flemish Revolution` (tech 755) are both real civ-specific (civ=36)
+techs - Burgundians' actual "spawn free militia-line units from attacked
+buildings" bonus, not stray unused art. Reverted before it shipped.
+Lesson: `enabled=0` and no obvious donor-usage elsewhere isn't sufficient
+proof something is unclaimed - always check for a real civ-specific
+enabling tech too, the same check already standard for confirming a
+grant's civ scope.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
+deployed.

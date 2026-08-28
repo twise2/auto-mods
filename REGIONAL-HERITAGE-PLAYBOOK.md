@@ -638,6 +638,17 @@ place since the unit isn't created fresh by `makeHero()`.
   Prefer relocation over removal whenever a free slot exists - removal
   should be reserved for cases where no free slot exists, or where the
   removal itself is the actual intent (e.g. Knight-line-for-identity).
+- **`enabled=0` and no obvious donor-usage elsewhere in this codebase is
+  not proof a unit is unclaimed.** "Flemish Militia" (a genuinely
+  complete, distinct-looking stat clone at first glance) looked like free
+  cosmetic art - it's actually Burgundians' own real "Flemish Revolution"
+  civ bonus, gated by two real civ-specific (civ=36) techs (`Flemish
+  Militia (make avail)`, `Flemish Revolution`). Before treating any
+  `enabled=0` unit as an available donor, check for a real civ-specific
+  enabling/upgrade tech the same way every other real-vs-fake access
+  question in this project gets checked (search `data.techs` for an
+  effect command targeting that unit id, and look at the tech's own
+  `civ` field) - not just "is it used as a donor anywhere in this repo."
 
 ---
 
