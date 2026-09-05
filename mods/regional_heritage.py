@@ -1007,7 +1007,7 @@ def give_paladin_skins_to_regional_flavor_civs(data: DatFile):
     # "regional skins" thread pairs Cumans with Vytautas on Paladin) and
     # confirmed via CivTechTrees Node Status: Cumans is the one civ in this
     # whole group that genuinely has real Paladin access.
-    for civ_id in civ_ids_named(data, ['Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans']):
+    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans']):
         reskin_unit_for_civ(data, civ_id, PALADIN, VYTAUTAS_THE_GREAT)
 
     # Wang Tong: confirmed to have gotten a genuinely new cavalry model in
@@ -1052,27 +1052,30 @@ def give_paladin_skins_to_regional_flavor_civs(data: DatFile):
 
 
 def give_knight_and_cavalier_skins_to_viking_and_eastern_european_civs(data: DatFile):
-    # Vikings and the Slavs/Bulgarians/Poles/Bohemians cluster are the same
-    # civs already holding the Vytautas Paladin skin (above) - real per-civ
-    # access confirmed invisible for all of them (Node Status
-    # `NotAvailable`, Vikings confirmed directly by user report). Rather
-    # than leave them with only an unreachable Paladin skin, give them a
-    # real, visible pair on the two tiers they actually have: Knight and
-    # Cavalier. Vytautas stays on Paladin (harmless - never shown for
-    # these civs, still correctly shown for Cumans) since this is a
-    # different unit entirely, not a conflict.
+    # Vikings and the whole Vytautas Paladin group above (Slavs/Bulgarians/
+    # Poles/Bohemians/Cumans) all get the same Knight and Cavalier pair -
+    # a consistent 3-tier identity across the whole cluster. For Vikings
+    # and Slavs/Bulgarians/Poles/Bohemians, Paladin itself stays unreachable
+    # (Node Status `NotAvailable`, Vikings confirmed directly by user
+    # report) so Knight/Cavalier are the only tiers of this that are ever
+    # actually visible for them; Cumans genuinely has all three (Node
+    # Status `ResearchedCompleted` through Paladin) so they show the full
+    # Knight->Cavalier->Paladin progression: Bohemond, Kestutis, Vytautas.
+    # No conflict adding Cumans here - Knight/Cavalier/Paladin are three
+    # different real units, and Cumans wasn't already assigned a Knight or
+    # Cavalier skin anywhere else.
     #
     # Bohemond (of Taranto/Antioch, Norman Crusader prince) - confirmed via
     # direct in-game comparison (user) to have a genuinely distinct
     # Knight-tier look, not a reuse of vanilla Knight's own appearance.
-    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians']):
+    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans']):
         reskin_unit_for_civ(data, civ_id, KNIGHT, BOHEMOND)
 
     # Kestutis (Lithuanian Grand Duke, Vytautas' own father) - confirmed
     # via direct in-game comparison (user) to have a genuinely distinct
     # Cavalier-tier look, and to visually pair well with Bohemond's Knight
     # look for the same civs.
-    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians']):
+    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans']):
         reskin_unit_for_civ(data, civ_id, CAVALIER, KESTUTIS)
 
 

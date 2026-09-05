@@ -2873,3 +2873,23 @@ other 4, unchanged from v46).
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
 deployed.
+
+## v48: Cumans added to the Bohemond/Kestutis Knight/Cavalier group
+
+User request: extend v47's Bohemond (Knight)/Kestutis (Cavalier) pair to
+Cumans too, matching the rest of the Vytautas Paladin group. No conflict
+- Cumans wasn't assigned a Knight or Cavalier skin anywhere else (Wang
+Tong's Cavalier group, v46, deliberately excludes Cumans since that's
+what freed it up for the Vytautas Paladin group in the first place).
+Cumans is now the one civ in this whole cluster that genuinely shows the
+full 3-tier progression in a real game (Bohemond -> Kestutis -> Vytautas,
+Node Status confirms real access through Paladin) - everyone else in the
+group only ever shows the first two.
+
+Verified in the rebuilt `.dat`: Cumans' Knight/Cavalier/Paladin standing
+graphics match Bohemond (5621/5620), Kestutis (12367/12366), and
+Vytautas (10520/10521) respectively.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
+deployed.
