@@ -108,7 +108,22 @@ this session actually made, not theoretical caution.
   instead - see the Sosso Guard entry in `NOTES-civ-identity-expansion.md`
   (v43/v44) for the concrete resolution pattern (fall the whole group back
   to whatever tier every civ in it can actually reach, rather than
-  splitting per-civ by who reaches the higher tier).
+  splitting per-civ by who reaches the higher tier). **Refined in v50**:
+  this hard rule is specifically about two *common* unit types sharing a
+  look (Pikeman/Halberdier, or a hero's look landing on some other civ's
+  common troops while ALSO being reused for a different common unit type
+  elsewhere). A hero sharing a look with its *own* civ's common troops is
+  a judgment call, not an automatic violation - hero units glow and are
+  otherwise visually distinguished in a real game, so the confusion this
+  rule exists to prevent doesn't apply the same way. Preference order:
+  use a good replacement skin for the hero when one is already known
+  (see Wang Tong/Guan Yu and Pacanchique/Cunhambebe for the pattern);
+  accept the overlap when no good replacement is in hand (Francesco
+  Sforza/Italians, Kotyan Khan/Cumans, Edward Longshanks/British were all
+  left this way in v50 - audit every `HERO_FOR_CIV` direct assignment
+  against every `reskin_unit_for_civ` donor for this specific same-civ
+  case, but don't treat a hit as something that must be fixed before
+  shipping.
 
 ---
 

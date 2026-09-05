@@ -32,7 +32,8 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
     FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
     KUSHLUK, JARL, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE, \
-    ENVOY, JOHN_THE_FEARLESS, ROBERT_GUISCARD, BOHEMOND, KESTUTIS, TECH_KNIGHT_MAKE_AVAIL
+    ENVOY, JOHN_THE_FEARLESS, ROBERT_GUISCARD, BOHEMOND, KESTUTIS, GILBERT_DE_CLARE, EDWARD_LONGSHANKS, \
+    TECH_KNIGHT_MAKE_AVAIL
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -1058,6 +1059,23 @@ def give_knight_and_cavalier_skins_to_viking_and_eastern_european_civs(data: Dat
     # look for the same civs.
     for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans']):
         reskin_unit_for_civ(data, civ_id, CAVALIER, KESTUTIS)
+
+    # Gilbert de Clare (Anglo-Norman "Strongbow" family) - unclaimed,
+    # complete graphics, real Knight-tier look. British had no common
+    # Knight-line skin at all before this.
+    for civ_id in civ_ids_named(data, ['British']):
+        reskin_unit_for_civ(data, civ_id, KNIGHT, GILBERT_DE_CLARE)
+
+    # Edward Longshanks is already British's own real hero
+    # (HERO_FOR_CIV["British"], direct assignment - no unit_skin_override).
+    # Reusing his look for British's own Paladin means the same civ sees
+    # his face on both their hero and their mass-trained cavalry - user
+    # judgment call: acceptable here since hero units glow and are
+    # otherwise visually distinguished in a real game, unlike two
+    # different *common* unit types sharing one look (which stays a hard
+    # no - see the Sosso Guard rule above).
+    for civ_id in civ_ids_named(data, ['British']):
+        reskin_unit_for_civ(data, civ_id, PALADIN, EDWARD_LONGSHANKS)
 
 
 def give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data: DatFile):

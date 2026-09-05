@@ -2938,3 +2938,45 @@ graphic fields, resolved real historical name). None implemented.
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat` (207 -> 205 real grants, matching the 2 removed civs),
 re-ran `audit_collisions.py` (0 confirmed, 60 possible), deployed.
+
+## v50: British gets Gilbert de Clare (Knight) and Edward Longshanks (Paladin); full hero-vs-common-unit collision audit; rule refined
+
+Full audit of every donor used in both `heroes_and_villains.py` (hero
+assignments) and `regional_heritage.py` (common-unit reskins), looking
+for any donor rendering as two different unit types. First pass had a
+false positive (matched a commented-out `#"Shu": {"land": None, "water":
+LIU_BEI}` line - fixed by stripping comments before scanning) and one
+case needing manual confirmation (Tariq ibn Ziyad/Elite Genitour - the
+existing code comment already confirms Berbers, his own civ, is
+deliberately excluded from that civ list, so no real conflict). Final,
+confirmed result: exactly two real same-civ collisions -
+**Francesco Sforza** (Italians' own hero, also the Champion donor for
+Italians/Sicilians/Portuguese) and **Kotyan Khan** (Cumans' own hero,
+also the Heavy Cavalry Archer donor for Tatars/Cumans/Turks/Huns). No
+reskin-vs-reskin target-type collisions remain (the Sosso Guard fix
+holds), and no `unit_skin_override` skin donor is reused as a reskin
+donor elsewhere.
+
+**Rule refined** (user judgment call): a hero sharing a look with its own
+civ's common troops is acceptable, unlike two different *common* unit
+types sharing one look (which stays a hard no - the original v44 rule) -
+hero units glow and are otherwise visually distinguished in a real game,
+so the practical confusion the v44 rule exists to prevent doesn't apply
+the same way. Preference order: use a good replacement skin for the hero
+when one is already known/confirmed; accept the overlap when it isn't.
+Per this, Francesco Sforza/Kotyan Khan were left as-is (no known good
+replacement in hand for either), and Edward Longshanks was used directly
+for British's Paladin skin despite already being British's own hero.
+
+**Implemented**: British gets two brand-new skins, both by user request -
+**Gilbert de Clare** (Anglo-Norman "Strongbow" family, unclaimed, complete
+graphics) on Knight - British had no common Knight-line skin at all
+before this - and **Edward Longshanks** (already British's own hero) on
+Paladin.
+
+Verified in the rebuilt `.dat`: British Knight standing graphic 5419/
+5418 (Gilbert de Clare's), Paladin 4452/4451 (Edward Longshanks's).
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
+deployed.

@@ -617,6 +617,7 @@ SUN_CE = 2040  # unique DE model, distinct from every other Three Kingdoms hero 
 ROBERT_GUISCARD = 1677  # Lords of the West era, graphic checked against every known-used donor this session - no match found
 BOHEMOND = 1681  # Norman Crusader prince, confirmed genuinely distinct Knight-tier look
 KESTUTIS = 1721  # Lithuanian Grand Duke (Vytautas' father), confirmed genuinely distinct Cavalier-tier look
+GILBERT_DE_CLARE = 1671  # Anglo-Norman "Strongbow" family - British Knight-tier skin
 TECH_KNIGHT_MAKE_AVAIL = 166  # real vanilla "Knight (make avail)", civ=-1, gated on Castle Age - THE actual, sole source of Knight access for every civ
 
 # Water heroes (WARSHIP_CLASS) - paired with an existing land hero of the same person
