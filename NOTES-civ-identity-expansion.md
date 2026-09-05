@@ -2749,3 +2749,67 @@ grant's civ scope.
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
 deployed.
+
+## v46: Wang Tong migrated from Paladin to Cavalier, Cumans added to Vytautas, Chinese's hero re-skinned to Guan Yu
+
+User report: "many civs dont have paladin. Is there a good cavalier
+replacement... for civs in the steppes, middle east, asia, or india?"
+Checked real `CivTechTrees` Node Status across the whole steppe/ME/Asia/
+India bucket (excluding the 9 civs this mod already deliberately stripped
+Knight/Cavalier/Paladin from for Steppe-Lancer/Elephant/Hei-Kuang
+identity - Turks/Huns/Berbers/Saracens/Malay/Burmese/Khmer/Vietnamese/
+Chinese). Found two genuinely different problems: Mongols/Tatars/
+Japanese/Koreans have real Cavalier but not Paladin (fixable by moving a
+skin down one tier); Khitans/Jurchens/Bengalis/Gurjaras/Dravidians have
+*no* real Knight-line access at all, not even Cavalier (not fixable by a
+tier change - would need an entirely different real unit line, out of
+scope here). Persians already has its own real distinct content (Savar).
+
+Cross-checked against community research (AoE forums "regional skins"
+thread, a mirror of a Reddit post): independently proposes almost the
+exact same fix - "Wang Tong skin for Central Asian, Southeast Asian, East
+Asian, and Hun Cavaliers (excluding Cumans)", and separately pairs Cumans
+with Vytautas on Paladin.
+
+Implemented: Wang Tong moved from Paladin to Cavalier, civ list corrected
+from `['Tatars', 'Cumans', 'Khitans', 'Jurchens']` to `['Mongols',
+'Tatars', 'Japanese', 'Koreans']` (Cumans moved out since it already has
+real Paladin; Khitans/Jurchens dropped since neither tier ever helped
+them). Cumans added to the existing Vytautas Paladin group (`['Slavs',
+'Bulgarians', 'Poles', 'Bohemians', 'Cumans']`) - confirmed via Node
+Status it's the one civ in that whole group with genuine access.
+
+**Caught before shipping**: Wang Tong is already Chinese's own real land
+hero (`HERO_FOR_CIV["Chinese"]`, no `unit_skin_override` wrapper - direct
+assignment). Applying Wang Tong to the new Cavalier group would have been
+the same hero-vs-common-unit skin clash as the Pacanchique/Muisca case
+(v45) - caught by re-auditing every donor before finalizing, per the v44
+rule. Fixed the same way: Chinese's hero keeps its name/stats but renders
+as **Guan Yu** instead (Three Kingdoms era, revered as the God of War in
+Chinese folk religion - Liu Bei, his real sworn brother, is already
+Chinese's Champion skin). Zhuge Liang was tried first and rejected by
+`validate_hero_for_civ` itself - real class mismatch (59, a foot-
+strategist model, vs. Wang Tong's mounted class 12); Guan Yu (also class
+12) correctly matches. Confirmed both Guan Yu and Zhuge Liang have no
+real civ-specific enabling tech anywhere (genuinely unclaimed, learned
+from the Flemish Militia near-miss in v45 to check this explicitly).
+
+Also considered and declined: Dinh Le as an alternate Cavalier donor -
+checked directly, it shares the *exact same* graphic as Wang Tong (both
+render from id 1440/1439), so it's not a distinct option, just another
+name for the same art. Also considered Sundjata for the Indian-civs
+Cavalier tier - declined, since Bengalis/Gurjaras/Dravidians are
+confirmed to have zero real Knight-line access at any tier (Node Status
+`NotAvailable` across Knight/Cavalier/Paladin all three), so a tier
+change wouldn't help them the way it helped the steppe/Asia group;
+Hindustanis remains unconfirmed (no CivTechTrees file in the base game).
+
+Verified in the rebuilt `.dat`: Wang Tong's shared template (1185) and
+all 4 new Cavalier civs show standing graphic 1440/1439; Chinese's actual
+cloned hero unit (a separate id, not 1185) shows Guan Yu's graphic
+(12944/12943); Cumans/Slavs share Vytautas' graphic (10520/10521) on
+Paladin.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
+deployed.

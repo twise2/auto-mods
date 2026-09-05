@@ -1003,17 +1003,36 @@ def give_paladin_skins_to_regional_flavor_civs(data: DatFile):
     #
     # Vytautas the Great: confirmed unique appearance via the wiki, real
     # Grand Duke of Lithuania - applied to the wider Eastern European
-    # Paladin-tier bucket.
-    for civ_id in civ_ids_named(data, ['Slavs', 'Bulgarians', 'Poles', 'Bohemians']):
+    # Paladin-tier bucket. Cumans added per community research (AoE forums
+    # "regional skins" thread pairs Cumans with Vytautas on Paladin) and
+    # confirmed via CivTechTrees Node Status: Cumans is the one civ in this
+    # whole group that genuinely has real Paladin access.
+    for civ_id in civ_ids_named(data, ['Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans']):
         reskin_unit_for_civ(data, civ_id, PALADIN, VYTAUTAS_THE_GREAT)
 
     # Wang Tong: confirmed to have gotten a genuinely new cavalry model in
     # Definitive Edition (pre-DE he was a plain Cataphract, which would
     # have collided with Byzantines' real unique). Real Ming general sent
-    # against Le Loi's Vietnamese uprising - applied to the Central
-    # Asian/East Asian steppe-cavalry bucket that still has Paladin access.
-    for civ_id in civ_ids_named(data, ['Tatars', 'Cumans', 'Khitans', 'Jurchens']):
-        reskin_unit_for_civ(data, civ_id, PALADIN, WANG_TONG)
+    # against Le Loi's Vietnamese uprising.
+    #
+    # Moved from Paladin to Cavalier, and civ list corrected: user report
+    # ("many civs dont have paladin") plus a direct CivTechTrees Node
+    # Status check confirmed Tatars/Khitans/Jurchens (the civs Wang Tong
+    # used to be assigned to alongside Cumans) never had real Paladin
+    # access - this skin was invisible for 3 of its 4 civs the whole time.
+    # Cumans (the one civ here that DOES have real Paladin) moved to the
+    # Vytautas group above instead, matching community research (AoE
+    # forums "regional skins" thread proposes exactly this: Wang Tong for
+    # Central/East Asian Cavaliers, excluding Cumans). Khitans/Jurchens
+    # dropped entirely - CivTechTrees confirms they have NO real Knight-
+    # line access at all (not even Cavalier), so neither tier ever helped
+    # them; a real fix for them needs a completely different unit, not in
+    # scope here. Mongols and Japanese/Koreans added instead - all 3
+    # confirmed via Node Status to have real Cavalier but not Paladin,
+    # matching the same community source's proposed regional scope
+    # (Central Asian/East Asian) almost exactly.
+    for civ_id in civ_ids_named(data, ['Mongols', 'Tatars', 'Japanese', 'Koreans']):
+        reskin_unit_for_civ(data, civ_id, CAVALIER, WANG_TONG)
 
     # Sundjata's own real look (Malians' hero, freed up by the Sumanguru
     # skin_override in heroes_and_villains.py's HERO_FOR_CIV) applied to

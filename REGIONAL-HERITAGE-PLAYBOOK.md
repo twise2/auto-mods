@@ -649,6 +649,23 @@ place since the unit isn't created fresh by `makeHero()`.
   question in this project gets checked (search `data.techs` for an
   effect command targeting that unit id, and look at the tech's own
   `civ` field) - not just "is it used as a donor anywhere in this repo."
+- **A `HERO_FOR_CIV`/`unit_skin_override` swap must match the base hero's
+  real `class_` value, and `validate_hero_for_civ` enforces this for
+  you.** Tried Zhuge Liang as Chinese's new hero look (freeing Wang Tong
+  for a Cavalier skin) - Zhuge Liang is `class_=59` (a foot-strategist
+  model), Wang Tong is `class_=12` (mounted) - the validator raised
+  `ValueError: skin_override ... does not match unit's class_` before the
+  build even finished. Don't treat this validator as a formality to work
+  around; when it fires, the fix is picking a different donor with the
+  matching class (Guan Yu, also `class_=12`, worked), not silencing or
+  bypassing the check.
+- **Two unit ids can share the exact same graphic set already.** Dinh Le
+  (1184), Le Lai (1180), and Wang Tong (1185) all render from the
+  identical standing graphic (1440/1439) - a shared art asset used for
+  three different scenario characters. Before proposing "unit X instead
+  of unit Y" as a genuinely different visual option, diff their actual
+  graphic fields - they can be the same picture under a different name,
+  in which case it's not a real alternative.
 
 ---
 

@@ -9,7 +9,7 @@ from genieutils.techtree import UnitConnection, Common
 from genieutils.unit import ResourceCost, ResourceStorage, TrainLocation
 from mods.util import clone, enable_unit_for_civ, reskin_unit_for_civ
 from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE, WHITE_TIGER_YAN, \
-    WANG_TONG, ALARIC_THE_GOTH, SUNDJATA, SHAH_ISHMAIL, SALADIN, HARALD_HARDRADA, QUTLUGH, \
+    WANG_TONG, GUAN_YU, ALARIC_THE_GOTH, SUNDJATA, SHAH_ISHMAIL, SALADIN, HARALD_HARDRADA, QUTLUGH, \
     CUAUHTEMOC, ATTILA_THE_HUN, PACAL_II, EL_CID_CAMPEADOR, GENGHIS_KHAN, FRANCESCO_SFORZA, \
     MIKLOS_TOLDI, ALEXANDER_NEVSKI, TARIQ_IBN_ZIYAD, DAGNAJAN, SURYAVARMAN_I, KUSHLUK, \
     GAJAH_MADA, LE_LOI, KOTYAN_KHAN, VYTAUTAS_THE_GREAT, OSMAN, THEMISTOCLES_WARSHIP, \
@@ -68,7 +68,17 @@ HERO_FOR_CIV = {
     "British": {"land": EDWARD_LONGSHANKS, "water": None},
     "Byzantine": {"land": BELISARIUS, "water": None},
     "Celts": {"land": WILLIAM_WALLACE, "water": None},
-    "Chinese": {"land": WANG_TONG, "water": None},
+    # Wang Tong's own real look is freed up for reuse as a Cavalier skin
+    # for the Central/East Asian steppe-cavalry group (regional_heritage.py)
+    # - Chinese's own hero keeps the name/stats but renders as Guan Yu
+    # instead (revered as the God of War in Chinese folk religion, one of
+    # the most iconic figures of the Three Kingdoms era, complete DE
+    # graphics, genuinely unclaimed - and Liu Bei, his real sworn brother,
+    # is already reused as Chinese's own Champion skin, a nice thematic
+    # pairing). Zhuge Liang was considered first but rejected by
+    # validate_hero_for_civ - wrong class (59, a foot-strategist model) for
+    # Wang Tong's mounted class (12); Guan Yu correctly matches.
+    "Chinese": {"land": unit_skin_override(WANG_TONG, GUAN_YU), "water": None},
     "French": {"land": JOAN_OF_ARC, "water": None},
     "Goths": {"land": ALARIC_THE_GOTH, "water": None},
     "Japanese": {"land": NOBUNAGA, "water": None},
