@@ -2813,3 +2813,63 @@ Paladin.
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
 deployed.
+
+## v47: Knight/Cavalier skins for Vikings and the Eastern European cluster (Bohemond/Kestutis), sourced from the AoE2 Hero wiki roster
+
+User asked to work through the AoE2 Fandom "Hero" wiki page's full roster
+and think through Knight-line fits. The wiki itself was unreachable this
+session (`ageofempires.fandom.com` returns HTTP 402 for every page tried,
+including narrower ones like `Reynald_de_Chatillon` and the MediaWiki API
+endpoint - a session-wide block, not a one-off failure), so resolved the
+same information a different way: the game's own localization files
+(`resources/br/strings/key-value/*.txt`, keyed by each unit's real
+`language_dll_name`) to get every candidate's actual display name instead
+of guessing from cryptic internal codes like `HRLION` or `HBLACK`.
+
+Cross-referenced ~50 class-12 (mounted) hero units this way against every
+donor already claimed anywhere in this mod. Real names resolved include
+Richard the Lionheart, The Black Prince, William the Conqueror, Vlad
+Dracula, Bohemond, Kestutis, Algirdas, and several Hundred Years War/
+Grand Duchy of Lithuania figures - full list and reasoning kept in this
+session's transcript, distilled here to what got used.
+
+**User verified several of these directly in-game** (Scenario Editor,
+not this session) and reported back which are genuinely unique sprites
+vs. which just reuse an existing look:
+- William the Conqueror, Richard the Lionheart, The Black Prince, Grand
+  Master of the Templars, Emperor Sigismund: **not unique** - reuse
+  vanilla Paladin/Cavalier/Frankish Paladin's existing appearance. Not
+  usable as distinct donors.
+- **Bohemond**: genuinely distinct Knight-tier look.
+- **Kestutis**: genuinely distinct Cavalier-tier look, pairs well with
+  Bohemond visually.
+- **Algirdas**: genuinely distinct and a great look, but reads as too
+  "kingly" for a mass-trained common unit - flagged as a good future
+  *hero* candidate instead, not implemented as a common-unit skin.
+- **Vlad Dracula**: distinct ("between Knight and Cavalier"), but no
+  civ in this roster has a clean historical fit (no Wallachian/Romanian
+  civ exists) - user declined to use him rather than force a weak fit.
+
+**Implemented**: new `give_knight_and_cavalier_skins_to_viking_and_
+eastern_european_civs`. Vikings and the Slavs/Bulgarians/Poles/Bohemians
+cluster (the same civs already holding the currently-invisible Vytautas
+Paladin skin, per v46's Node Status findings) get Bohemond on Knight and
+Kestutis on Cavalier - the two tiers they actually, verifiably have.
+Vytautas stays assigned to Paladin for this same group - not a conflict,
+since Knight/Cavalier/Paladin are three different real units; it's just
+never shown for these 5 (still correctly shown for Cumans).
+
+Also flagged, not yet fixed: Sicilians/Italians are in the exact same
+"real Cavalier, no real Paladin" situation Wang Tong's group was in
+(v46) - Robert Guiscard's Paladin skin has been invisible for both the
+whole time. Bohemond (a fellow Hauteville-family Norman, like Robert
+Guiscard) is a natural candidate if this gets revisited.
+
+Verified in the rebuilt `.dat`: all 5 civs show Knight standing graphic
+5621/5620 (Bohemond's), Cavalier 12367/12366 (Kestutis's); Paladin
+untouched (vanilla default for Vikings, Vytautas's 10520/10521 for the
+other 4, unchanged from v46).
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
+deployed.

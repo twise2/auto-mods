@@ -33,7 +33,7 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
     FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
     KUSHLUK, JARL, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE, \
-    ENVOY, JOHN_THE_FEARLESS, ROBERT_GUISCARD, TECH_KNIGHT_MAKE_AVAIL
+    ENVOY, JOHN_THE_FEARLESS, ROBERT_GUISCARD, BOHEMOND, KESTUTIS, TECH_KNIGHT_MAKE_AVAIL
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
 # give civs units/buildings they plausibly would have fielded historically, focused on
@@ -1051,6 +1051,31 @@ def give_paladin_skins_to_regional_flavor_civs(data: DatFile):
         reskin_unit_for_civ(data, civ_id, PALADIN, ROBERT_GUISCARD)
 
 
+def give_knight_and_cavalier_skins_to_viking_and_eastern_european_civs(data: DatFile):
+    # Vikings and the Slavs/Bulgarians/Poles/Bohemians cluster are the same
+    # civs already holding the Vytautas Paladin skin (above) - real per-civ
+    # access confirmed invisible for all of them (Node Status
+    # `NotAvailable`, Vikings confirmed directly by user report). Rather
+    # than leave them with only an unreachable Paladin skin, give them a
+    # real, visible pair on the two tiers they actually have: Knight and
+    # Cavalier. Vytautas stays on Paladin (harmless - never shown for
+    # these civs, still correctly shown for Cumans) since this is a
+    # different unit entirely, not a conflict.
+    #
+    # Bohemond (of Taranto/Antioch, Norman Crusader prince) - confirmed via
+    # direct in-game comparison (user) to have a genuinely distinct
+    # Knight-tier look, not a reuse of vanilla Knight's own appearance.
+    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians']):
+        reskin_unit_for_civ(data, civ_id, KNIGHT, BOHEMOND)
+
+    # Kestutis (Lithuanian Grand Duke, Vytautas' own father) - confirmed
+    # via direct in-game comparison (user) to have a genuinely distinct
+    # Cavalier-tier look, and to visually pair well with Bohemond's Knight
+    # look for the same civs.
+    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians']):
+        reskin_unit_for_civ(data, civ_id, CAVALIER, KESTUTIS)
+
+
 def give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data: DatFile):
     # Same cosmetic-only mechanism again, applied to Heavy Cavalry Archer -
     # unlike Champion/Paladin, no civ in this mod has lost Cavalry Archer
@@ -1302,5 +1327,6 @@ def mod(data: DatFile):
     give_fortified_church_to_teutons_and_spanish(data)
     give_champion_skins_to_regional_flavor_civs(data)
     give_paladin_skins_to_regional_flavor_civs(data)
+    give_knight_and_cavalier_skins_to_viking_and_eastern_european_civs(data)
     give_heavy_cavalry_archer_skins_to_regional_flavor_civs(data)
     give_hussar_skins_to_regional_flavor_civs(data)

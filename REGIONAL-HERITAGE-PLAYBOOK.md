@@ -505,12 +505,47 @@ Mongols' Genghis Khan -> Girgen Khan in v36). Only worth doing when a
 good same-class alternate actually exists *and* the hero isn't so
 central to its own civ's identity that no stand-in would do - Le Loi
 (Vietnamese) and Pachacuti (Incas) were both considered and declined for
-exactly that reason. Also not required just because a hero's look gets
-reused elsewhere - Wang Tong, Vytautas, Kotyan Khan, Prithviraj, Osman,
-and Francesco Sforza all got reused directly with no swap, since none of
-them are globally recognizable enough that seeing the same look twice
-(their own hero, plus regular troops elsewhere) reads as odd the way it
-would for Genghis Khan.
+exactly that reason. Not required just because a hero's look gets reused
+elsewhere for a *different* civ's common unit - Vytautas, Kotyan Khan,
+Prithviraj, Osman, and Francesco Sforza all got reused directly with no
+swap, since seeing the same look on a hero plus regular troops elsewhere
+doesn't read as odd on its own. **This is not a permanent exemption,
+though - a name that's "safe to reuse directly" today can stop being safe
+the moment a later change adds that same donor to something else.** Wang
+Tong was reused directly with no swap for a long time (Chinese's own
+hero, no conflict) - until v46 put his look on a brand-new Cavalier skin
+for 4 other civs too, which is exactly the two-different-unit-types
+violation the rule in section 2 exists to catch. Re-check every existing
+`HERO_FOR_CIV` entry (not just the new assignment) whenever a donor gets
+reused for something new, not just once when it was first added.
+
+**When the wiki is unreachable, the game's own localization files
+resolve real names from cryptic internal codes.**
+`ageofempires.fandom.com` was blocked for `WebFetch` for an entire
+session (HTTP 402 on every page tried, including narrower ones and the
+MediaWiki API - not a one-off failure). `resources/br/strings/key-value/
+*.txt` (format: `<id> "<text>"`) maps each unit's real
+`Unit.language_dll_name` field to its actual display name - resolves
+things like `HRLION` -> "Richard the Lionheart" or `HBLACK` -> "The Black
+Prince" without guessing from the abbreviated internal short-name, which
+is frequently *not* a reliable hint (`HWILL`, which looks like it should
+be William Wallace, actually resolves to "Alexander Nevski" at that
+particular id - a different unit entirely from the real
+`WILLIAM_WALLACE` constant used elsewhere in this mod).
+
+**A "genuinely distinct look" finding still isn't proof it's *usable* -
+verify visually in-game before committing a civ list.** Several
+candidates surfaced via the wiki/localization-file research (William the
+Conqueror, Richard the Lionheart, The Black Prince, Grand Master of the
+Templars, Emperor Sigismund) turned out, on direct in-game comparison by
+the user, to just reuse an existing vanilla Paladin/Cavalier/Frankish
+Paladin appearance despite having a distinct *name* and a real historical
+identity - the graphic fields alone (standing/dying/attack ids all
+present and non-null) don't distinguish "genuinely bespoke art" from "a
+plain reuse of a common unit's own graphics," since a scenario hero can
+legitimately point its graphic fields at the same ids a common unit uses.
+When in doubt, a quick in-game Scenario Editor placement is the only
+fully reliable check.
 
 **`unit_skin_override` only covers civs actually routed through
 `makeHero()`.** Shu/Wu/Wei are deliberately excluded from `HERO_FOR_CIV`
