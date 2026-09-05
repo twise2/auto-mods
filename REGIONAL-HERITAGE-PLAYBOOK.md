@@ -79,6 +79,22 @@ this session actually made, not theoretical caution.
   e.g., a ranged unit as a starting-scout replacement was rejected
   because it lets players snipe enemy scouts/villagers risk-free from
   minute one, even though the historical case for it existed.
+- **A civ's genuinely single-civ-exclusive Castle unique tech/unit should
+  stay exclusive to that civ (hard user rule) - but "gated by a
+  civ-specific Castle tech" and "already shared by more than one civ in
+  real vanilla" are different situations, and only the first one violates
+  this.** Checked every "unique building/tech" grant's real enabling
+  tech's `civ` field: Harbor is gated behind Malay's own real unique
+  Castle tech (Thalassocracy, civ=29 only) - giving it to Vietnamese/
+  Vikings was a real violation, removed (v49). Feitoria/Krepost/Donjon/
+  Folwark/Thirisadai are *also* single-civ-exclusive by this same test,
+  but the user judged those fine to keep as-is - this is a judgment call
+  per grant, not an automatic "any single-civ-exclusive tech must be
+  reverted" rule. Caravanserai (already native to both Hindustanis and
+  Persians) and Fortified Church (already native to both Georgians and
+  Armenians) are a genuinely different case - extending an
+  already-multi-civ-shared cluster, not stealing one civ's sole
+  identity marker - and weren't touched.
 - **A donor's look must never render as two different unit types, ever
   (hard user rule).** Multiple civs sharing one donor for the *same* unit
   type is fine and is this mod's whole group pattern (e.g. Gidajan as

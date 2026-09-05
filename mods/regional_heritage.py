@@ -8,7 +8,7 @@ from genieutils.unit import AttackOrArmor
 from mods.util import enable_unit_for_civ, upgrade_unit_for_civ, grant_effect_to_civ, reskin_unit_for_civ, \
     disable_unit_line_for_civ, set_train_locations_for_civ, disable_tech_for_civ, set_starting_scout_for_civ, \
     research_elite_upgrade_for_civ, set_research_location_for_civ
-from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUDAL_AGE, \
+from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     CASTLE_AGE, \
     TYPE_ENABLE_DISABLE_UNIT, TYPE_FOOD, TYPE_WOOD, TYPE_GOLD, \
     STEPPE_LANCER, ELITE_STEPPE_LANCER, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, ARMORED_ELEPHANT, \
@@ -18,8 +18,7 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, FEUD
     LIGHT_CAVALRY, TECH_LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, \
     SETTLEMENT, SETTLEMENT_AGE_3, FIRE_LANCER, ELITE_FIRE_LANCER, MILL, LUMBER_CAMP, MINING_CAMP, \
     KNIGHT, CAVALIER, PALADIN, TECH_CAVALIER, TECH_PALADIN, FRANKISH_PALADIN_SKIN, CRUSADER_KNIGHT_SKIN, \
-    FEITORIA, DONJON, KREPOST, HARBOR, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
-    DOCK_AGE2, DOCK_AGE3, DOCK_AGE4, TYPE_DOCK_TRAIN_LOCATION, \
+    FEITORIA, DONJON, KREPOST, FOLWARK1, FOLWARK3, MILL_AGE2, MILL_AGE3, MILL_AGE4, \
     CHURCH, CHURCH_AGE2, CHURCH_AGE3, CHURCH_AGE4, FORTIFIED_CHURCH, \
     THIRISADAI, CONDOTTIERO, SLINGER, \
     SAMURAI, ELITE_SAMURAI, FIRE_ARCHER, ELITE_FIRE_ARCHER, ATTACK_CLASS_UNIQUE_UNIT, \
@@ -768,24 +767,6 @@ def give_krepost_to_slavs(data: DatFile):
         enable_unit_for_civ(data, civ_id, KREPOST, CASTLE_AGE)
 
 
-def give_harbor_to_vietnamese(data: DatFile):
-    # Harbor (Malay's unique Dock upgrade) fits Vietnamese just as well - the
-    # same coastal Southeast Asian maritime-trade economy already tying
-    # Vietnamese to Malay/Khmer/Burmese throughout this mod. Vikings fit the
-    # same idea from a completely different angle - Norse maritime trade routes
-    # were just as central to their identity.
-    # Real cost/location, matching vanilla's own "Malay UT" tech that grants
-    # Harbor (300 food/300 gold, Castle button 7, 40s) - unlike every other
-    # elite-tier grant in this file, the real tech only requires Feudal Age
-    # (not Imperial), so age_tech overrides the default here to match.
-    for civ_id in civ_ids_named(data, ['Vietnamese', 'Vikings']):
-        research_elite_upgrade_for_civ(
-            data, civ_id,
-            [(dock_tier, HARBOR) for dock_tier in (TYPE_DOCK_TRAIN_LOCATION, DOCK_AGE2, DOCK_AGE3, DOCK_AGE4)],
-            [], 82, 7, [(TYPE_FOOD, 300), (TYPE_GOLD, 300)], 40,
-            f'Harbor for {data.civs[civ_id].name}', 624, age_tech=FEUDAL_AGE)
-
-
 def give_longboats_the_ability_to_transport_units(data: DatFile):
     # Longboats were real Viking troop transports historically, not just
     # warships - the game's own Transport Ship already has this exact
@@ -1325,7 +1306,6 @@ def mod(data: DatFile):
     give_folwark_to_bohemians(data)
     give_donjon_to_italians(data)
     give_krepost_to_slavs(data)
-    give_harbor_to_vietnamese(data)
     give_longboats_the_ability_to_transport_units(data)
     give_fortified_church_to_teutons_and_spanish(data)
     give_champion_skins_to_regional_flavor_civs(data)

@@ -2893,3 +2893,48 @@ Vytautas (10520/10521) respectively.
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
 deployed.
+
+## v49: removed give_harbor_to_vietnamese - a real civ-exclusive unique tech, not shareable regional content
+
+User principle: unique units/techs researched at the Castle should stay
+exclusive to their own civ, unlike this mod's other regional grants
+(Steppe Lancer, Elephant Archer, Genitour, etc.) which are civ=-1 "make
+avail" content already loosely shared in the base game. Checked the real
+enabling tech's `civ` field for every "unique building/tech" grant in the
+file to separate the two categories:
+
+- **Genuinely single-civ-exclusive** (violates the principle):
+  `give_harbor_to_vietnamese` - Harbor is gated behind Malay's own real
+  unique Castle Age tech, Thalassocracy (civ=29 only). User confirmed
+  this one should go; the mechanical parallel comment ("Harbor for
+  Vietnamese") never should have existed alongside Malay's own real
+  Thalassocracy identity marker.
+- **Already shared by more than one civ in real vanilla** (kept,
+  confirmed fine by user): Feitoria (Portuguese-only, civ=24) ->
+  Spanish, Krepost (Bulgarians-only, civ=32) -> Slavs, Donjon
+  (**Sicilians**-only, civ=37 - corrected an assumption here, not
+  French's) -> Italians, Folwark (Poles-only, civ=38) -> Bohemians,
+  Thirisadai (Dravidians-only, civ=40) -> other Indian Ocean civs.
+  Caravanserai is already native to *both* Hindustanis (civ=20) and
+  Persians (civ=8); Fortified Church already native to *both* Georgians
+  (civ=45) and Armenians (civ=44); Condottiero's enabling tech is civ=-1
+  (real restriction not visible in the tech system, same caveat as Steppe
+  Lancer's own civ=-1 tech).
+
+Removed `give_harbor_to_vietnamese` entirely (function + its `mod()`
+call), and the imports it made otherwise-unused (`HARBOR`, `DOCK_AGE2/3/
+4`, `TYPE_DOCK_TRAIN_LOCATION`, `FEUDAL_AGE`). Verified in the rebuilt
+`.dat`: Vietnamese/Vikings' Harbor unit is back to `enabled=0` with no
+civ-specific enabling tech (matches every other civ that never had it);
+Malay's own real Thalassocracy access is untouched.
+
+Also corrected the same session's earlier Roland/Zawisza Czarny/
+Tokhtamysh Khan (`EKESHIK`) suggestions - user confirmed via direct
+in-game check that all three are **not** unique looks (Roland = plain
+Knight skin, Zawisza = plain Hussar skin, Tokhtamysh Khan = plain Elite
+Keshik skin) despite passing every indirect check (unclaimed, complete
+graphic fields, resolved real historical name). None implemented.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat` (207 -> 205 real grants, matching the 2 removed civs),
+re-ran `audit_collisions.py` (0 confirmed, 60 possible), deployed.
