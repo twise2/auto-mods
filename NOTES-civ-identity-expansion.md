@@ -2980,3 +2980,35 @@ Verified in the rebuilt `.dat`: British Knight standing graphic 5419/
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
 deployed.
+
+## v51: reverted Edward Longshanks/Paladin, Gilbert de Clare/Knight, and Roger Bosso/Knight - no more one-off single-civ Knight-line skins
+
+Three reversals in quick succession, same session as v50:
+
+1. Edward Longshanks on British's Paladin - reverted per user call: despite
+   the "hero units glow, so a hero-vs-own-civ's-troops overlap is fine"
+   reasoning from v50 holding up in the abstract, seeing your own hero's
+   exact face on your mass-trained Paladins read as unintuitive in
+   practice once actually placed. British's Paladin is back to the real
+   vanilla default.
+2. Tried Roger Bosso (already Sicilians' own hero) on Italians' Knight
+   instead of Sicilians', specifically to avoid repeating the same
+   pattern that just got Edward Longshanks reverted.
+3. **User then clarified the actual objection**: not the hero-overlap
+   question at all - it's that Gilbert de Clare (British-only) and Roger
+   Bosso (Italians-only) were both one-off, single-civ picks, breaking
+   from every other skin in this mod being a proper regional cluster
+   (multiple thematically-related civs sharing one donor - Bohemond/
+   Kestutis for 6 Viking/Eastern-European civs, Wang Tong for 4 steppe/
+   Asian civs, Sosso Guard for 3 African civs, etc.). Reverted both.
+
+**Going forward**: no more single-civ Knight/Cavalier/Paladin skins -
+only cluster-wide ones matching the rest of this mod's pattern. British
+and Italians are both back to their real vanilla Knight-line defaults.
+
+Verified in the rebuilt `.dat`: both civs' Knight standing graphic is
+back to the real vanilla default (933/932).
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
+deployed.

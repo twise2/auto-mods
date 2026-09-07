@@ -119,11 +119,28 @@ this session actually made, not theoretical caution.
   use a good replacement skin for the hero when one is already known
   (see Wang Tong/Guan Yu and Pacanchique/Cunhambebe for the pattern);
   accept the overlap when no good replacement is in hand (Francesco
-  Sforza/Italians, Kotyan Khan/Cumans, Edward Longshanks/British were all
-  left this way in v50 - audit every `HERO_FOR_CIV` direct assignment
-  against every `reskin_unit_for_civ` donor for this specific same-civ
-  case, but don't treat a hit as something that must be fixed before
-  shipping.
+  Sforza/Italians and Kotyan Khan/Cumans were left this way in v50 - audit
+  every `HERO_FOR_CIV` direct assignment against every
+  `reskin_unit_for_civ` donor for this specific same-civ case, but don't
+  treat a hit as something that must be fixed before shipping. **Edward
+  Longshanks/British was tried the same way in v50 but reverted in v51**
+  - the reasoning holds up in the abstract, but seeing your own hero's
+  exact face on your mass-trained troops read as unintuitive once
+  actually placed. Treat this preference-order as a starting point for
+  discussion, not a green light to implement without checking - a hero
+  overlap that sounds fine on paper can still get reverted once seen.
+- **Every skin in this mod should be a regional cluster (multiple
+  thematically-related civs sharing one donor), never a one-off pick for
+  a single civ (hard user rule, v51).** Gilbert de Clare (British-only)
+  and Roger Bosso (Italians-only) were both added as single-civ Knight
+  skins and reverted specifically for this reason - not because of a
+  hero-overlap problem (that's the separate rule above), but because a
+  single civ getting its own bespoke Knight/Cavalier/Paladin pick breaks
+  the pattern every other skin in this mod follows (Bohemond/Kestutis for
+  6 Viking/Eastern-European civs, Wang Tong for 4 steppe/Asian civs, Sosso
+  Guard for 3 African civs, etc.). A civ having no skin at all on some
+  tier is preferable to a single-civ exception - only add a new
+  Knight/Cavalier/Paladin skin when it covers a genuine multi-civ cluster.
 
 ---
 
