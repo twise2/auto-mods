@@ -23,7 +23,7 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     THIRISADAI, CONDOTTIERO, SLINGER, \
     SAMURAI, ELITE_SAMURAI, FIRE_ARCHER, ELITE_FIRE_ARCHER, ATTACK_CLASS_UNIQUE_UNIT, \
     LONGBOAT, ELITE_LONGBOAT, CLASS_TRANSPORT_BOAT, TRANSPORT_SHIP, \
-    ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, \
+    ROCKET_CART, HEAVY_ROCKET_CART, TRACTION_TREBUCHET, LOU_CHUAN, VARANGIAN_GUARD, ELITE_VARANGIAN_GUARD, \
     HEI_KUANG_CAVALRY, ELITE_HEI_KUANG_CAVALRY, GRENADIER, HAND_CANNONEER, \
     JIAN_SWORDSMAN, ELITE_JIAN_SWORDSMAN, TEMPLE_GUARD, ELITE_TEMPLE_GUARD, \
     WAR_CHARIOT, ELITE_WAR_CHARIOT, CHAMPION, HEAVY_CAVALRY_ARCHER, PIKEMAN, \
@@ -445,6 +445,27 @@ def give_lou_chuan_to_other_east_asian_civs(data: DatFile):
     # Lancer/Rocket Cart.
     for civ_id in civ_ids_named(data, ['Khitans', 'Koreans', 'Vietnamese']):
         enable_unit_for_civ(data, civ_id, LOU_CHUAN, TECH_REQUIREMENT_IMPERIAL_AGE)
+
+
+def give_varangian_guard_to_slavs(data: DatFile):
+    # Varangian Guard (`civ=-1` regional infantry, added with the Saxons/
+    # Varangians/Danes update) is currently real-native to Byzantines and
+    # the 4 Norse-flavor civs (Danes, Saxons, Varangians, Vikings) -
+    # confirmed via CivTechTrees Node Status across every civ in the
+    # game, not assumed. Slavs is a genuine, well-documented historical
+    # fit, not just thematic proximity: the actual founding event of the
+    # Byzantine Varangian Guard was Grand Prince Vladimir I of Kiev
+    # sending 6,000 Varangian warriors to Emperor Basil II in 988 AD -
+    # Kievan Rus' is exactly what this mod's Slavs civ represents.
+    # Real cost/location, matching vanilla's own "Elite Varangian Guard"
+    # tech exactly (750 food/475 gold, Barracks button 9, 50s) - confirmed
+    # free for Slavs (audit_collisions.py's real_competitors() at Barracks
+    # button 4/9, no civ-specific competitor).
+    for civ_id in civ_ids_named(data, ['Slavs']):
+        enable_tech = enable_unit_for_civ(data, civ_id, VARANGIAN_GUARD, CASTLE_AGE)
+        research_elite_upgrade_for_civ(data, civ_id, [(VARANGIAN_GUARD, ELITE_VARANGIAN_GUARD)], [enable_tech],
+                                        12, 9, [(TYPE_FOOD, 750), (TYPE_GOLD, 475)], 50,
+                                        f'Elite Varangian Guard for {data.civs[civ_id].name}', 1454)
 
 
 def give_hei_kuang_cavalry_to_chinese(data: DatFile):
@@ -1296,6 +1317,7 @@ def mod(data: DatFile):
     give_rocket_cart_to_japanese(data)
     give_traction_trebuchet_to_east_asian_civs(data)
     give_lou_chuan_to_other_east_asian_civs(data)
+    give_varangian_guard_to_slavs(data)
     give_hei_kuang_cavalry_to_chinese(data)
     give_grenadier_to_gunpowder_civs_without_hand_cannoneer(data)
     give_jian_swordsman_to_other_three_kingdoms_civs(data)

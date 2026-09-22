@@ -3012,3 +3012,66 @@ back to the real vanilla default (933/932).
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 60 possible),
 deployed.
+
+## v52: new game update (buildid 25464371) - Saxons/Varangians/Danes added, Varangian Guard extended to Slavs
+
+Real, confirmed game update landed (`.dat` file modified today, Steam
+`appmanifest_813780.acf` buildid `25464371`). Total civ count went
+60 -> 63: three brand-new civs, **Saxons** (civ 60), **Varangians**
+(civ 61), **Danes** (civ 62). `CivTechTrees/SAXONS.json`,
+`VARANGIANS.json`, `DANES.json` all exist. Confirmed the whole existing
+build pipeline (`build-local-mod.sh`, `auto-mod.py`,
+`sync_tech_trees.py`, `disable_unit_lines.py`) still runs cleanly
+against the new `.dat` with zero code changes needed - nothing in this
+codebase hardcoded the old civ count.
+
+Checked the 3 new civs' own real unique content (civ-specific enabling
+techs, `civ` field 60/61/62): Saxons get Hearth Troop/Elite Hearth Troop
+(infantry), Varangians get Jarl/Elite Jarl (a real new unique unit,
+**unrelated** to the existing `JARL` hero constant already used in this
+mod as Vikings' Hussar skin - same name, different unit id, confirmed no
+collision), Danes get Jomsviking/Elite Jomsviking (infantry).
+
+User specifically asked about Mounted Crossbowman and Varangian Guard -
+both turned out to be real, new **`civ=-1` regional units** (same
+pattern as Steppe Lancer/Elephant Archer/Genitour), not part of the new
+civs' own exclusive kit:
+
+- **Mounted Crossbowman/Heavy Mounted Crossbowman** (Archery Range,
+  class 36): checked every civ's real `CivTechTrees` Node Status -
+  already real-native to 15 civs (Bohemians, Britons, Burgundians,
+  Celts, Danes, French, Italians, Poles, Portuguese, Saxons, Sicilians,
+  Spanish, Teutons, Varangians, Vikings) - a comprehensive Western/
+  Central European bloc already. **No extension implemented** - didn't
+  find a civ with a genuinely distinct historical fit not already
+  covered; forcing one in would just be filling a slot, not a real fit.
+- **Varangian Guard/Elite Varangian Guard** (Barracks, class 6): real-
+  native to Byzantines + the same 4 Norse-flavor civs (Danes, Saxons,
+  Varangians, Vikings). **Extended to Slavs** - a specific, well-
+  documented historical fit, not just thematic proximity: the actual
+  founding event of the Byzantine Varangian Guard was Grand Prince
+  Vladimir I of Kiev sending 6,000 Varangian warriors to Emperor Basil
+  II in 988 AD, and Kievan Rus' is exactly what this mod's Slavs civ
+  represents. Real cost/location matching vanilla's own tech exactly
+  (750 food/475 gold, Barracks button 9, 50s). Checked for a real
+  collision at Slavs' Barracks button 4/9 first (`audit_collisions.py`'s
+  `real_competitors()`) - none found.
+
+**Scope boundary, not addressed this pass**: the 3 new civs themselves
+(Saxons/Varangians/Danes) aren't onboarded into any of this mod's
+existing systems yet - no hero assignment, no Knight-line evaluation, no
+Champion/Paladin/Hussar/Heavy-Cavalry-Archer skins, no camel/elephant/
+steppe-lancer-style grants. The pipeline handles their existence
+gracefully (they build cleanly, just receive nothing from this mod, same
+baseline as any civ not yet targeted by a `civ_ids_named(...)` call) -
+but a full pass for these 3 civs (matching the depth already done for
+every other civ in this mod) is a genuinely separate, large follow-up
+task, not attempted here.
+
+Verified in the rebuilt `.dat`: Slavs' Varangian Guard and Elite
+Varangian Guard both train from Barracks button 4, matching real
+vanilla convention.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 62 possible),
+deployed.
