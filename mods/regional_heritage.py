@@ -1067,17 +1067,26 @@ def give_knight_and_cavalier_skins_to_viking_and_eastern_european_civs(data: Dat
     # different real units, and Cumans wasn't already assigned a Knight or
     # Cavalier skin anywhere else.
     #
+    # Saxons and Varangians added (2026 Saxons/Varangians/Danes update):
+    # both confirmed via CivTechTrees Node Status to have real Knight and
+    # Cavalier access but not Paladin - the exact same pattern as the rest
+    # of this cluster. Danes only reaches real Knight (no Cavalier, no
+    # Paladin) - added to the Knight loop only, below.
+    #
     # Bohemond (of Taranto/Antioch, Norman Crusader prince) - confirmed via
     # direct in-game comparison (user) to have a genuinely distinct
     # Knight-tier look, not a reuse of vanilla Knight's own appearance.
-    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans']):
+    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans',
+                                        'Saxons', 'Varangians', 'Danes']):
         reskin_unit_for_civ(data, civ_id, KNIGHT, BOHEMOND)
 
     # Kestutis (Lithuanian Grand Duke, Vytautas' own father) - confirmed
     # via direct in-game comparison (user) to have a genuinely distinct
     # Cavalier-tier look, and to visually pair well with Bohemond's Knight
-    # look for the same civs.
-    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans']):
+    # look for the same civs. Danes excluded here - no real Cavalier
+    # access (Node Status `NotAvailable`), unlike Saxons/Varangians.
+    for civ_id in civ_ids_named(data, ['Vikings', 'Slavs', 'Bulgarians', 'Poles', 'Bohemians', 'Cumans',
+                                        'Saxons', 'Varangians']):
         reskin_unit_for_civ(data, civ_id, CAVALIER, KESTUTIS)
 
     # British (Gilbert de Clare) and Italians (Roger Bosso) were both

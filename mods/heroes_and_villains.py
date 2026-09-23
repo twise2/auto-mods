@@ -18,6 +18,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
     VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, FRANSICO_DE_ORELLANA, \
     ALEXANDER_THE_GREAT, PORUS, THRACIAN_CHIEFTAIN, LAUTARO, PACANCHIQUE, ARARIBOIA, CUNHAMBEBE, \
+    HAROLD_GODWINSON, \
     TYPE_POPULATION_HEADROOM, TYPE_CURRENT_POPULATION, TYPE_TOTAL_UNITS_OWNED, TYPE_FOOD_STORAGE, \
     TYPE_GOLD_STORAGE, TYPE_CASTLE_TRAIN_LOCATION, TYPE_DOCK_TRAIN_LOCATION, TYPE_POPULATION_HEADROOM, \
     TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
@@ -158,6 +159,10 @@ HERO_FOR_CIV = {
     # Cusi Yupanqui, an Inca figure).
     "Muisca": {"land": unit_skin_override(PACANCHIQUE, CUNHAMBEBE), "water": None},
     "Tupi": {"land": ARARIBOIA, "water": None},
+    # Harold Godwinson: the last Anglo-Saxon King of England, added with
+    # the 2026 Saxons/Varangians/Danes update - unambiguous fit, complete
+    # DE graphics, genuinely unclaimed.
+    "Saxons": {"land": HAROLD_GODWINSON, "water": None},
     # Shu/Wu/Wei already have real native land heroes (Cao Cao/Liu Bei/Sun
     # Jian - see CIVS_WITH_HEROES_ALREADY, which skips them entirely below).
     # If a good water-only hero is ever found for one of them, add just the

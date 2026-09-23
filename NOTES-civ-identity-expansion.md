@@ -3075,3 +3075,66 @@ vanilla convention.
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 62 possible),
 deployed.
+
+## v53: Saxons/Varangians/Danes onboarded into the Knight/Cavalier cluster and hero system
+
+User asked to do a full onboarding pass for the 3 new civs from v52,
+matching the depth already done for every other civ. Checked real
+`CivTechTrees` Node Status for Knight/Cavalier/Paladin: Saxons and
+Varangians both have real Knight+Cavalier, no Paladin - the exact same
+pattern as the existing Bohemond(Knight)/Kestutis(Cavalier) cluster
+(Vikings/Slavs/Bulgarians/Poles/Bohemians/Cumans). Danes only reaches
+real Knight (no Cavalier, no Paladin).
+
+**Implemented**: Saxons and Varangians added to both the Bohemond and
+Kestutis civ lists; Danes added to Bohemond (Knight) only, excluded from
+Kestutis (Cavalier) since real access doesn't exist there. Adding to an
+*existing* cluster, not a new one-off - matches the v51 rule.
+
+Scanned the new unit id range (2680+) for hero-class units added with
+this update: 4 found. Resolved real names via the localization-file
+technique (same as v50): **Harold Godwinson** (id 2721, "Haroldo" - the
+last Anglo-Saxon King of England) and **Tostig Godwinson** (id 2724,
+"Tostigo Godunho" - his brother, Earl of Northumbria) are both complete,
+unclaimed, real historical figures tied directly to 1066 (Hastings/
+Stamford Bridge). The other two (Einar Paunch-Shaker, a real Orkneyinga
+Saga figure; "Dreki", likely a named Norse ship rather than a person) are
+lower-confidence fits, not pursued this pass.
+
+**Implemented**: Harold Godwinson as Saxons' own hero (`HERO_FOR_CIV`,
+direct assignment - unambiguous fit, no override needed). Tostig
+Godwinson isn't a clean historical fit for either Varangians or Danes
+(he was English, not Norse-Rus' or Danish) - left unassigned rather than
+force it onto a civ he doesn't actually represent. Varangians and Danes
+both still have no dedicated hero from this mod, same conservative
+stance already taken for Koreans.
+
+Also checked the Missionary-heritage cluster (`give_missionaries_to_
+civs_with_missionary_heritage`, currently Italians/Portuguese/Byzantine/
+Teutons/Romans/French/British/Burgundians, a "Catholic Europe" theme) for
+a possible Saxons fit - real Anglo-Saxon missionary activity did happen
+(Boniface converting continental Germany), but it's a more speculative
+fit than the Knight/Cavalier and hero wins above - **not added**, flagged
+for a future pass rather than diluting this one with a weaker call.
+Condottiero's mercenary-civs group was also checked for Varangians (they
+were real mercenaries) - declined, since Condottiero's real flavor is
+specifically Italian/Genoese condottieri-captain service, a different
+mercenary tradition from the Byzantine Varangian Guard's own elite-
+bodyguard service (already given its own real grant in v52).
+
+**Still open** (explicitly not attempted this pass): Champion/Hussar/
+Heavy-Cavalry-Archer skin research for these 3 civs, a full Knight-line-
+removal evaluation (do any of them fit a "true steppe/camel/elephant
+civ" identity that should replace Knight/Cavalier/Paladin entirely, the
+way Turks/Huns/Berbers/Saracens/etc. do?), and any camel/elephant/silk-
+road-cluster fits. Each of those needs its own dedicated research pass,
+not a rushed guess.
+
+Verified in the rebuilt `.dat`: Saxons/Varangians both show Bohemond
+(5621/5620) on Knight and Kestutis (12367/12366) on Cavalier; Danes
+shows Bohemond on Knight but its Cavalier is untouched at the real
+vanilla default (1049/1050), confirming the exclusion worked.
+
+Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
+output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 62 possible),
+deployed.
