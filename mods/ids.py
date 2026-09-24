@@ -630,6 +630,7 @@ FINN_ARNASON = 2725  # Norwegian noble, Earl of Halland in Sweyn II of Denmark's
 ROLLO = 428  # "Hrolf the Ganger" in-game - founder of Normandy; model is Vikings' Berserk
 POLYCRITUS = 2319  # "The Aeginetan" in-game - Polycritus of Aegina, Salamis; unique warship-class model
 DREKI = 2728  # named longship from the same campaign (warship class)
+ZHOU_YU = 2044  # Three Kingdoms campaign hero - aura donor for Borrowed Arrows (+1 range)
 GILBERT_DE_CLARE = 1671  # Anglo-Norman "Strongbow" family - British Knight-tier skin
 TECH_KNIGHT_MAKE_AVAIL = 166  # real vanilla "Knight (make avail)", civ=-1, gated on Castle Age - THE actual, sole source of Knight access for every civ
 

@@ -25,7 +25,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
     TYPE_SPAWN_UNIT, TOWN_CENTER, TYPE_TOWN_CENTER_BUILT, SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD, CONQUISTADOR_CLASS, \
     WARSHIP_CLASS, CAVLARY_CLASS, INFANTRY_CLASS, ARCHER_CLASS, CAVALRY_ARCHER_CLASS, HAND_CANNONEER_CLASS, \
-    HEALER_CLASS, MONK_CLASS, SCOUT_CAVALRY_CLASS, POWERUP_GLOW_INFANTRY, POWERUP_GLOW_CAVALRY, \
+    HEALER_CLASS, MONK_CLASS, SCOUT_CAVALRY_CLASS, ZHOU_YU, POWERUP_GLOW_INFANTRY, POWERUP_GLOW_CAVALRY, \
     CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH, SUNDA_ROYAL_FIGHTER, GIRGEN_KHAN, SUMANGURU #auras
 
 AURA_ACTION = 155
@@ -229,6 +229,12 @@ class auraClass:
         self.healing = getAuraFromUnit(LIU_BEI, data)
         self.attackSpeed = getAuraFromUnit(CAO_CAO, data)
         self.movementSpeed = getAuraFromUnit(SUN_JIAN, data)
+        # Battle Horn: +2 melee/+2 pierce armor, plus +2 attack (melee) / +1
+        # (ranged) - more than its "gain additional armor" text says.
+        self.armor = getAuraFromUnit(HARALD_THE_VARANGIAN, data)
+        # Borrowed Arrows: +1 range to archers, cav archers, conquistadors,
+        # hand cannoneers, and the War Chariots.
+        self.range = getAuraFromUnit(ZHOU_YU, data)
 
 
 def addUnitToAllCivs(unit: Unit, data: DatFile):
@@ -295,12 +301,20 @@ def limitHeroesForCiv(data: DatFile, hidden_resource_id: int) -> int:
 
 def extendTasks(unit: Unit, tasks) -> Unit:
     #extend the tasks of the unit with the new tasks
+    # Skip an aura whose stats the unit already buffs natively (e.g. Harald
+    # himself already has Battle Horn) - stacking a second copy would double it.
+    native_stats = {t.search_wait_time for t in unit.bird.tasks if t.action_type == AURA_ACTION}
+    if native_stats & {t.search_wait_time for t in tasks if t.action_type == AURA_ACTION}:
+        logging.info(f'{unit.name} already has this aura natively - not adding a second copy')
+        return unit
+    # Donors that already draw their own glow (Battle Horn) are copied as-is.
+    add_glow = not any(t.action_type == AURA_ACTION and t.proceeding_graphic_id >= 0 for t in tasks)
     for task in tasks:
         # Copy: the donor task objects are shared across every hero, so
         # setting id/glow in place would leak between units.
         task = copy.deepcopy(task)
         task.id = len(unit.bird.tasks) #set the id to be the next available id
-        if task.action_type == AURA_ACTION and task.proceeding_graphic_id < 0:
+        if add_glow and task.action_type == AURA_ACTION and task.proceeding_graphic_id < 0:
             # Mirror Harald's own aura: glow drawn on each affected unit,
             # cavalry-sized for mounted classes, infantry-sized otherwise.
             task.proceeding_graphic_id = (POWERUP_GLOW_CAVALRY if task.class_id in MOUNTED_AURA_TARGET_CLASSES
@@ -351,10 +365,12 @@ def giveAuraAndLangauge(unit: Unit, data: DatFile) -> Unit:
     elif(unit.class_ in [CAVALRY_ARCHER_CLASS, CONQUISTADOR_CLASS]):
         logging.info("giving attack speed aura to unit")
         extendTasks(unit, auras.attackSpeed)
-    elif(unit.class_ in [INFANTRY_CLASS, ARCHER_CLASS, HAND_CANNONEER_CLASS]):
-        logging.info("giving move and attack speed aura to unit")
-        extendTasks(unit, auras.attackSpeed)
-        extendTasks(unit, auras.movementSpeed)
+    elif(unit.class_ == INFANTRY_CLASS):
+        logging.info("giving armor aura (Battle Horn) to unit")
+        extendTasks(unit, auras.armor)
+    elif(unit.class_ in [ARCHER_CLASS, HAND_CANNONEER_CLASS]):
+        logging.info("giving range aura (Borrowed Arrows) to unit")
+        extendTasks(unit, auras.range)
     elif(unit.class_ in [MONK_CLASS, HEALER_CLASS]):
         logging.info("giving healing aura to unit")
         extendTasks(unit, auras.healing)

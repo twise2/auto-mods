@@ -3274,3 +3274,39 @@ Portuguese hero clones all carry glowing aura tasks (cavalry glow on
 mounted target classes, infantry glow otherwise), with unique task ids;
 Shu's native Liu Bei and the Gaia template copy still show -1 (no leak).
 Clean build.
+
+## v59: hero auras by class - infantry get Battle Horn, archers get Borrowed Arrows
+
+Decoded the aura rows: each aura task's `search_wait_time` is the stat it
+changes (5 move speed, 10 attack reload, 109 HP regen, 116/117 melee/
+pierce armor, 9 attack, 12 range), and the header row's
+`wwise_resource_gathering_sound_id` is its in-game description string.
+**Battle Horn** (Harald) gives +2 melee/+2 pierce armor *and* +2 attack
+(+1 for ranged units), more than its "gain additional armor" text says;
+**Borrowed Arrows** (Zhou Yu, 2044) gives +1 range to archers, cavalry
+archers, conquistadors, hand cannoneers, and the War Chariots.
+
+New mapping in `giveAuraAndLangauge` (user-approved):
+- Cavalry, Warship: move speed (Sun Jian) - unchanged
+- Cavalry archer, Conquistador: attack speed (Cao Cao) - unchanged
+- **Infantry: Battle Horn** (was attack speed + move speed)
+- **Archer, Hand cannoneer: Borrowed Arrows** (was attack speed + move speed)
+- Monk, Healer: healing (Liu Bei) - unchanged
+
+`extendTasks` now skips an aura whose stats the hero already buffs
+natively - Harald (Varangians) and Pacanchique (Muisca) already have armor
+auras, so neither gets a second copy. Battle Horn already draws its own
+glow on one row set, so it's copied as-is rather than getting extra glow
+layers.
+
+Also tried and **reverted** the same session: custom hero training
+tooltips via a mod `key-value-modded-strings-utf8.txt`. This is a
+data-only mod shared in multiplayer lobbies - only the `.dat` travels, so
+a strings file wouldn't be shared. (Found along the way: DE reads a
+unit's training tooltip at string id `language_dll_help - 79000`; our
+heroes point at 26000, which is empty.)
+
+Verified in the rebuilt `.dat`: 12 infantry heroes carry Battle Horn, the
+archer hero Borrowed Arrows, cavalry/warships move speed, cavalry
+archers/conquistador attack speed, monks healing; heroes with a native aura
+of their own keep it. Clean build.
