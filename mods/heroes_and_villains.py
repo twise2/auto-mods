@@ -18,7 +18,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
     VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, FRANSICO_DE_ORELLANA, \
     ALEXANDER_THE_GREAT, PORUS, THRACIAN_CHIEFTAIN, LAUTARO, PACANCHIQUE, ARARIBOIA, CUNHAMBEBE, \
-    HARALD_THE_VARANGIAN, TOSTIG_GODWINSON, FINN_ARNASON, HALLDOR_SNORRASON, DREKI, \
+    HARALD_THE_VARANGIAN, TOSTIG_GODWINSON, ROLLO, HALLDOR_SNORRASON, ULF_OSPAKSSON, DREKI, \
     TYPE_POPULATION_HEADROOM, TYPE_CURRENT_POPULATION, TYPE_TOTAL_UNITS_OWNED, TYPE_FOOD_STORAGE, \
     TYPE_GOLD_STORAGE, TYPE_CASTLE_TRAIN_LOCATION, TYPE_DOCK_TRAIN_LOCATION, TYPE_POPULATION_HEADROOM, \
     TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
@@ -97,11 +97,12 @@ HERO_FOR_CIV = {
     "Turks": {"land": OSMAN, "water": None},
     # Harald Hardrada moved to Varangians (as the DLC's own Harald model,
     # see below) - he commanded the Byzantine Varangian Guard. Erik the Red
-    # pairs with Vikings' existing water hero, his son Leif Erikson. His
-    # model is Vikings' own Elite Berserk, i.e. their own unique unit, so no
-    # cross-civ conflict (Siegfried was the alternative, but renders as a
-    # plain default Champion).
-    "Vikings": {"land": ERIK_THE_RED, "water": LEIF_ERIKSON},
+    # pairs with Vikings' existing water hero, his son Leif Erikson. His own
+    # model is Vikings' Elite Berserk, so per user request he renders with
+    # Ulf Ospaksson's unique same-class model instead - Ulf was Icelandic,
+    # and Erik lived in Iceland before founding the Greenland colony.
+    # (Siegfried was the other option, but renders as a plain Champion.)
+    "Vikings": {"land": unit_skin_override(ERIK_THE_RED, ULF_OSPAKSSON), "water": LEIF_ERIKSON},
     "Aztecs": {"land": CUAUHTEMOC, "water": None},
     "Huns": {"land": ATTILA_THE_HUN, "water": None},
     "Koreans": {"land": None, "water": ADMIRAL_YI_SHUN_SHIN},  # no land unit found yet, could add one later w/ lang file setup
@@ -177,10 +178,13 @@ HERO_FOR_CIV = {
     # Harald spent years commanding the Byzantine Varangian Guard before
     # becoming King of Norway; Dreki is the longship from his campaign.
     "Varangians": {"land": HARALD_THE_VARANGIAN, "water": DREKI},
-    # Finn Arnason served Sweyn II of Denmark as Earl of Halland and fought
-    # for Denmark at Nisa (1062), but his own model is a plain Halberdier -
-    # rendered with Halldor Snorrason's unique same-class model instead.
-    "Danes": {"land": unit_skin_override(FINN_ARNASON, HALLDOR_SNORRASON), "water": None},
+    # Rollo ("Hrolf the Ganger" in-game) - founder of Normandy, recorded as
+    # Danish by the Norman chronicler Dudo, and Normandy was settled largely
+    # by Danes. No Danish figure in the game has its own sprite, and Rollo's
+    # model is Vikings' Berserk (their Castle unique), so he renders with
+    # Halldor Snorrason's unique same-class model instead. Replaced Finn
+    # Arnason (same borrowed look, far less recognizable).
+    "Danes": {"land": unit_skin_override(ROLLO, HALLDOR_SNORRASON), "water": None},
     # Shu/Wu/Wei already have real native land heroes (Cao Cao/Liu Bei/Sun
     # Jian - see CIVS_WITH_HEROES_ALREADY, which skips them entirely below).
     # If a good water-only hero is ever found for one of them, add just the

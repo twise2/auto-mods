@@ -627,6 +627,7 @@ ULF_OSPAKSSON = 2722  # Icelandic Varangian, Harald's comrade and later marshal
 HALLDOR_SNORRASON = 2723  # Icelandic Varangian who served with Harald in Byzantium
 TOSTIG_GODWINSON = 2724  # Anglo-Saxon Earl of Northumbria
 FINN_ARNASON = 2725  # Norwegian noble, Earl of Halland in Sweyn II of Denmark's service - model is a plain Halberdier
+ROLLO = 428  # "Hrolf the Ganger" in-game - founder of Normandy; model is Vikings' Berserk
 DREKI = 2728  # named longship from the same campaign (warship class)
 GILBERT_DE_CLARE = 1671  # Anglo-Norman "Strongbow" family - British Knight-tier skin
 TECH_KNIGHT_MAKE_AVAIL = 166  # real vanilla "Knight (make avail)", civ=-1, gated on Castle Age - THE actual, sole source of Knight access for every civ

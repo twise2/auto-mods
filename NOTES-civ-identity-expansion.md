@@ -3212,3 +3212,27 @@ Also checked the user's list of classic Danish figures (Knut the Great,
 Svein Forkbeard, Harald Bluetooth, Gorm, Ragnar Lothbrok, Ivar, Guthrum,
 etc.) - only Rollo exists in the data ("Hrolf the Ganger", 428), and his
 model is Vikings' own Berserk.
+
+## v56: Danes' hero -> Rollo, Vikings' Erik the Red gets a unique (non-Berserk) look
+
+Scanned every hero-flagged unit in the game (both `hero_mode` values),
+English names, excluding anything already assigned (wiki still HTTP 402).
+No Danish or Anglo-Saxon hero with its own sprite exists beyond Tostig
+Godwinson (Saxons' current hero, kept). Classic Danish figures (Knut,
+Svein Forkbeard, Harald Bluetooth, Gorm, Ragnar, Ivar, Guthrum, etc.)
+aren't in the data at all; only Rollo is ("Hrolf the Ganger", 428).
+
+- **Danes**: Rollo replaces Finn Arnason - far more recognizable, recorded
+  as Danish by the Norman chronicler Dudo, and Normandy was settled largely
+  by Danes. His own model is Vikings' Berserk (their Castle unique), so he
+  renders with Halldor Snorrason's unique same-class model via
+  `unit_skin_override`, the same look Finn had.
+- **Vikings**: user asked for a unique, non-Berserk look. Erik the Red
+  keeps his name/stats (still paired with water hero Leif Erikson, his son)
+  but renders with Ulf Ospaksson's unique, unclaimed same-class model - Ulf
+  was Icelandic, and Erik lived in Iceland before founding Greenland.
+- Varangians unchanged - Harald already uses the DLC's own unique sprite.
+
+Verified in the rebuilt `.dat`: Vikings' Erik clone renders Ulf's 19594,
+Danes' Rollo clone renders Halldor's 19588. Clean build,
+`audit_collisions.py` 0 confirmed / 62 possible.
