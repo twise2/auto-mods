@@ -3251,3 +3251,26 @@ have water heroes; Stoertebeker (114) - class 53, not `WARSHIP_CLASS`, so
 Verified in the rebuilt `.dat`: Spartans' clone trains from the Dock
 (45) at the hero slot, button 24, with its unique model 15549. Clean
 build, `audit_collisions.py` 0 confirmed / 62 possible. Deployed.
+
+## v58: every hero's aura now shows Harald's glow on affected units
+
+User noticed the DLC's Harald makes units around him glow. Inspected his
+aura tasks (`action_type == 155`): the glow is just the task's
+`proceeding_graphic_id` - graphic 13023 ("PowerupGlow Infantry") for foot
+target classes, 13024 ("PowerupGlow Cavalry") for mounted ones (classes
+12/23/36/47). The donor auras this mod copies onto every hero (Liu Bei
+healing, Cao Cao attack speed, Sun Jian move speed) all leave it at -1 -
+same effect, no visual.
+
+`extendTasks` now sets the glow on each copied aura task, using the same
+mounted/foot class split Harald's aura uses. It also now deep-copies each
+task first: it used to append the *same* donor task objects to every hero
+and overwrite their `id` each time, so every hero shared one set of task
+objects - editing the glow in place would have leaked everywhere
+(including the Gaia template the donors are read from).
+
+Verified in the rebuilt `.dat`: British/Saxons/Varangians/Vikings/
+Portuguese hero clones all carry glowing aura tasks (cavalry glow on
+mounted target classes, infantry glow otherwise), with unique task ids;
+Shu's native Liu Bei and the Gaia template copy still show -1 (no leak).
+Clean build.

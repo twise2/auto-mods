@@ -1,3 +1,4 @@
+import copy
 import logging
 
 from genieutils.civ import Civ
@@ -24,8 +25,12 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
     TYPE_SPAWN_UNIT, TOWN_CENTER, TYPE_TOWN_CENTER_BUILT, SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD, CONQUISTADOR_CLASS, \
     WARSHIP_CLASS, CAVLARY_CLASS, INFANTRY_CLASS, ARCHER_CLASS, CAVALRY_ARCHER_CLASS, HAND_CANNONEER_CLASS, \
-    HEALER_CLASS, MONK_CLASS, \
+    HEALER_CLASS, MONK_CLASS, SCOUT_CAVALRY_CLASS, POWERUP_GLOW_INFANTRY, POWERUP_GLOW_CAVALRY, \
     CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH, SUNDA_ROYAL_FIGHTER, GIRGEN_KHAN, SUMANGURU #auras
+
+AURA_ACTION = 155
+# Same class split Harald's own aura uses for its cavalry-sized glow.
+MOUNTED_AURA_TARGET_CLASSES = {CAVLARY_CLASS, CONQUISTADOR_CLASS, CAVALRY_ARCHER_CLASS, SCOUT_CAVALRY_CLASS}
 
 #reserve spaces for hidden resouces. Dont use 501 as its used for sparta already.
 LAND_BASILIUS_RESOURCE_VALUE = 201  
@@ -291,8 +296,15 @@ def limitHeroesForCiv(data: DatFile, hidden_resource_id: int) -> int:
 def extendTasks(unit: Unit, tasks) -> Unit:
     #extend the tasks of the unit with the new tasks
     for task in tasks:
-        #get correct ids
+        # Copy: the donor task objects are shared across every hero, so
+        # setting id/glow in place would leak between units.
+        task = copy.deepcopy(task)
         task.id = len(unit.bird.tasks) #set the id to be the next available id
+        if task.action_type == AURA_ACTION and task.proceeding_graphic_id < 0:
+            # Mirror Harald's own aura: glow drawn on each affected unit,
+            # cavalry-sized for mounted classes, infantry-sized otherwise.
+            task.proceeding_graphic_id = (POWERUP_GLOW_CAVALRY if task.class_id in MOUNTED_AURA_TARGET_CLASSES
+                                          else POWERUP_GLOW_INFANTRY)
         unit.bird.tasks.append(task)
     return unit
 
