@@ -3310,3 +3310,34 @@ Verified in the rebuilt `.dat`: 12 infantry heroes carry Battle Horn, the
 archer hero Borrowed Arrows, cavalry/warships move speed, cavalry
 archers/conquistador attack speed, monks healing; heroes with a native aura
 of their own keep it. Clean build.
+
+## v60: hero training tooltips now describe the hero's aura (data-only)
+
+DE reads a unit's training-button tooltip from string id
+`language_dll_help - 79000`. Our heroes pointed at 26000, which is empty,
+so their Castle/Dock buttons showed no description. The previous attempt
+(custom text in a mod strings file) was reverted in v59 - this is a
+data-only mod shared in multiplayer, so only the `.dat` travels.
+
+New `setAuraTooltip()` points each hero's `language_dll_help` at its
+aura's own base-game description string + 79000, found from whichever
+aura row on the hero carries that stat (so Harald/Pacanchique, who keep
+their native version, show their own ability text). These strings ship
+in every language folder (checked en/de/fr/es/zh), so nothing new travels
+with the mod. Trade-off: the tooltip shows only the ability line, not the
+usual "Create Name (cost)" header or stat line, since those only appear
+when the tooltip string itself contains them. Battle Horn's line says
+"additional armor" but the aura also gives attack - no existing string
+covers both without misdescribing a click ability.
+
+Verified in the rebuilt `.dat`: every hero's tooltip resolves to real
+text - Southland Tactics (38), Battle Horn (12, incl. Harald's own),
+Emperor's Decree (10), Protector of the People (2), Borrowed Arrows (1),
+Battle Formation (Pacanchique's native aura).
+
+Also checked, not fixable: the user confirmed in-game that hovering a
+hero's ability icon (Genghis Khan) shows nothing. Compared every
+ability-related task and field against Shu's/Wu's native Liu Bei/Sun
+Jian - identical action types, `creatable` ability/tooltip fields,
+`break_off_combat`, `interface_kind`. Whatever drives that icon's hover
+text isn't exposed in the `.dat`; the training tooltip covers it.

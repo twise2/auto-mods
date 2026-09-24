@@ -29,6 +29,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH, SUNDA_ROYAL_FIGHTER, GIRGEN_KHAN, SUMANGURU #auras
 
 AURA_ACTION = 155
+HELP_TOOLTIP_OFFSET = 79000  # DE reads a unit's training tooltip at string id (language_dll_help - 79000)
 # Same class split Harald's own aura uses for its cavalry-sized glow.
 MOUNTED_AURA_TARGET_CLASSES = {CAVLARY_CLASS, CONQUISTADOR_CLASS, CAVALRY_ARCHER_CLASS, SCOUT_CAVALRY_CLASS}
 
@@ -359,24 +360,46 @@ def giveAuraAndLangauge(unit: Unit, data: DatFile) -> Unit:
     #set unit to use aura abilities
     unit.type_50.break_off_combat = TYPE_INFLUENCE_ABILITY
 
+    aura = None
     if(unit.class_ in [CAVLARY_CLASS, WARSHIP_CLASS]):
         logging.info("giving move speed aura to unit")
-        extendTasks(unit, auras.movementSpeed)
+        aura = auras.movementSpeed
     elif(unit.class_ in [CAVALRY_ARCHER_CLASS, CONQUISTADOR_CLASS]):
         logging.info("giving attack speed aura to unit")
-        extendTasks(unit, auras.attackSpeed)
+        aura = auras.attackSpeed
     elif(unit.class_ == INFANTRY_CLASS):
         logging.info("giving armor aura (Battle Horn) to unit")
-        extendTasks(unit, auras.armor)
+        aura = auras.armor
     elif(unit.class_ in [ARCHER_CLASS, HAND_CANNONEER_CLASS]):
         logging.info("giving range aura (Borrowed Arrows) to unit")
-        extendTasks(unit, auras.range)
+        aura = auras.range
     elif(unit.class_ in [MONK_CLASS, HEALER_CLASS]):
         logging.info("giving healing aura to unit")
-        extendTasks(unit, auras.healing)
+        aura = auras.healing
     else:
         logging.error(f"Unit {unit.name} not given an aura")
+    if aura is not None:
+        extendTasks(unit, aura)
+        setAuraTooltip(unit, aura)
     fixHeroCreationText(unit)
+
+
+def setAuraTooltip(unit: Unit, aura) -> Unit:
+    """Point the hero's training tooltip at its aura's own description string
+    (e.g. "Southland Tactics - Nearby military units move significantly
+    faster"). DE reads the tooltip at string id language_dll_help - 79000.
+    These strings ship in every language folder of the base game, so this
+    is data-only and multiplayer-safe - no strings file travels with the mod.
+    Uses whichever row actually carries that stat on the unit, so a hero that
+    kept its own native version of the aura (Harald, Pacanchique) shows its
+    own ability's text.
+    """
+    stats = {t.search_wait_time for t in aura if t.action_type == AURA_ACTION}
+    for task in unit.bird.tasks:
+        if task.action_type == AURA_ACTION and task.gather_type and task.search_wait_time in stats:
+            unit.language_dll_help = task.wwise_resource_gathering_sound_id + HELP_TOOLTIP_OFFSET
+            return unit
+    return unit
             
 def makeHero(unitId: int, civ: Civ, data: DatFile, land_basilius_unit_id: int, water_basilius_unit_id: int) -> int:
     logging.info(f'Patching hero unit {unitId}')
