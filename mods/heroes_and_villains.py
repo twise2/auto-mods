@@ -18,7 +18,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
     VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, FRANSICO_DE_ORELLANA, \
     ALEXANDER_THE_GREAT, PORUS, THRACIAN_CHIEFTAIN, LAUTARO, PACANCHIQUE, ARARIBOIA, CUNHAMBEBE, \
-    HARALD_THE_VARANGIAN, TOSTIG_GODWINSON, ROLLO, HALLDOR_SNORRASON, ULF_OSPAKSSON, DREKI, \
+    HARALD_THE_VARANGIAN, TOSTIG_GODWINSON, ROLLO, HALLDOR_SNORRASON, ULF_OSPAKSSON, DREKI, POLYCRITUS, \
     TYPE_POPULATION_HEADROOM, TYPE_CURRENT_POPULATION, TYPE_TOTAL_UNITS_OWNED, TYPE_FOOD_STORAGE, \
     TYPE_GOLD_STORAGE, TYPE_CASTLE_TRAIN_LOCATION, TYPE_DOCK_TRAIN_LOCATION, TYPE_POPULATION_HEADROOM, \
     TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
@@ -146,7 +146,10 @@ HERO_FOR_CIV = {
     "Romans": {"land": POPE_LEO_I, "water": None},  # could be improved if custom unit is added, or lang script updated
     "Armenians": {"land": THOROS, "water": None},
     "Georgians": {"land": TAMAR, "water": None},
-    "Spartans": {"land": LEONIDAS, "water": None},
+    # Polycritus of Aegina ("The Aeginetan" in-game) - Aegina was a Spartan
+    # ally, and he fought at Salamis in the allied Greek fleet commanded by
+    # the Spartan Eurybiades. Unique warship-class model, unclaimed.
+    "Spartans": {"land": LEONIDAS, "water": POLYCRITUS},
     "Achaemenids": {"land": DARIUS, "water": ARTEMISIA},  # Artemisia commanded ships for Xerxes, Darius's son, at Salamis
     "Athenians": {"land": MILTIADES, "water": THEMISTOCLES_WARSHIP},  # Miltiades was the actual victor of Marathon; Themistocles built the navy that won at Salamis
     "Khitans": {"land": KUSHLUK, "water": None},  # fine but not amazing

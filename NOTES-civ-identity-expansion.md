@@ -3236,3 +3236,18 @@ aren't in the data at all; only Rollo is ("Hrolf the Ganger", 428).
 Verified in the rebuilt `.dat`: Vikings' Erik clone renders Ulf's 19594,
 Danes' Rollo clone renders Halldor's 19588. Clean build,
 `audit_collisions.py` 0 confirmed / 62 possible.
+
+## v57: Spartans get Polycritus of Aegina as water hero; final DLC-pass build
+
+Checked every unclaimed, unique-sprite hero ship for civs without a water
+hero. **Polycritus of Aegina** ("The Aeginetan", 2319, warship class,
+unique model, no real civ tech enabling it) -> **Spartans**' water slot:
+Aegina was a Spartan ally, and he fought at Salamis in the allied Greek
+fleet under the Spartan admiral Eurybiades. Declined: Dionysius of Phocaea
+(2311) - unique, but the civs he fits (Athenians, Achaemenids) already
+have water heroes; Stoertebeker (114) - class 53, not `WARSHIP_CLASS`, so
+`validate_hero_for_civ` rejects him for the water slot.
+
+Verified in the rebuilt `.dat`: Spartans' clone trains from the Dock
+(45) at the hero slot, button 24, with its unique model 15549. Clean
+build, `audit_collisions.py` 0 confirmed / 62 possible. Deployed.
