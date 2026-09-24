@@ -31,7 +31,7 @@ from mods.ids import TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_TOWN_CENTER_BUILT, \
     PACANCHIQUE, \
     VYTAUTAS_THE_GREAT, WANG_TONG, SUBOTAI, KOTYAN_KHAN, PRITHVIRAJ, LIU_BEI, ZHANG_FEI, \
     FRANCESCO_SFORZA, SUNDJATA, TARIQ_IBN_ZIYAD, CUMAN_CHIEF, SHAH_ISHMAIL, \
-    KUSHLUK, JARL, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE, \
+    KUSHLUK, GENERAL_ARAIYAN, RAJENDRA_CHOLA, QUTLUGH, SUN_CE, \
     ENVOY, JOHN_THE_FEARLESS, ROBERT_GUISCARD, BOHEMOND, KESTUTIS, TECH_KNIGHT_MAKE_AVAIL
 
 # The idea behind this mod, in the spirit of the earlier `regionalAdditions` branch:
@@ -1177,11 +1177,12 @@ def give_hussar_skins_to_regional_flavor_civs(data: DatFile):
     for civ_id in civ_ids_named(data, ['Mongols', 'Huns', 'Tatars', 'Cumans', 'Magyars']):
         reskin_unit_for_civ(data, civ_id, HUSSAR, KUSHLUK)
 
-    # Jarl: confirmed via the wiki to have gotten a genuinely unique DE
-    # model (pre-DE was a plain reskinned Tarkan) - "based on a generic
-    # Norse commander," unclaimed by HERO_FOR_CIV, no swap needed.
-    for civ_id in civ_ids_named(data, ['Vikings']):
-        reskin_unit_for_civ(data, civ_id, HUSSAR, JARL)
+    # Jarl (Vikings' Hussar) removed: the Saxons/Varangians/Danes update
+    # reused the JARL hero model verbatim for Varangians' new Castle unique
+    # unit (Jarl, id 2708 - identical standing/walk/attack graphics), so
+    # this skin would now dress another civ's common unit as Varangians'
+    # unique unit. It was also dead code all along - Vikings' Node Status
+    # for Hussar is `NotAvailable`, they cap at Light Cavalry.
 
     # Envoy: confirmed via the wiki to have gotten a genuinely unique DE
     # model (pre-DE was a plain reskinned Light Cavalry) - "similarities

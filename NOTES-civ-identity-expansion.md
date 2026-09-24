@@ -3138,3 +3138,29 @@ vanilla default (1049/1050), confirming the exclusion worked.
 Linted, rebuilt via `build-local-mod.sh`, verified structurally in the
 output `.dat`, re-ran `audit_collisions.py` (0 confirmed, 62 possible),
 deployed.
+
+## v54: post-DLC review - removed Vikings' Hussar=Jarl skin (now Varangians' unique unit look)
+
+Review of the Saxons/Varangians/Danes update against this mod: the update
+reused the existing `JARL` hero model (id 931) verbatim for Varangians'
+new Castle unique unit, Jarl (id 2708, Castle button 1) - identical
+standing/walk/attack graphics. This mod had `JARL` as Vikings' Hussar
+skin, so Vikings' common Hussars would now render as Varangians' unique
+unit - against the "Castle uniques stay with their civ" rule (v49). It
+was also dead code all along: Vikings' Node Status for Hussar is
+`NotAvailable` (they cap at Light Cavalry). Removed, plus the now-unused
+`JARL` import.
+
+Since the update clearly recycles hero models into unique units, checked
+every skin donor and every candidate/assigned Norse hero against all
+units for shared graphics: no other skin donor collides with a new unit;
+Harold Godwinson (Saxons' hero, v53), Tostig Godwinson, and Dreki all
+have genuinely unique looks. Einar Paunch-Shaker reuses Armenians' Elite
+Composite Bowman look, and Harald Hardrada (Vikings' hero) reuses
+Vikings' own Elite Berserk look - so neither is usable for Varangians or
+Danes.
+
+Verified in the rebuilt `.dat`: Vikings' Hussar back to vanilla; Saxons/
+Varangians/Danes Knight-line skins and Slavs' Varangian Guard unchanged
+from v52/v53. Clean build (only the expected "no hero" notices for Gaia/
+Danes/Varangians), `audit_collisions.py` 0 confirmed, 62 possible.
