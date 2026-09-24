@@ -9,7 +9,7 @@ from genieutils.techtree import UnitConnection, Common
 from genieutils.unit import ResourceCost, ResourceStorage, TrainLocation
 from mods.util import clone, enable_unit_for_civ, reskin_unit_for_civ
 from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE, WHITE_TIGER_YAN, \
-    WANG_TONG, GUAN_YU, ALARIC_THE_GOTH, SUNDJATA, SHAH_ISHMAIL, SALADIN, HARALD_HARDRADA, QUTLUGH, \
+    WANG_TONG, GUAN_YU, ALARIC_THE_GOTH, SUNDJATA, SHAH_ISHMAIL, SALADIN, ERIK_THE_RED, QUTLUGH, \
     CUAUHTEMOC, ATTILA_THE_HUN, PACAL_II, EL_CID_CAMPEADOR, GENGHIS_KHAN, FRANCESCO_SFORZA, \
     MIKLOS_TOLDI, ALEXANDER_NEVSKI, TARIQ_IBN_ZIYAD, DAGNAJAN, SURYAVARMAN_I, KUSHLUK, \
     GAJAH_MADA, LE_LOI, KOTYAN_KHAN, VYTAUTAS_THE_GREAT, OSMAN, THEMISTOCLES_WARSHIP, \
@@ -18,7 +18,7 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     THOROS, JOAN_OF_ARC, NOBUNAGA, ULRICH_VON_JUNGINGEN, PACHACUTI, RAJENDRA_CHOLA, POPE_LEO_I, \
     VASCO_DA_GAMA, ADMIRAL_YI_SHUN_SHIN, MIHIRA_BHOJA, LEIF_ERIKSON, EDWARD_LONGSHANKS, FRANSICO_DE_ORELLANA, \
     ALEXANDER_THE_GREAT, PORUS, THRACIAN_CHIEFTAIN, LAUTARO, PACANCHIQUE, ARARIBOIA, CUNHAMBEBE, \
-    HAROLD_GODWINSON, \
+    HARALD_THE_VARANGIAN, TOSTIG_GODWINSON, FINN_ARNASON, HALLDOR_SNORRASON, DREKI, \
     TYPE_POPULATION_HEADROOM, TYPE_CURRENT_POPULATION, TYPE_TOTAL_UNITS_OWNED, TYPE_FOOD_STORAGE, \
     TYPE_GOLD_STORAGE, TYPE_CASTLE_TRAIN_LOCATION, TYPE_DOCK_TRAIN_LOCATION, TYPE_POPULATION_HEADROOM, \
     TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
@@ -95,7 +95,13 @@ HERO_FOR_CIV = {
     "Saracens": {"land": SALADIN, "water": None},
     "Teutons": {"land": ULRICH_VON_JUNGINGEN, "water": None},
     "Turks": {"land": OSMAN, "water": None},
-    "Vikings": {"land": HARALD_HARDRADA, "water": LEIF_ERIKSON},
+    # Harald Hardrada moved to Varangians (as the DLC's own Harald model,
+    # see below) - he commanded the Byzantine Varangian Guard. Erik the Red
+    # pairs with Vikings' existing water hero, his son Leif Erikson. His
+    # model is Vikings' own Elite Berserk, i.e. their own unique unit, so no
+    # cross-civ conflict (Siegfried was the alternative, but renders as a
+    # plain default Champion).
+    "Vikings": {"land": ERIK_THE_RED, "water": LEIF_ERIKSON},
     "Aztecs": {"land": CUAUHTEMOC, "water": None},
     "Huns": {"land": ATTILA_THE_HUN, "water": None},
     "Koreans": {"land": None, "water": ADMIRAL_YI_SHUN_SHIN},  # no land unit found yet, could add one later w/ lang file setup
@@ -159,10 +165,22 @@ HERO_FOR_CIV = {
     # Cusi Yupanqui, an Inca figure).
     "Muisca": {"land": unit_skin_override(PACANCHIQUE, CUNHAMBEBE), "water": None},
     "Tupi": {"land": ARARIBOIA, "water": None},
-    # Harold Godwinson: the last Anglo-Saxon King of England, added with
-    # the 2026 Saxons/Varangians/Danes update - unambiguous fit, complete
-    # DE graphics, genuinely unclaimed.
-    "Saxons": {"land": HAROLD_GODWINSON, "water": None},
+    # Saxons/Varangians/Danes heroes all come from the same update's Harald
+    # Hardrada campaign. Names resolved from the *English* strings file -
+    # unit 2721 was first misread from the Portuguese file ("Haroldo") as
+    # Harold Godwinson; it's actually Harald. Each pick below has a unique
+    # model (no graphic shared with any other unit) and no real civ tech
+    # enabling it.
+    #
+    # Tostig Godwinson: Anglo-Saxon Earl of Northumbria.
+    "Saxons": {"land": TOSTIG_GODWINSON, "water": None},
+    # Harald spent years commanding the Byzantine Varangian Guard before
+    # becoming King of Norway; Dreki is the longship from his campaign.
+    "Varangians": {"land": HARALD_THE_VARANGIAN, "water": DREKI},
+    # Finn Arnason served Sweyn II of Denmark as Earl of Halland and fought
+    # for Denmark at Nisa (1062), but his own model is a plain Halberdier -
+    # rendered with Halldor Snorrason's unique same-class model instead.
+    "Danes": {"land": unit_skin_override(FINN_ARNASON, HALLDOR_SNORRASON), "water": None},
     # Shu/Wu/Wei already have real native land heroes (Cao Cao/Liu Bei/Sun
     # Jian - see CIVS_WITH_HEROES_ALREADY, which skips them entirely below).
     # If a good water-only hero is ever found for one of them, add just the

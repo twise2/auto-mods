@@ -575,6 +575,7 @@ VASCO_DA_GAMA = 203
 ADMIRAL_YI_SHUN_SHIN = 844
 MIHIRA_BHOJA = 1762
 LEIF_ERIKSON = 106
+ERIK_THE_RED = 171
 OSMAN = 943
 EDWARD_LONGSHANKS = 1669
 BERNARD_DE_ARMAGNAC = 1687
@@ -621,8 +622,12 @@ SUN_CE = 2040  # unique DE model, distinct from every other Three Kingdoms hero 
 ROBERT_GUISCARD = 1677  # Lords of the West era, graphic checked against every known-used donor this session - no match found
 BOHEMOND = 1681  # Norman Crusader prince, confirmed genuinely distinct Knight-tier look
 KESTUTIS = 1721  # Lithuanian Grand Duke (Vytautas' father), confirmed genuinely distinct Cavalier-tier look
-HAROLD_GODWINSON = 2721  # last Anglo-Saxon King of England, added with the Saxons/Varangians/Danes update
-TOSTIG_GODWINSON = 2724  # Harold's brother, Earl of Northumbria - same update
+HARALD_THE_VARANGIAN = 2721  # DLC-era Harald Hardrada model (English string "Harald"), distinct from HARALD_HARDRADA (426)
+ULF_OSPAKSSON = 2722  # Icelandic Varangian, Harald's comrade and later marshal
+HALLDOR_SNORRASON = 2723  # Icelandic Varangian who served with Harald in Byzantium
+TOSTIG_GODWINSON = 2724  # Anglo-Saxon Earl of Northumbria
+FINN_ARNASON = 2725  # Norwegian noble, Earl of Halland in Sweyn II of Denmark's service - model is a plain Halberdier
+DREKI = 2728  # named longship from the same campaign (warship class)
 GILBERT_DE_CLARE = 1671  # Anglo-Norman "Strongbow" family - British Knight-tier skin
 TECH_KNIGHT_MAKE_AVAIL = 166  # real vanilla "Knight (make avail)", civ=-1, gated on Castle Age - THE actual, sole source of Knight access for every civ
 

@@ -571,7 +571,7 @@ reused for something new, not just once when it was first added.
 resolve real names from cryptic internal codes.**
 `ageofempires.fandom.com` was blocked for `WebFetch` for an entire
 session (HTTP 402 on every page tried, including narrower ones and the
-MediaWiki API - not a one-off failure). `resources/br/strings/key-value/
+MediaWiki API - not a one-off failure). `resources/en/strings/key-value/
 *.txt` (format: `<id> "<text>"`) maps each unit's real
 `Unit.language_dll_name` field to its actual display name - resolves
 things like `HRLION` -> "Richard the Lionheart" or `HBLACK` -> "The Black
@@ -580,6 +580,17 @@ is frequently *not* a reliable hint (`HWILL`, which looks like it should
 be William Wallace, actually resolves to "Alexander Nevski" at that
 particular id - a different unit entirely from the real
 `WILLIAM_WALLACE` constant used elsewhere in this mod).
+
+**Use the English strings folder (`resources/en/`), not another language's.** An
+earlier pass read `resources/br/` (Portuguese), where both Harald and Harold
+render as "Haroldo" - unit 2721 (`HARALD`) got shipped as Saxons' hero
+under the belief it was Harold Godwinson, when it's actually Harald
+Hardrada's DLC model (v55 fix). **Also: don't filter hero candidates on
+`creatable.hero_mode == 1` alone** - the Saxons/Varangians/Danes update's
+Ulf Ospaksson, Halldor Snorrason, Finn Arnason, and Kalf Arnason all carry
+`hero_mode = -111` and were missed by that filter until the user supplied
+the names. `makeHero()` sets `hero_mode = 1` itself, so either value works
+as a hero source.
 
 **A "genuinely distinct look" finding still isn't proof it's *usable* -
 verify visually in-game before committing a civ list.** Several

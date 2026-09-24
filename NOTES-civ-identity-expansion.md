@@ -3164,3 +3164,51 @@ Verified in the rebuilt `.dat`: Vikings' Hussar back to vanilla; Saxons/
 Varangians/Danes Knight-line skins and Slavs' Varangian Guard unchanged
 from v52/v53. Clean build (only the expected "no hero" notices for Gaia/
 Danes/Varangians), `audit_collisions.py` 0 confirmed, 62 possible.
+
+## v55: heroes for Saxons/Varangians/Danes, Harald Hardrada moved to Varangians, Vikings get Erik the Red - and a v53 mistake corrected
+
+**Correction to v53**: unit 2721 (`HARALD`) was shipped as Saxons' hero
+as "Harold Godwinson". It's actually **Harald** - the new DLC's Harald
+Hardrada model. The name was resolved from the Portuguese strings file
+(`resources/br/`), where both names render "Haroldo"; the English file
+(`resources/en/`) says "Harald". No Harold Godwinson unit exists at all.
+
+The user supplied the update's full hero list (a Harald Hardrada
+campaign). Four of them were invisible to v53's scan because they carry
+`hero_mode = -111`, not 1: Ulf Ospaksson (2722), Halldor Snorrason
+(2723), Finn Arnason (2725), Kalf Arnason (2726). Checked every
+candidate for a unique model (no graphic shared with any other unit)
+and for any real civ tech enabling it (none do):
+
+- Unique: Harald (2721), Ulf Ospaksson, Halldor Snorrason, Tostig
+  Godwinson (2724), Dreki (2728, a warship-class longship).
+- Not usable as-is: Finn Arnason (plain Halberdier model), Kalf Arnason
+  (plain Two-Handed Swordsman), Einar Paunch-Shaker (Armenians' Elite
+  Composite Bowman), old Harald Hardrada 426 (Vikings' Elite Berserk).
+
+**Implemented** (`HERO_FOR_CIV`):
+- **Saxons**: Tostig Godwinson - Anglo-Saxon Earl of Northumbria.
+- **Varangians**: Harald (2721, land) - he commanded the Byzantine
+  Varangian Guard - and Dreki (water), the longship from his campaign.
+  Per user request Harald Hardrada moved here from Vikings; uses the DLC's
+  own unique Harald model rather than the old 426 one, which is literally
+  Vikings' Elite Berserk and would dress Varangians' hero as another
+  civ's Castle unique unit.
+- **Danes**: Finn Arnason (served Sweyn II of Denmark as Earl of Halland,
+  fought for Denmark at Nisa in 1062), rendered via `unit_skin_override`
+  with Halldor Snorrason's unique same-class model since his own is a
+  plain Halberdier.
+- **Vikings**: Erik the Red (land) replaces Harald Hardrada - pairs with
+  their existing water hero, his son Leif Erikson. His model is Vikings'
+  own Elite Berserk (their own unique unit, so no cross-civ conflict);
+  Siegfried was the alternative but renders as a plain default Champion.
+
+Verified in the rebuilt `.dat`: every civ's actual cloned hero shows the
+intended model (Danes' Finn clone shows Halldor's 19588). Clean build -
+"No hero" notices now only for Gaia. `audit_collisions.py`: 0 confirmed,
+62 possible.
+
+Also checked the user's list of classic Danish figures (Knut the Great,
+Svein Forkbeard, Harald Bluetooth, Gorm, Ragnar Lothbrok, Ivar, Guthrum,
+etc.) - only Rollo exists in the data ("Hrolf the Ganger", 428), and his
+model is Vikings' own Berserk.
