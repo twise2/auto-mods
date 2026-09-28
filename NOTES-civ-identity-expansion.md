@@ -3341,3 +3341,34 @@ ability-related task and field against Shu's/Wu's native Liu Bei/Sun
 Jian - identical action types, `creatable` ability/tooltip fields,
 `break_off_combat`, `interface_kind`. Whatever drives that icon's hover
 text isn't exposed in the `.dat`; the training tooltip covers it.
+
+## v61: hero aura glow removed - it was desyncing multiplayer games
+
+User reported instability since the update. Validated the built `.dat`
+against vanilla (dangling unit/tech/effect/graphic references, unit-slot
+counts across civs, duplicate task ids): no problems beyond vanilla's own,
+and the one extra hit (Rewarding Snipes' relic cart dropping unit 285, the
+Gaia-only Relic) is exactly what vanilla's relic cart does. Local build and
+published mod 330977 are byte-identical (same md5 and in-game checksum), so
+not a version mismatch.
+
+The game's own logs showed three multiplayer desyncs on Sep 24 (21:11,
+21:37, 21:42 - `logs/*-p0-sync.txt`). In all three the dominant simulation
+event is `Object RNG - ApplyPowerupToUnit` (1,546 / 2,061 / 2,118 calls);
+older sync logs from 2023-2024 show it 0 times in 7 of 8. Hero auras
+without glow had run since April 2025 with no sync logs at all. The v58
+glow (an aura row's `proceeding_graphic_id` = "PowerupGlow") shipped Sep 23
+at 22:01; the desyncs came the next evening. In vanilla only campaign
+heroes (e.g. Harald) use it; the multiplayer Three Kingdoms heroes don't.
+
+New `removeAuraGlow()` sets `proceeding_graphic_id = -1` on every aura row
+of every hero, including the glow Battle Horn and Harald carry from
+campaign data. Aura effects, the v59 class mapping, and the v60 tooltips
+are unchanged. Verified in the rebuilt `.dat`: 0 glowing aura rows across
+67 hero clones (821 aura rows), and no unit has more glow rows than
+vanilla. Mod description updated to drop the glow sentence.
+
+If games still desync: next suspect is Battle Horn/Borrowed Arrows
+themselves (campaign-hero auras, also never exercised in vanilla
+multiplayer) - fall back to the Three Kingdoms auras for infantry/archer
+heroes. Publish the rebuild to mod 330977 so every player gets it.

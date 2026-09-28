@@ -25,13 +25,11 @@ from mods.ids import TABINSHWEHTI, TSAR_KONSTANTIN, BELISARIUS, WILLIAM_WALLACE,
     TECH_REQUIREMENT_IMPERIAL_AGE, TYPE_INFLUENCE_ABILITY, TYPE_TOTAL_UNITS_OWNED,\
     TYPE_SPAWN_UNIT, TOWN_CENTER, TYPE_TOWN_CENTER_BUILT, SPECIAL_UNIT_SPAWN_BASILIEUS_DEAD, CONQUISTADOR_CLASS, \
     WARSHIP_CLASS, CAVLARY_CLASS, INFANTRY_CLASS, ARCHER_CLASS, CAVALRY_ARCHER_CLASS, HAND_CANNONEER_CLASS, \
-    HEALER_CLASS, MONK_CLASS, SCOUT_CAVALRY_CLASS, ZHOU_YU, POWERUP_GLOW_INFANTRY, POWERUP_GLOW_CAVALRY, \
+    HEALER_CLASS, MONK_CLASS, ZHOU_YU, \
     CAO_CAO, LIU_BEI, SUN_JIAN, FORTIFIED_CHURCH, SUNDA_ROYAL_FIGHTER, GIRGEN_KHAN, SUMANGURU #auras
 
 AURA_ACTION = 155
 HELP_TOOLTIP_OFFSET = 79000  # DE reads a unit's training tooltip at string id (language_dll_help - 79000)
-# Same class split Harald's own aura uses for its cavalry-sized glow.
-MOUNTED_AURA_TARGET_CLASSES = {CAVLARY_CLASS, CONQUISTADOR_CLASS, CAVALRY_ARCHER_CLASS, SCOUT_CAVALRY_CLASS}
 
 #reserve spaces for hidden resouces. Dont use 501 as its used for sparta already.
 LAND_BASILIUS_RESOURCE_VALUE = 201  
@@ -308,19 +306,27 @@ def extendTasks(unit: Unit, tasks) -> Unit:
     if native_stats & {t.search_wait_time for t in tasks if t.action_type == AURA_ACTION}:
         logging.info(f'{unit.name} already has this aura natively - not adding a second copy')
         return unit
-    # Donors that already draw their own glow (Battle Horn) are copied as-is.
-    add_glow = not any(t.action_type == AURA_ACTION and t.proceeding_graphic_id >= 0 for t in tasks)
     for task in tasks:
         # Copy: the donor task objects are shared across every hero, so
-        # setting id/glow in place would leak between units.
+        # setting id in place would leak between units.
         task = copy.deepcopy(task)
         task.id = len(unit.bird.tasks) #set the id to be the next available id
-        if add_glow and task.action_type == AURA_ACTION and task.proceeding_graphic_id < 0:
-            # Mirror Harald's own aura: glow drawn on each affected unit,
-            # cavalry-sized for mounted classes, infantry-sized otherwise.
-            task.proceeding_graphic_id = (POWERUP_GLOW_CAVALRY if task.class_id in MOUNTED_AURA_TARGET_CLASSES
-                                          else POWERUP_GLOW_INFANTRY)
         unit.bird.tasks.append(task)
+    return unit
+
+
+def removeAuraGlow(unit: Unit) -> Unit:
+    """No on-unit glow on any hero aura. An aura row's proceeding_graphic_id
+    ("PowerupGlow") makes the game run ApplyPowerupToUnit, which draws from
+    the synced Object RNG - after glow was added to every hero aura (v58),
+    three multiplayer games desynced the next night, with that call dominating
+    all three sync logs (thousands of times; zero in older logs). Only
+    campaign heroes use it in vanilla; the multiplayer Three Kingdoms heroes
+    don't. Also clears the glow Battle Horn/Harald bring from campaign data.
+    """
+    for task in unit.bird.tasks:
+        if task.action_type == AURA_ACTION:
+            task.proceeding_graphic_id = -1
     return unit
 
 
@@ -381,6 +387,7 @@ def giveAuraAndLangauge(unit: Unit, data: DatFile) -> Unit:
     if aura is not None:
         extendTasks(unit, aura)
         setAuraTooltip(unit, aura)
+    removeAuraGlow(unit)
     fixHeroCreationText(unit)
 
 
